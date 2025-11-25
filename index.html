@@ -7,42 +7,54 @@
   <style>
     body { font-family: Arial, sans-serif; background: #111; color: #fff; text-align: center; padding: 20px; }
     #counter { font-size: 48px; margin: 20px 0; }
-    button { font-size: 20px; border: none; border-radius: 10px; cursor: pointer; background: #333; color: #fff; }
+    button { font-size: 20px; border: none; border-radius: 10px; cursor: pointer; background: #333; }
 
-    /* Панель переключения */
     #menu { display: flex; justify-content: center; margin-bottom: 20px; }
-    #menu button { flex: 1; margin: 0 5px; padding: 10px 0; font-size: 18px; }
+    #menu button { flex: 1; margin: 0 5px; padding: 10px 0; font-size: 18px; color: #fff; }
     .active { background: #555; }
 
-    /* Кликер */
     #clickerPanel { display: none; }
-    #clickButton { padding: 40px 60px; font-size: 32px; }
+    #clickButton { padding: 40px 60px; font-size: 32px; color: #fff; }
 
-    /* Магазин */
     #shopPanel { display: none; }
     #shop { margin-top: 20px; }
-    .item { margin: 15px 0; padding: 15px; background: #222; border-radius: 8px; text-align: left; }
+    .item { 
+      margin: 15px 0; 
+      padding: 15px; 
+      background: #222; 
+      border-radius: 8px; 
+      display: flex; 
+      align-items: center; 
+    }
+    .item img { 
+      width: 60px; 
+      height: 60px; 
+      margin-right: 15px; 
+      border-radius: 5px; 
+    }
+    .item-text { 
+      flex: 1; 
+      text-align: left; 
+    }
     .item b { display: block; font-size: 18px; }
     .item p { margin: 5px 0; font-size: 14px; }
     .item .property { font-size: 12px; opacity: 0.7; }
+    .item button { margin-top: 10px; font-weight: bold; width: 100%; border-radius: 8px; padding: 10px; font-size: 16px; }
   </style>
 </head>
 <body>
   <h1>AnTI Shop</h1>
 
-  <!-- Панель переключения -->
   <div id="menu">
     <button id="clickerTab" class="active">Кликер</button>
     <button id="shopTab">Магазин</button>
   </div>
 
-  <!-- Кликер -->
   <div id="clickerPanel">
     <div id="counter">0</div>
     <button id="clickButton">Клик!</button>
   </div>
 
-  <!-- Магазин -->
   <div id="shopPanel">
     <div id="shop">
       <div id="items"></div>
@@ -53,7 +65,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
     import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-    // Firebase конфиг
     const firebaseConfig = {
       apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",
       authDomain: "anti-shop-d6b33.firebaseapp.com",
@@ -67,7 +78,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Генерация уникального ID игрока
     let userId = localStorage.getItem("userId");
     if (!userId) {
       userId = "user_" + Math.random().toString(36).substr(2, 9);
@@ -86,13 +96,13 @@
     const clickerTab = document.getElementById('clickerTab');
     const shopTab = document.getElementById('shopTab');
 
-    // Переключение между панелями
     clickerTab.addEventListener('click', () => {
       clickerPanel.style.display = 'block';
       shopPanel.style.display = 'none';
       clickerTab.classList.add('active');
       shopTab.classList.remove('active');
     });
+
     shopTab.addEventListener('click', () => {
       clickerPanel.style.display = 'none';
       shopPanel.style.display = 'block';
@@ -100,14 +110,25 @@
       clickerTab.classList.remove('active');
     });
 
-    // Магазин
     const shopItems = [
       {
         id: 1,
         name: 'Оторванная пуговица',
         cost: 50,
-        description: 'Кажется, это пуговица которая раньше служила подобием глаза плюшевой игрушке.',
-        property: 'Удваивает заработок за клик'
+        description: 'Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.',
+        property: 'Прибавляет +1 к заработку за клик',
+        incrementCost: 50,
+        img: 'item-1.png'
+      },
+      {
+        id: 2,
+        name: 'Страшная штука',
+        cost: 250,
+        description: 'Оно пугает.',
+        property: 'Прибавляет +50 к заработку за клик',
+        power: 50,
+        stock: 5,
+        img: 'item-2.png'
       }
     ];
 
@@ -116,25 +137,77 @@
       shopItems.forEach(item => {
         const div = document.createElement('div');
         div.className = 'item';
+
+        const button = document.createElement('button');
+
+        const stockEl = document.createElement('p');
+        stockEl.className = 'stock';
+        if (item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
+
+        const updateButtonText = () => {
+          if (item.stock !== undefined && item.stock <= 0) {
+            button.textContent = 'распродано';
+            button.style.color = 'gray';
+            if (stockEl) stockEl.textContent = '';
+          } else {
+            button.textContent = `Купить за ${item.cost}`;
+            button.style.fontWeight = 'bold';
+            if (stockEl && item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
+          }
+        };
+
+        button.addEventListener('click', () => {
+          if ((item.stock === undefined || item.stock > 0) && coins >= item.cost) {
+            coins -= item.cost;
+            if (item.id === 1) {
+              clickPower += 1;
+              item.cost += item.incrementCost;
+            }
+            if (item.id === 2) {
+              clickPower += item.power;
+              item.stock -= 1;
+            }
+            updateUI();
+            saveData();
+            updateButtonText();
+          }
+        });
+
         div.innerHTML = `
-          <b>${item.name} — ${item.cost}</b>
-          <p>${item.description}</p>
-          <p class='property'>${item.property}</p>
-          <button onclick="buy(${item.id})">Купить</button>
+          <img src="${item.img}" alt="${item.name}">
+          <div class="item-text">
+            <b>${item.name}</b>
+            <p>${item.description}</p>
+            <p class='property'>${item.property}</p>
+          </div>
         `;
+
+        if (item.stock !== undefined) div.appendChild(stockEl);
+        div.appendChild(button);
         itemsBlock.appendChild(div);
+
+        updateButtonText();
       });
+      updateUI();
     }
 
     function updateUI() {
       counter.textContent = coins;
+      document.querySelectorAll('.item').forEach((div, i) => {
+        const btn = div.querySelector('button');
+        const item = shopItems[i];
+        if (item.stock !== undefined && item.stock <= 0) {
+          btn.style.color = 'gray';
+        } else if (coins >= item.cost) {
+          btn.style.color = 'lime';
+        } else {
+          btn.style.color = 'red';
+        }
+      });
     }
 
     function saveData() {
-      update(ref(db, "players/" + userId), {
-        coins: coins,
-        clickPower: clickPower
-      });
+      update(ref(db, "players/" + userId), { coins: coins, clickPower: clickPower });
     }
 
     async function loadData() {
@@ -147,19 +220,6 @@
       updateUI();
     }
 
-    // Покупка товаров
-    function buy(id) {
-      const item = shopItems.find(i => i.id === id);
-      if (coins >= item.cost) {
-        coins -= item.cost;
-        if (item.id === 1) clickPower *= 2; // удваиваем clickPower при покупке "Оторванной пуговицы"
-        updateUI();
-        saveData();
-      } else {
-        alert('Недостаточно монет!');
-      }
-    }
-
     clickButton.addEventListener('click', () => {
       coins += clickPower;
       updateUI();
@@ -169,7 +229,6 @@
     renderShop();
     loadData();
 
-    // Показываем кликер по умолчанию
     clickerPanel.style.display = 'block';
   </script>
 </body>
