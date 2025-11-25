@@ -4,9 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AnTI Shop</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    body { font-family: Arial, sans-serif; background: #111; color: #fff; text-align: center; padding: 20px; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: #111; 
+      color: #fff; 
+      text-align: center; 
+      padding: 20px; 
+    }
+
     #counter { font-size: 48px; margin: 20px 0; }
+
+    .price {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 18px;
+    }
+
+    .price img {
+      width: 22px;
+      height: 22px;
+    }
+
     button { font-size: 20px; border: none; border-radius: 10px; cursor: pointer; background: #333; }
 
     #menu { display: flex; justify-content: center; margin-bottom: 20px; }
@@ -35,8 +58,11 @@
     .item .property { font-size: 12px; opacity: 0.7; }
     .item .stock { font-size: 12px; color: red; margin-top: 5px; }
     .item button { margin-top: 10px; font-weight: bold; width: 100%; border-radius: 8px; padding: 10px; font-size: 16px; }
+    .item button .price { font-size: 16px; }
+    .item button .price img { width: 18px; height: 18px; }
   </style>
 </head>
+
 <body>
   <h1>AnTI Shop</h1>
 
@@ -46,7 +72,10 @@
   </div>
 
   <div id="clickerPanel">
-    <div id="counter">0</div>
+    <div id="counter" class="price">
+      <span id="counterValue">0</span>
+      <img src="img/anti-coin.png">
+    </div>
     <button id="clickButton">Клик!</button>
   </div>
 
@@ -82,7 +111,7 @@
     let coins = 0;
     let clickPower = 1;
 
-    const counter = document.getElementById('counter');
+    const counterValue = document.getElementById('counterValue');
     const clickButton = document.getElementById('clickButton');
     const itemsBlock = document.getElementById('items');
 
@@ -113,7 +142,7 @@
         description: 'Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.',
         property: 'Прибавляет +1 к заработку за клик',
         incrementCost: 50,
-        img: 'item-1.png'
+        img: 'img/item-1.png'
       },
       {
         id: 2,
@@ -123,7 +152,7 @@
         property: 'Прибавляет +10 к заработку за клик',
         power: 10,
         stock: 5,
-        img: 'item-2.png'
+        img: 'img/item-2.png'
       }
     ];
 
@@ -138,14 +167,12 @@
           shopItems.forEach(item => {
             if (data.shopItems[item.id]) {
               item.stock = data.shopItems[item.id].stock ?? item.stock;
-              if (item.id === 1) item.cost = data.shopItems[item.id].cost ?? item.cost;
+              item.cost = data.shopItems[item.id].cost ?? item.cost;
             }
           });
         }
       }
-
       updateUI();
-      renderShop();  // ← вот это добавлено
     }
 
     function saveData() {
@@ -170,6 +197,7 @@
         const button = document.createElement('button');
         const stockEl = document.createElement('p');
         stockEl.className = 'stock';
+
         if (item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
 
         const updateButtonText = () => {
@@ -178,8 +206,12 @@
             button.style.color = 'gray';
             if (stockEl) stockEl.textContent = '';
           } else {
-            button.textContent = `Купить за ${item.cost}`;
-            button.style.fontWeight = 'bold';
+            button.innerHTML = `
+              <div class="price">
+                Купить за ${item.cost}
+                <img src="img/anti-coin.png">
+              </div>
+            `;
             if (stockEl && item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
           }
         };
@@ -222,7 +254,8 @@
     }
 
     function updateUI() {
-      counter.textContent = coins;
+      counterValue.textContent = coins;
+
       document.querySelectorAll('.item').forEach((div, i) => {
         const btn = div.querySelector('button');
         const item = shopItems[i];
