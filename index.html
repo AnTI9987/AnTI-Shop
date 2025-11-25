@@ -17,28 +17,23 @@
     #clickButton { padding: 40px 60px; font-size: 32px; color: #fff; }
 
     #shopPanel { display: none; }
-    #shop { margin-top: 20px; }
+    #shop { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
     .item { 
-      margin: 15px 0; 
       padding: 15px; 
       background: #222; 
       border-radius: 8px; 
       display: flex; 
-      align-items: center; 
+      flex-direction: column; 
+      align-items: center;
+      text-align: left;
     }
-    .item img { 
-      width: 60px; 
-      height: 60px; 
-      margin-right: 15px; 
-      border-radius: 5px; 
-    }
-    .item-text { 
-      flex: 1; 
-      text-align: left; 
-    }
+    .item-top { display: flex; width: 100%; align-items: center; margin-bottom: 10px; }
+    .item img { width: 60px; height: 60px; margin-right: 15px; border-radius: 5px; }
+    .item-text { flex: 1; }
     .item b { display: block; font-size: 18px; }
     .item p { margin: 5px 0; font-size: 14px; }
     .item .property { font-size: 12px; opacity: 0.7; }
+    .item .stock { font-size: 12px; color: red; margin-top: 5px; }
     .item button { margin-top: 10px; font-weight: bold; width: 100%; border-radius: 8px; padding: 10px; font-size: 16px; }
   </style>
 </head>
@@ -70,7 +65,7 @@
       authDomain: "anti-shop-d6b33.firebaseapp.com",
       databaseURL: "https://anti-shop-d6b33-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "anti-shop-d6b33",
-      storageBucket: "anti-shop-d6b33.firebasestorage.app",
+      storageBucket: "anti-shop-d6b33.appspot.com",
       messagingSenderId: "292698259142",
       appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"
     };
@@ -132,6 +127,38 @@
       }
     ];
 
+    async function loadData() {
+      const snapshot = await get(ref(db, "players/" + userId));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        coins = data.coins ?? 0;
+        clickPower = data.clickPower ?? 1;
+
+        if (data.shopItems) {
+          shopItems.forEach(item => {
+            if (data.shopItems[item.id]) {
+              item.stock = data.shopItems[item.id].stock ?? item.stock;
+              if (item.id === 1) item.cost = data.shopItems[item.id].cost ?? item.cost;
+            }
+          });
+        }
+      }
+      updateUI();
+    }
+
+    function saveData() {
+      const shopData = {};
+      shopItems.forEach(item => {
+        shopData[item.id] = { stock: item.stock ?? null, cost: item.cost ?? null };
+      });
+
+      update(ref(db, "players/" + userId), {
+        coins: coins,
+        clickPower: clickPower,
+        shopItems: shopData
+      });
+    }
+
     function renderShop() {
       itemsBlock.innerHTML = '';
       shopItems.forEach(item => {
@@ -139,7 +166,6 @@
         div.className = 'item';
 
         const button = document.createElement('button');
-
         const stockEl = document.createElement('p');
         stockEl.className = 'stock';
         if (item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
@@ -163,7 +189,7 @@
               clickPower += 1;
               item.cost += item.incrementCost;
             }
-            if (item.id === 2) {
+            if (item.id === 2 && item.stock > 0) {
               clickPower += item.power;
               item.stock -= 1;
             }
@@ -174,16 +200,18 @@
         });
 
         div.innerHTML = `
-          <img src="${item.img}" alt="${item.name}">
-          <div class="item-text">
-            <b>${item.name}</b>
-            <p>${item.description}</p>
-            <p class='property'>${item.property}</p>
+          <div class="item-top">
+            <img src="${item.img}" alt="${item.name}">
+            <div class="item-text">
+              <b>${item.name}</b>
+              <p>${item.description}</p>
+              <p class='property'>${item.property}</p>
+            </div>
           </div>
         `;
 
         if (item.stock !== undefined) div.appendChild(stockEl);
-        div.appendChild(button); // кнопка теперь под текстом
+        div.appendChild(button); // кнопка теперь внизу блока
         itemsBlock.appendChild(div);
 
         updateButtonText();
@@ -206,20 +234,6 @@
       });
     }
 
-    function saveData() {
-      update(ref(db, "players/" + userId), { coins: coins, clickPower: clickPower });
-    }
-
-    async function loadData() {
-      const snapshot = await get(ref(db, "players/" + userId));
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        coins = data.coins ?? 0;
-        clickPower = data.clickPower ?? 1;
-      }
-      updateUI();
-    }
-
     clickButton.addEventListener('click', () => {
       coins += clickPower;
       updateUI();
@@ -228,7 +242,6 @@
 
     renderShop();
     loadData();
-
     clickerPanel.style.display = 'block';
   </script>
 </body>
