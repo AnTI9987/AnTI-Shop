@@ -1,81 +1,75 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const clicksDisplay = document.getElementById('clicks');
-    let clicks = parseInt(localStorage.getItem('clicks')) || 0;
+let clicks = Number(localStorage.getItem("clicks")) || 0;
+let clickPower = Number(localStorage.getItem("clickPower")) || 1;
 
-    clicksDisplay.textContent = clicks;
+let price1 = Number(localStorage.getItem("price1")) || 50;
+let price2 = 250;
 
-    const items = [
-        {
-            id: 1,
-            name: "пуговица",
-            price: 50,
-            increment: 50,
-            stock: Infinity,
-            stockKey: null, // бесконечный товар, не сохраняем
-            button: document.getElementById('buy-1'),
-            stockDisplay: document.getElementById('stock-1'),
-            img: 'img/item-1.png'
-        },
-        {
-            id: 2,
-            name: "шайба",
-            price: 250,
-            increment: 10,
-            stock: 5,
-            stockKey: "stock_item_2",
-            button: document.getElementById('buy-2'),
-            stockDisplay: document.getElementById('stock-2'),
-            img: 'img/item-2.png'
-        }
-    ];
+let stock2 = Number(localStorage.getItem("stock2"));
+if (stock2 === null) stock2 = 5;
 
-    // загрузка сохранённых остатков
-    items.forEach(item => {
-        if (item.stockKey) {
-            const savedStock = localStorage.getItem(item.stockKey);
-            if (savedStock !== null) {
-                item.stock = parseInt(savedStock);
-            }
-        }
-        updateItemDisplay(item);
-    });
+document.getElementById("clicks").textContent = clicks;
+document.getElementById("price1").textContent = price1;
+document.getElementById("price2").textContent = price2;
+document.getElementById("stock2").textContent = "В наличии: " + stock2;
 
-    // обработчики покупки
-    items.forEach(item => {
-        item.button.addEventListener('click', () => {
-            if (clicks >= item.price && item.stock > 0) {
-                clicks -= item.price;
-                clicksDisplay.textContent = clicks;
-                localStorage.setItem('clicks', clicks);
+function save() {
+    localStorage.setItem("clicks", clicks);
+    localStorage.setItem("clickPower", clickPower);
+    localStorage.setItem("price1", price1);
+    localStorage.setItem("stock2", stock2);
+}
 
-                clicks += item.increment;
-                clicksDisplay.textContent = clicks;
-                localStorage.setItem('clicks', clicks);
+document.getElementById("click-btn").onclick = () => {
+    clicks += clickPower;
+    document.getElementById("clicks").textContent = clicks;
+    save();
+};
 
-                if (item.stock !== Infinity) {
-                    item.stock--;
-                    localStorage.setItem(item.stockKey, item.stock);
-                }
+function updateButtons() {
+    let b1 = document.getElementById("buy1");
+    if (clicks >= price1) b1.className = "btn-yes";
+    else b1.className = "btn-no";
 
-                updateItemDisplay(item);
-            }
-        });
-    });
-
-    function updateItemDisplay(item) {
-        // если товар закончился
-        if (item.stock <= 0) {
-            item.button.textContent = "распродано";
-            item.button.disabled = true;
-            item.stockDisplay.textContent = "в наличии: 0";
-            return;
-        }
-
-        // если есть в наличии
-        item.button.textContent = `купить за ${item.price}`;
-        item.button.disabled = false;
-        item.stockDisplay.textContent = item.stock === Infinity
-            ? "в наличии: ∞"
-            : `в наличии: ${item.stock}`;
+    let b2 = document.getElementById("buy2");
+    if (stock2 <= 0) {
+        b2.textContent = "распродано";
+        b2.className = "btn-no";
+        b2.disabled = true;
+    } else if (clicks >= price2) {
+        b2.className = "btn-yes";
+    } else {
+        b2.className = "btn-no";
     }
-});
+}
+
+updateButtons();
+
+document.getElementById("buy1").onclick = () => {
+    if (clicks >= price1) {
+        clicks -= price1;
+        clickPower += 1;
+        price1 = Math.floor(price1 * 1.5);
+
+        document.getElementById("clicks").textContent = clicks;
+        document.getElementById("price1").textContent = price1;
+
+        save();
+        updateButtons();
+    }
+};
+
+document.getElementById("buy2").onclick = () => {
+    if (stock2 <= 0) return;
+
+    if (clicks >= price2) {
+        clicks -= price2;
+        clickPower += 10;
+        stock2 -= 1;
+
+        document.getElementById("clicks").textContent = clicks;
+        document.getElementById("stock2").textContent = "В наличии: " + stock2;
+
+        save();
+        updateButtons();
+    }
+};
