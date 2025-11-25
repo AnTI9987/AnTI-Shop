@@ -12,10 +12,9 @@
   #menu { display: flex; justify-content: center; margin-bottom: 20px; }
   #menu button { flex: 1; margin: 0 5px; padding: 10px 0; font-size: 18px; color: #fff; }
   .active { background: #555; }
-  #clickerPanel { display: none; position: relative; }
+  #clickerPanel, #shopPanel { display: none; position: relative; }
   #clickButton { margin-top: 20px; border: none; background: none; cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; user-select: none; }
   #clickButton img { display: block; margin: 0 auto; transition: transform 0.15s ease; }
-  #shopPanel { display: none; }
   #shop { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
   .item { padding: 15px; background: #222; border-radius: 8px; display: flex; flex-direction: column; align-items: center; text-align: left; }
   .item-top { display: flex; width: 100%; align-items: center; margin-bottom: 10px; }
@@ -53,7 +52,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",
@@ -70,7 +69,7 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-let userId = localStorage.getItem("userId");
+let userId = null;
 let coins = 0, clickPower = 1, dataLoaded = false;
 
 const googleSignIn = document.getElementById('googleSignIn');
@@ -83,19 +82,22 @@ const shopPanel = document.getElementById('shopPanel');
 const clickerTab = document.getElementById('clickerTab');
 const shopTab = document.getElementById('shopTab');
 
-googleSignIn.addEventListener('click', () => { signInWithRedirect(auth, provider); });
+googleSignIn.addEventListener('click', () => {
+  signInWithRedirect(auth, provider);
+});
 
-getRedirectResult(auth)
-  .then((result) => {
-    if (result.user) {
-      userId = result.user.uid;
-      localStorage.setItem("userId", userId);
-      loadData();
-      renderShop();
-      clickerPanel.style.display='block';
-    }
-  })
-  .catch(console.error);
+onAuthStateChanged(auth, user => {
+  if(user) {
+    userId = user.uid;
+    localStorage.setItem("userId", userId);
+    googleSignIn.style.display = 'none';
+    loadData();
+    renderShop();
+    clickerPanel.style.display='block';
+  } else {
+    googleSignIn.style.display = 'inline-block';
+  }
+});
 
 clickerTab.addEventListener('click', () => { clickerPanel.style.display='block'; shopPanel.style.display='none'; clickerTab.classList.add('active'); shopTab.classList.remove('active'); });
 shopTab.addEventListener('click', () => { clickerPanel.style.display='none'; shopPanel.style.display='block'; shopTab.classList.add('active'); clickerTab.classList.remove('active'); });
@@ -108,18 +110,16 @@ const shopItems = [
 async function loadData() {
   if (!userId) return;
   const snapshot = await get(ref(db, "players/" + userId));
-  if (snapshot.exists()) {
+  if(snapshot.exists()) {
     const data = snapshot.val();
     coins = data.coins ?? 0;
     clickPower = data.clickPower ?? 1;
-    if (data.shopItems) {
-      shopItems.forEach(item => {
-        if (data.shopItems[item.id]) {
-          item.stock = data.shopItems[item.id].stock ?? item.stock;
-          if (item.id === 1) item.cost = data.shopItems[item.id].cost ?? item.cost;
-        }
-      });
-    }
+    if(data.shopItems) shopItems.forEach(item => {
+      if(data.shopItems[item.id]) {
+        item.stock = data.shopItems[item.id].stock ?? item.stock;
+        if(item.id===1) item.cost = data.shopItems[item.id].cost ?? item.cost;
+      }
+    });
   }
   dataLoaded = true;
   updateUI();
@@ -128,60 +128,51 @@ async function loadData() {
 function saveData() {
   if (!userId) return;
   const shopData = {};
-  shopItems.forEach(item => { shopData[item.id] = { stock: item.stock ?? null, cost: item.cost ?? null }; });
+  shopItems.forEach(item => { shopData[item.id] = { stock:item.stock ?? null, cost:item.cost ?? null }; });
   update(ref(db, "players/" + userId), { coins: coins, clickPower: clickPower, shopItems: shopData });
 }
 
 function renderShop() {
-  itemsBlock.innerHTML = '';
-  shopItems.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'item';
-
-    const button = document.createElement('button');
-    const stockEl = document.createElement('p');
-    stockEl.className = 'stock';
-    if (item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
-
-    const updateButtonText = () => {
-      if (item.stock !== undefined && item.stock <= 0) { button.innerHTML = 'распродано'; button.style.color='gray'; if(stockEl) stockEl.textContent=''; }
-      else { button.innerHTML = `<div class="price">Купить за ${item.cost}<img src="img/anti-coin.png"></div>`; button.style.fontWeight='bold'; if(stockEl && item.stock!==undefined) stockEl.textContent=`В наличии: ${item.stock}`; }
+  itemsBlock.innerHTML='';
+  shopItems.forEach(item=>{
+    const div=document.createElement('div'); div.className='item';
+    const button=document.createElement('button');
+    const stockEl=document.createElement('p'); stockEl.className='stock';
+    if(item.stock!==undefined) stockEl.textContent=`В наличии: ${item.stock}`;
+    const updateButtonText=()=>{
+      if(item.stock!==undefined && item.stock<=0){ button.innerHTML='распродано'; button.style.color='gray'; if(stockEl) stockEl.textContent=''; }
+      else{ button.innerHTML=`<div class="price">Купить за ${item.cost}<img src="img/anti-coin.png"></div>`; button.style.fontWeight='bold'; if(stockEl && item.stock!==undefined) stockEl.textContent=`В наличии: ${item.stock}`; }
     };
-
-    button.addEventListener('click', () => {
-      if (!dataLoaded) return;
-      if ((item.stock===undefined || item.stock>0) && coins>=item.cost) {
-        coins -= item.cost;
-        if (item.id===1) { clickPower+=1; item.cost+=item.incrementCost; }
-        if (item.id===2 && item.stock>0) { clickPower+=item.power; item.stock-=1; }
+    button.addEventListener('click', ()=>{
+      if(!dataLoaded) return;
+      if((item.stock===undefined || item.stock>0) && coins>=item.cost){
+        coins-=item.cost;
+        if(item.id===1){ clickPower+=1; item.cost+=item.incrementCost; }
+        if(item.id===2 && item.stock>0){ clickPower+=item.power; item.stock-=1; }
         updateUI(); saveData(); updateButtonText();
       }
     });
-
-    div.innerHTML = `<div class="item-top"><img src="${item.img}" alt="${item.name}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p class='property'>${item.property}</p></div></div>`;
+    div.innerHTML=`<div class="item-top"><img src="${item.img}" alt="${item.name}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p class='property'>${item.property}</p></div></div>`;
     if(item.stock!==undefined) div.appendChild(stockEl);
-    div.appendChild(button);
-    itemsBlock.appendChild(div);
-
+    div.appendChild(button); itemsBlock.appendChild(div);
     updateButtonText();
   });
   updateUI();
 }
 
-function updateUI() {
-  counterValue.textContent = coins;
-  document.querySelectorAll('.item').forEach((div,i)=>{ 
-    const btn = div.querySelector('button'); 
-    const item = shopItems[i]; 
-    if(item.stock!==undefined && item.stock<=0) btn.style.color='gray'; 
-    else if(coins>=item.cost) btn.style.color='lime'; 
+function updateUI(){
+  counterValue.textContent=coins;
+  document.querySelectorAll('.item').forEach((div,i)=>{
+    const btn=div.querySelector('button');
+    const item=shopItems[i];
+    if(item.stock!==undefined && item.stock<=0) btn.style.color='gray';
+    else if(coins>=item.cost) btn.style.color='lime';
     else btn.style.color='red';
   });
 }
 
 function spawnFloatingCoin(x,y,value){
-  const floatEl=document.createElement('div');
-  floatEl.className='floating-coin';
+  const floatEl=document.createElement('div'); floatEl.className='floating-coin';
   floatEl.style.left=x+'px'; floatEl.style.top=y+'px';
   floatEl.innerHTML=`${value}<img src="img/anti-coin.png" width="14" height="14">`;
   document.body.appendChild(floatEl);
@@ -192,21 +183,12 @@ function spawnFloatingCoin(x,y,value){
 clickButton.addEventListener('click', e=>{
   if(!dataLoaded) return;
   const rect=clickImg.getBoundingClientRect();
-  const x=rect.left+rect.width/2-7;
-  const y=rect.top;
+  const x=rect.left+rect.width/2-7; const y=rect.top;
   spawnFloatingCoin(x,y,clickPower);
-
-  clickImg.src="img/click2.png";
-  clickImg.style.transform="scale(0.9)";
+  clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.9)";
   setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150);
-
-  coins+=clickPower;
-  updateUI();
-  saveData();
+  coins+=clickPower; updateUI(); saveData();
 });
-
-renderShop();
-clickerPanel.style.display='block';
 </script>
 </body>
 </html>
