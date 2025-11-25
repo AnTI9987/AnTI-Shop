@@ -13,15 +13,15 @@
       text-align: center; 
       padding: 20px; 
     }
-    #counter { font-size: 48px; margin: 20px 0; }
-    button { font-size: 20px; border: none; border-radius: 10px; cursor: pointer; background: #333; }
-
+    #counter { font-size: 48px; margin: 20px 0; display: inline-flex; align-items: center; gap: 4px; }
+    #counter img { width: 32px; height: 32px; }
+    
     #menu { display: flex; justify-content: center; margin-bottom: 20px; }
     #menu button { flex: 1; margin: 0 5px; padding: 10px 0; font-size: 18px; color: #fff; }
     .active { background: #555; }
 
     #clickerPanel { display: none; }
-    #clickButton { padding: 40px 60px; font-size: 32px; color: #fff; }
+    #clickButton { margin-top: 20px; border: none; background: none; cursor: pointer; }
 
     #shopPanel { display: none; }
     #shop { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
@@ -46,10 +46,14 @@
     .price {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 2px;
       font-size: 16px;
     }
     .price img { width: 18px; height: 18px; }
+
+    .click-animation {
+      transition: transform 0.15s ease;
+    }
   </style>
 </head>
 <body>
@@ -61,11 +65,13 @@
   </div>
 
   <div id="clickerPanel">
-    <div id="counter" class="price">
+    <div id="counter">
       <span id="counterValue">0</span>
       <img src="img/anti-coin.png">
     </div>
-    <button id="clickButton">Клик!</button>
+    <button id="clickButton">
+      <img id="clickImg" src="img/click1.png" width="200">
+    </button>
   </div>
 
   <div id="shopPanel">
@@ -99,8 +105,10 @@
 
     let coins = 0;
     let clickPower = 1;
+    let dataLoaded = false;
 
     const counterValue = document.getElementById('counterValue');
+    const clickImg = document.getElementById('clickImg');
     const clickButton = document.getElementById('clickButton');
     const itemsBlock = document.getElementById('items');
 
@@ -124,25 +132,8 @@
     });
 
     const shopItems = [
-      {
-        id: 1,
-        name: 'Оторванная пуговица',
-        cost: 50,
-        description: 'Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.',
-        property: 'Прибавляет +1 к заработку за клик',
-        incrementCost: 50,
-        img: 'img/item-1.png'
-      },
-      {
-        id: 2,
-        name: 'Страшная штука',
-        cost: 250,
-        description: 'Оно пугает.',
-        property: 'Прибавляет +10 к заработку за клик',
-        power: 10,
-        stock: 5,
-        img: 'img/item-2.png'
-      }
+      { id:1, name:'Оторванная пуговица', cost:50, description:'Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.', property:'Прибавляет +1 к заработку за клик', incrementCost:50, img:'img/item-1.png' },
+      { id:2, name:'Страшная штука', cost:250, description:'Оно пугает.', property:'Прибавляет +10 к заработку за клик', power:10, stock:5, img:'img/item-2.png' }
     ];
 
     async function loadData() {
@@ -151,7 +142,6 @@
         const data = snapshot.val();
         coins = data.coins ?? 0;
         clickPower = data.clickPower ?? 1;
-
         if (data.shopItems) {
           shopItems.forEach(item => {
             if (data.shopItems[item.id]) {
@@ -161,9 +151,9 @@
           });
         }
       }
-
+      dataLoaded = true;
       updateUI();
-      renderShop(); 
+      renderShop();
     }
 
     function saveData() {
@@ -171,12 +161,7 @@
       shopItems.forEach(item => {
         shopData[item.id] = { stock: item.stock ?? null, cost: item.cost ?? null };
       });
-
-      update(ref(db, "players/" + userId), {
-        coins: coins,
-        clickPower: clickPower,
-        shopItems: shopData
-      });
+      update(ref(db, "players/" + userId), { coins: coins, clickPower: clickPower, shopItems: shopData });
     }
 
     function renderShop() {
@@ -196,44 +181,23 @@
             button.style.color = 'gray';
             if (stockEl) stockEl.textContent = '';
           } else {
-            button.innerHTML = `
-              <div class="price">
-                Купить за ${item.cost} <img src="img/anti-coin.png">
-              </div>
-            `;
+            button.innerHTML = `<div class="price">Купить за ${item.cost}<img src="img/anti-coin.png"></div>`;
             button.style.fontWeight = 'bold';
             if (stockEl && item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
           }
         };
 
         button.addEventListener('click', () => {
+          if (!dataLoaded) return;
           if ((item.stock === undefined || item.stock > 0) && coins >= item.cost) {
             coins -= item.cost;
-            if (item.id === 1) {
-              clickPower += 1;
-              item.cost += item.incrementCost;
-            }
-            if (item.id === 2 && item.stock > 0) {
-              clickPower += item.power;
-              item.stock -= 1;
-            }
-            updateUI();
-            saveData();
-            updateButtonText();
+            if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
+            if (item.id === 2 && item.stock > 0) { clickPower += item.power; item.stock -= 1; }
+            updateUI(); saveData(); updateButtonText();
           }
         });
 
-        div.innerHTML = `
-          <div class="item-top">
-            <img src="${item.img}" alt="${item.name}">
-            <div class="item-text">
-              <b>${item.name}</b>
-              <p>${item.description}</p>
-              <p class='property'>${item.property}</p>
-            </div>
-          </div>
-        `;
-
+        div.innerHTML = `<div class="item-top"><img src="${item.img}" alt="${item.name}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p class='property'>${item.property}</p></div></div>`;
         if (item.stock !== undefined) div.appendChild(stockEl);
         div.appendChild(button);
         itemsBlock.appendChild(div);
@@ -248,17 +212,19 @@
       document.querySelectorAll('.item').forEach((div, i) => {
         const btn = div.querySelector('button');
         const item = shopItems[i];
-        if (item.stock !== undefined && item.stock <= 0) {
-          btn.style.color = 'gray';
-        } else if (coins >= item.cost) {
-          btn.style.color = 'lime';
-        } else {
-          btn.style.color = 'red';
-        }
+        if (item.stock !== undefined && item.stock <= 0) btn.style.color = 'gray';
+        else if (coins >= item.cost) btn.style.color = 'lime';
+        else btn.style.color = 'red';
       });
     }
 
     clickButton.addEventListener('click', () => {
+      if (!dataLoaded) return;
+      clickImg.classList.add('click-animation');
+      clickImg.src = "img/click2.png";
+      clickImg.style.transform = "scale(0.9)";
+      setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; }, 150);
+
       coins += clickPower;
       updateUI();
       saveData();
