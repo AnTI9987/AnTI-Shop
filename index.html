@@ -125,8 +125,8 @@
         name: 'Страшная штука',
         cost: 250,
         description: 'Оно пугает.',
-        property: 'Прибавляет +50 к заработку за клик',
-        power: 50,
+        property: 'Прибавляет +10 к заработку за клик',
+        power: 10,
         stock: 5,
         img: 'item-2.png'
       }
@@ -183,7 +183,7 @@
         `;
 
         if (item.stock !== undefined) div.appendChild(stockEl);
-        div.appendChild(button);
+        div.appendChild(button); // кнопка теперь под текстом
         itemsBlock.appendChild(div);
 
         updateButtonText();
