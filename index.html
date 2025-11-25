@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Кликер</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    #counter {
+      font-size: 48px;
+      margin: 20px 0;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #333;
+      color: #fff;
+    }
+    #shop {
+      margin-top: 40px;
+      border-top: 2px solid #444;
+      padding-top: 20px;
+    }
+    .item {
+      margin: 10px 0;
+      padding: 10px;
+      background: #222;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Кликер</h1>
+
+  <div id="counter">0</div>
+  <button id="clickButton">Клик!</button>
+
+  <div id="shop">
+    <h2>Магазин</h2>
+    <div id="items"></div>
+  </div>
+
+  <script>
+    // Начальные данные игры
+    let coins = 0;
+    let clickPower = 1;
+
+    const counter = document.getElementById('counter');
+    const clickButton = document.getElementById('clickButton');
+    const itemsBlock = document.getElementById('items');
+
+    // Список товаров магазина
+    const shopItems = [
+      { id: 1, name: 'Усиление клика +1', cost: 50, power: 1 },
+      { id: 2, name: 'Усиление клика +5', cost: 200, power: 5 }
+    ];
+
+    function renderShop() {
+      itemsBlock.innerHTML = '';
+      shopItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <b>${item.name}</b><br>
+          Цена: ${item.cost}<br>
+          <button onclick="buy(${item.id})">Купить</button>
+        `;
+        itemsBlock.appendChild(div);
+      });
+    }
+
+    function buy(id) {
+      const item = shopItems.find(i => i.id === id);
+      if (coins >= item.cost) {
+        coins -= item.cost;
+        clickPower += item.power;
+        update();
+      } else {
+        alert('Недостаточно монет!');
+      }
+    }
+
+    function update() {
+      counter.textContent = coins;
+    }
+
+    clickButton.addEventListener('click', () => {
+      coins += clickPower;
+      update();
+    });
+
+    renderShop();
+    update();
+  </script>
+</body>
+</html>
