@@ -24,29 +24,21 @@
     justify-content: center; 
     align-items: center; 
     gap: 4px; 
-  }
+  }  
   #counter img { width: 32px; height: 32px; }
 
   #menu { display: flex; justify-content: center; margin-bottom: 20px; }
-  #menu button { flex: 1; margin: 0 5px; padding: 10px 0; font-size: 18px; color: #fff; }
-  .active { background: #555; }
+  #menu button { flex: 1; margin: 0 5px; padding: 10px 0; font-size: 18px; color: #fff; background: #555; border: none; border-radius: 8px; }
+  #menu button.active { background: #332614; }
 
   #clickerPanel { display: none; position: relative; }
   #clickButton { margin-top: 20px; border: none; background: none; cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
   #clickButton img { display: block; margin: 0 auto; transition: transform 0.15s ease; }
 
-  #shopPanel { display: none; background: #FFB74D; padding: 20px 0; }
+  #shopPanel { display: none; background: #FFBE5F; min-height: 100vh; padding: 20px; box-sizing: border-box; }
   #shop { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
 
-  .item {
-    padding: 15px;
-    background: #382307;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: left;
-  }
+  .item { padding: 15px; background: #513B1E; border-radius: 8px; display: flex; flex-direction: column; align-items: center; text-align: left; }
   .item-top { display: flex; width: 100%; align-items: center; margin-bottom: 10px; }
   .item img { width: 60px; height: 60px; margin-right: 15px; border-radius: 5px; }
   .item-text { flex: 1; }
@@ -54,18 +46,7 @@
   .item p { margin: 5px 0; font-size: 14px; }
   .item .property { font-size: 12px; opacity: 0.7; }
   .item .stock { font-size: 12px; color: red; margin-top: 5px; }
-  .item button {
-    margin-top: 10px;
-    font-weight: bold;
-    width: 100%;
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 16px;
-    background-color: #D68221;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
+  .item button { margin-top: 10px; font-weight: bold; width: 100%; border-radius: 8px; padding: 10px; font-size: 16px; background: #332614; color: #fff; border: none; cursor: pointer; }
 
   .price { display: inline-flex; align-items: center; gap: 2px; font-size: 16px; }
   .price img { width: 18px; height: 18px; }
@@ -214,7 +195,7 @@ function renderShop() {
       if ((item.stock === undefined || item.stock > 0) && coins >= item.cost) {
         coins -= item.cost;
         if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
-        if (item.id === 2 && item.stock > 0) { clickPower += item.power; item.stock -= 1; item.cost += 250; } // цена растёт на +250
+        if (item.id === 2 && item.stock > 0) { clickPower += item.power; item.stock -= 1; item.cost += 250; } // рост цены после покупки
         updateUI(); saveData(); updateButtonText();
       }
     });
@@ -250,18 +231,21 @@ function spawnFloatingCoin(x, y, value) {
   setTimeout(() => { floatEl.remove(); }, 800);
 }
 
-// мульти-тач на кликер
 clickButton.addEventListener('touchstart', e => {
   if (!dataLoaded) return;
   e.preventDefault();
+
   const touches = e.touches;
-  for (let t of touches) {
+  for (let i = 0; i < touches.length; i++) {
+    const t = touches[i];
     coins += clickPower;
     spawnFloatingCoin(t.clientX, t.clientY, clickPower);
   }
+
   clickImg.src = "img/click2.png";
   clickImg.style.transform = "scale(0.9)";
   setTimeout(() => { clickImg.src = "img/click1.png"; clickImg.style.transform="scale(1)"; }, 150);
+
   updateUI();
   saveData();
 }, { passive: false });
