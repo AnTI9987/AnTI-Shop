@@ -14,11 +14,13 @@
     padding: 20px; 
   }
   #counter { font-size: 48px; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 4px; }
-  #counter img { width: 32px; height: 32px; vertical-align: middle; }
+  #counter img { width: 32px; height: 32px; }
 
   #menu { display: flex; justify-content: center; margin-bottom: 20px; }
   #menu button { flex: 1; margin: 0 5px; padding: 10px 0; font-size: 18px; color: #fff; }
   .active { background: #555; }
+
+  #loginButton { padding: 10px 20px; font-size: 18px; margin: 20px 0; cursor: pointer; border-radius: 8px; background: #4285F4; color: white; border: none; }
 
   #clickerPanel { display: none; position: relative; }
   #clickButton { margin-top: 20px; border: none; background: none; cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -58,16 +60,14 @@
     opacity: 1;
     transition: all 0.8s ease-out;
   }
-
-  #googleSignIn { margin: 20px; padding: 10px 20px; font-size: 18px; border-radius: 8px; cursor: pointer; background: #4285F4; color: #fff; border: none; }
 </style>
 </head>
 <body>
 <h1>AnTI Shop</h1>
 
-<button id="googleSignIn">Войти через Google</button>
+<button id="loginButton">Войти через Google</button>
 
-<div id="menu">
+<div id="menu" style="display:none;">
   <button id="clickerTab" class="active">Кликер</button>
   <button id="shopTab">Магазин</button>
 </div>
@@ -90,7 +90,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",
@@ -107,12 +107,8 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-let userId = localStorage.getItem("userId");
-let coins = 0;
-let clickPower = 1;
-let dataLoaded = false;
-
-const googleSignIn = document.getElementById('googleSignIn');
+const loginButton = document.getElementById('loginButton');
+const menu = document.getElementById('menu');
 const counterValue = document.getElementById('counterValue');
 const clickImg = document.getElementById('clickImg');
 const clickButton = document.getElementById('clickButton');
@@ -122,52 +118,45 @@ const shopPanel = document.getElementById('shopPanel');
 const clickerTab = document.getElementById('clickerTab');
 const shopTab = document.getElementById('shopTab');
 
-clickerTab.addEventListener('click', () => { clickerPanel.style.display='block'; shopPanel.style.display='none'; clickerTab.classList.add('active'); shopTab.classList.remove('active'); });
-shopTab.addEventListener('click', () => { clickerPanel.style.display='none'; shopPanel.style.display='block'; shopTab.classList.add('active'); clickerTab.classList.remove('active'); });
+let coins = 0;
+let clickPower = 1;
+let dataLoaded = false;
+let userId = null;
 
 const shopItems = [
   { id:1, name:'Оторванная пуговица', cost:50, description:'Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.', property:'Прибавляет +1 к заработку за клик', incrementCost:50, img:'img/item-1.png' },
   { id:2, name:'Страшная штука', cost:250, description:'Оно пугает.', property:'Прибавляет +10 к заработку за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-googleSignIn.addEventListener('click', () => {
-  signInWithRedirect(auth, provider);
+loginButton.addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    userId = result.user.uid;
+  } catch(err) { console.log(err); }
 });
 
-getRedirectResult(auth).then((result) => {
-  if (result.user) {
-    const user = result.user;
-    userId = user.uid;
-    localStorage.setItem("userId", userId);
-    googleSignIn.style.display = 'none';
-    loadData();
-    renderShop();
-    clickerPanel.style.display = 'block';
-  }
-}).catch(console.error);
-
 onAuthStateChanged(auth, user => {
-  if (user && !userId) {
+  if(user){
+    loginButton.style.display = 'none';
+    menu.style.display = 'flex';
     userId = user.uid;
-    localStorage.setItem("userId", userId);
-    googleSignIn.style.display = 'none';
     loadData();
-    renderShop();
     clickerPanel.style.display = 'block';
   }
 });
 
 async function loadData() {
+  if(!userId) return;
   const snapshot = await get(ref(db, "players/" + userId));
   if (snapshot.exists()) {
     const data = snapshot.val();
     coins = data.coins ?? 0;
     clickPower = data.clickPower ?? 1;
-    if (data.shopItems) {
+    if(data.shopItems){
       shopItems.forEach(item => {
-        if (data.shopItems[item.id]) {
+        if(data.shopItems[item.id]){
           item.stock = data.shopItems[item.id].stock ?? item.stock;
-          if (item.id === 1) item.cost = data.shopItems[item.id].cost ?? item.cost;
+          if(item.id===1) item.cost = data.shopItems[item.id].cost ?? item.cost;
         }
       });
     }
@@ -177,93 +166,70 @@ async function loadData() {
   renderShop();
 }
 
-function saveData() {
+// --- оставляем остальной функционал кликера и магазина без изменений ---
+function saveData(){
   const shopData = {};
-  shopItems.forEach(item => { shopData[item.id] = { stock: item.stock ?? null, cost: item.cost ?? null }; });
-  update(ref(db, "players/" + userId), { coins: coins, clickPower: clickPower, shopItems: shopData });
+  shopItems.forEach(item=>{ shopData[item.id] = { stock: item.stock ?? null, cost: item.cost ?? null }; });
+  update(ref(db,"players/"+userId),{ coins, clickPower, shopItems: shopData });
 }
 
 function renderShop() {
   itemsBlock.innerHTML = '';
-  shopItems.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'item';
-    const button = document.createElement('button');
-    const stockEl = document.createElement('p');
-    stockEl.className = 'stock';
-    if (item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
-
-    const updateButtonText = () => {
-      if (item.stock !== undefined && item.stock <= 0) {
-        button.innerHTML = 'распродано';
-        button.style.color = 'gray';
-        if (stockEl) stockEl.textContent = '';
-      } else {
-        button.innerHTML = `<div class="price">Купить за ${item.cost}<img src="img/anti-coin.png"></div>`;
-        button.style.fontWeight = 'bold';
-        if (stockEl && item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
-      }
+  shopItems.forEach(item=>{
+    const div=document.createElement('div'); div.className='item';
+    const button=document.createElement('button');
+    const stockEl=document.createElement('p'); stockEl.className='stock';
+    if(item.stock!==undefined) stockEl.textContent=`В наличии: ${item.stock}`;
+    const updateButtonText=()=>{
+      if(item.stock!==undefined && item.stock<=0){ button.innerHTML='распродано'; button.style.color='gray'; if(stockEl) stockEl.textContent=''; }
+      else{ button.innerHTML=`<div class="price">Купить за ${item.cost}<img src="img/anti-coin.png"></div>`; button.style.fontWeight='bold'; if(stockEl && item.stock!==undefined) stockEl.textContent=`В наличии: ${item.stock}`; }
     };
-
-    button.addEventListener('click', () => {
-      if (!dataLoaded) return;
-      if ((item.stock === undefined || item.stock > 0) && coins >= item.cost) {
-        coins -= item.cost;
-        if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
-        if (item.id === 2 && item.stock > 0) { clickPower += item.power; item.stock -= 1; }
+    button.addEventListener('click',()=>{
+      if(!dataLoaded) return;
+      if((item.stock===undefined || item.stock>0) && coins>=item.cost){
+        coins-=item.cost;
+        if(item.id===1){ clickPower+=1; item.cost+=item.incrementCost; }
+        if(item.id===2 && item.stock>0){ clickPower+=item.power; item.stock-=1; }
         updateUI(); saveData(); updateButtonText();
       }
     });
-
-    div.innerHTML = `<div class="item-top"><img src="${item.img}" alt="${item.name}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p class='property'>${item.property}</p></div></div>`;
-    if (item.stock !== undefined) div.appendChild(stockEl);
-    div.appendChild(button);
-    itemsBlock.appendChild(div);
-
+    div.innerHTML=`<div class="item-top"><img src="${item.img}" alt="${item.name}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p class='property'>${item.property}</p></div></div>`;
+    if(item.stock!==undefined) div.appendChild(stockEl);
+    div.appendChild(button); itemsBlock.appendChild(div);
     updateButtonText();
   });
   updateUI();
 }
 
-function updateUI() {
-  counterValue.textContent = coins;
-  document.querySelectorAll('.item').forEach((div, i) => {
-    const btn = div.querySelector('button');
-    const item = shopItems[i];
-    if (item.stock !== undefined && item.stock <= 0) btn.style.color = 'gray';
-    else if (coins >= item.cost) btn.style.color = 'lime';
-    else btn.style.color = 'red';
-  });
-}
+function updateUI(){ counterValue.textContent=coins; document.querySelectorAll('.item').forEach((div,i)=>{ const btn=div.querySelector('button'); const item=shopItems[i]; if(item.stock!==undefined && item.stock<=0) btn.style.color='gray'; else if(coins>=item.cost) btn.style.color='lime'; else btn.style.color='red'; }); }
 
-function spawnFloatingCoin(x, y, value) {
-  const floatEl = document.createElement('div');
-  floatEl.className = 'floating-coin';
-  floatEl.style.left = x + 'px';
-  floatEl.style.top = y + 'px';
-  floatEl.innerHTML = `${value}<img src="img/anti-coin.png" width="14" height="14">`;
+function spawnFloatingCoin(x,y,value){
+  const floatEl=document.createElement('div');
+  floatEl.className='floating-coin';
+  floatEl.style.left=x+'px';
+  floatEl.style.top=y+'px';
+  floatEl.innerHTML=`${value}<img src="img/anti-coin.png" width="14" height="14">`;
   document.body.appendChild(floatEl);
   requestAnimationFrame(()=>{ floatEl.style.transform='translateY(-60px)'; floatEl.style.opacity='0'; });
-  setTimeout(()=>{ floatEl.remove(); }, 800);
+  setTimeout(()=>{ floatEl.remove(); },800);
 }
 
-clickButton.addEventListener('click', e => {
-  if (!dataLoaded) return;
-  const rect = clickImg.getBoundingClientRect();
-  const x = rect.left + rect.width/2 - 7; 
-  const y = rect.top;
-  spawnFloatingCoin(x, y, clickPower);
-
-  clickImg.src = "img/click2.png";
-  clickImg.style.transform = "scale(0.9)";
-  setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; }, 150);
-
-  coins += clickPower;
+clickButton.addEventListener('click',e=>{
+  if(!dataLoaded) return;
+  const rect=clickImg.getBoundingClientRect();
+  const x=rect.left+rect.width/2-7; 
+  const y=rect.top;
+  spawnFloatingCoin(x,y,clickPower);
+  clickImg.src="img/click2.png";
+  clickImg.style.transform="scale(0.9)";
+  setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150);
+  coins+=clickPower;
   updateUI();
   saveData();
 });
 
-clickerPanel.style.display = 'block';
+clickerTab.addEventListener('click',()=>{ clickerPanel.style.display='block'; shopPanel.style.display='none'; clickerTab.classList.add('active'); shopTab.classList.remove('active'); });
+shopTab.addEventListener('click',()=>{ clickerPanel.style.display='none'; shopPanel.style.display='block'; shopTab.classList.add('active'); clickerTab.classList.remove('active'); });
 </script>
 </body>
 </html>
