@@ -1,30 +1,43 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AnTI Shop</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>магазин кликов</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>AnTI Shop</h1>
 
-  <div id="menu">
-    <button id="clickerTab" class="active">Кликер</button>
-    <button id="shopTab">Магазин</button>
-  </div>
+    <div class="container">
 
-  <div id="clickerPanel">
-    <div id="counter">0</div>
-    <button id="clickButton">Клик!</button>
-  </div>
+        <h1>клики: <span id="clicks">0</span></h1>
 
-  <div id="shopPanel">
-    <div id="shop">
-      <div id="items"></div>
+        <div class="shop">
+
+            <!-- ТОВАР 1 -->
+            <div class="item">
+                <img src="img/item-1.png" class="item-img">
+                <div class="item-info">
+                    <p>оторванная пуговица — прибавляет +50 за клик</p>
+                    <button id="buy-1">купить за 50</button>
+                    <p id="stock-1" class="stock-text">в наличии: ∞</p>
+                </div>
+            </div>
+
+            <!-- ТОВАР 2 -->
+            <div class="item">
+                <img src="img/item-2.png" class="item-img">
+                <div class="item-info">
+                    <p>шайба — прибавляет +10 за клик</p>
+                    <button id="buy-2">купить за 250</button>
+                    <p id="stock-2" class="stock-text">в наличии: 5</p>
+                </div>
+            </div>
+
+        </div>
     </div>
-  </div>
 
-  <script type="module" src="js/app.js"></script>
+    <script src="app.js"></script>
+
 </body>
 </html>
