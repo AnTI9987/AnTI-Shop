@@ -2,42 +2,56 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>магазин кликов</title>
+    <title>AnTI Shop</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <h1>клики: <span id="clicks">0</span></h1>
+    <h1>AnTI Shop</h1>
 
-        <div class="shop">
-
-            <!-- ТОВАР 1 -->
-            <div class="item">
-                <img src="img/item-1.png" class="item-img">
-                <div class="item-info">
-                    <p>оторванная пуговица — прибавляет +50 за клик</p>
-                    <button id="buy-1">купить за 50</button>
-                    <p id="stock-1" class="stock-text">в наличии: ∞</p>
-                </div>
-            </div>
-
-            <!-- ТОВАР 2 -->
-            <div class="item">
-                <img src="img/item-2.png" class="item-img">
-                <div class="item-info">
-                    <p>шайба — прибавляет +10 за клик</p>
-                    <button id="buy-2">купить за 250</button>
-                    <p id="stock-2" class="stock-text">в наличии: 5</p>
-                </div>
-            </div>
-
-        </div>
+    <div id="clicker">
+        <h2>Клики: <span id="clicks">0</span></h2>
+        <button id="click-btn">КЛИК</button>
     </div>
 
-    <script src="app.js"></script>
+    <h2 style="margin-top:30px;">Магазин</h2>
+
+    <div class="shop">
+
+        <!-- ОТОРВАННАЯ ПУГОВИЦА -->
+        <div class="item">
+            <img src="images/item-1.png" class="item-img">
+
+            <div class="item-info">
+                <h3>Оторванная пуговица</h3>
+                <p>Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.</p>
+                <p class="prop">Прибавляет +1 к заработку за клик</p>
+
+                <button id="buy1">купить за <span id="price1">50</span></button>
+                <p class="stock-text">В наличии: ∞</p>
+            </div>
+        </div>
+
+        <!-- СТРАШНАЯ ШТУКА -->
+        <div class="item">
+            <img src="images/item-2.png" class="item-img">
+
+            <div class="item-info">
+                <h3>Страшная штука</h3>
+                <p>Её не стоит долго рассматривать…</p>
+                <p class="prop">Прибавляет +10 к заработку за клик</p>
+
+                <button id="buy2">купить за <span id="price2">250</span></button>
+                <p class="stock-text" id="stock2">В наличии: 5</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="app.js"></script>
 
 </body>
 </html>
