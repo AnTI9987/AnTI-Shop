@@ -13,7 +13,7 @@
     text-align: center; 
     padding: 20px; 
   }
-  #counter { font-size: 48px; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 4px; flex-direction: column; }
+  #counter { font-size: 48px; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 4px; }
   #counter img { width: 32px; height: 32px; }
 
   #menu { display: flex; justify-content: center; margin-bottom: 20px; }
@@ -72,8 +72,7 @@
 
 <div id="clickerPanel">
   <div id="counter">
-    <span id="counterValue">0</span>
-    <img src="img/anti-coin.png">
+    <span id="counterValue">0</span><img src="img/anti-coin.png">
   </div>
   <button id="clickButton">
     <img id="clickImg" src="img/click1.png" width="200">
@@ -236,7 +235,6 @@ clickButton.addEventListener('click', e => {
   const y = rect.top;
   spawnFloatingCoin(x, y, clickPower);
 
-  clickImg.classList.add('click-animation');
   clickImg.src = "img/click2.png";
   clickImg.style.transform = "scale(0.9)";
   setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; }, 150);
