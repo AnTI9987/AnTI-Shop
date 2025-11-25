@@ -13,7 +13,7 @@
     text-align: center; 
     padding: 20px; 
   }
-  #counter { font-size: 48px; margin: 20px 0; display: inline-flex; align-items: center; gap: 4px; }
+  #counter { font-size: 48px; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 4px; flex-direction: column; }
   #counter img { width: 32px; height: 32px; }
 
   #menu { display: flex; justify-content: center; margin-bottom: 20px; }
@@ -51,7 +51,7 @@
 
   .floating-coin {
     position: absolute;
-    font-size: 18px;
+    font-size: 14px;
     color: lime;
     display: flex;
     align-items: center;
@@ -222,7 +222,8 @@ function spawnFloatingCoin(x, y, value) {
   floatEl.className = 'floating-coin';
   floatEl.style.left = x + 'px';
   floatEl.style.top = y + 'px';
-  floatEl.innerHTML = `${value}<img src="img/anti-coin.png">`;
+  floatEl.style.fontSize = '14px';
+  floatEl.innerHTML = `${value}<img src="img/anti-coin.png" width="14" height="14">`;
   document.body.appendChild(floatEl);
   requestAnimationFrame(()=>{ floatEl.style.transform='translateY(-60px)'; floatEl.style.opacity='0'; });
   setTimeout(()=>{ floatEl.remove(); }, 800);
@@ -231,7 +232,7 @@ function spawnFloatingCoin(x, y, value) {
 clickButton.addEventListener('click', e => {
   if (!dataLoaded) return;
   const rect = clickImg.getBoundingClientRect();
-  const x = rect.left + rect.width/2;
+  const x = rect.left + rect.width/2 - 7; 
   const y = rect.top;
   spawnFloatingCoin(x, y, clickPower);
 
