@@ -1,4 +1,6 @@
 <script type="module">
+window.addEventListener("DOMContentLoaded", () => {
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
@@ -41,7 +43,7 @@ const clickerTab = document.getElementById('clickerTab');
 const shopTab = document.getElementById('shopTab');
 
 // ------------------------------
-// ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+// ТАБЫ
 // ------------------------------
 clickerTab.addEventListener('click', () => {
   clickerPanel.style.display = 'block';
@@ -69,6 +71,7 @@ async function loadData() {
   const snapshot = await get(ref(db, "players/" + userId));
   if (snapshot.exists()) {
     const data = snapshot.val();
+
     coins = data.coins ?? 0;
     clickPower = data.clickPower ?? 1;
 
@@ -76,7 +79,8 @@ async function loadData() {
       shopItems.forEach(item => {
         if (data.shopItems[item.id]) {
           item.stock = data.shopItems[item.id].stock ?? item.stock;
-          if (item.id === 1) item.cost = data.shopItems[item.id].cost ?? item.cost;
+          if (item.id === 1)
+            item.cost = data.shopItems[item.id].cost ?? item.cost;
         }
       });
     }
@@ -84,7 +88,7 @@ async function loadData() {
 
   dataLoaded = true;
   updateUI();
-  renderShop();
+  renderShop();   // ← теперь вызываем после загрузки
 }
 
 function saveData() {
@@ -104,6 +108,8 @@ function saveData() {
 }
 
 function renderShop() {
+  if (!itemsBlock) return;
+
   itemsBlock.innerHTML = '';
   shopItems.forEach(item => {
     const div = document.createElement('div');
@@ -125,8 +131,6 @@ function renderShop() {
         button.innerHTML =
           `<div class="price">Купить за ${item.cost}<img src="img/anti-coin.png"></div>`;
         button.style.fontWeight = 'bold';
-        if (item.stock !== undefined)
-          stockEl.textContent = `В наличии: ${item.stock}`;
       }
     };
 
@@ -154,13 +158,13 @@ function renderShop() {
 
     div.innerHTML =
     `<div class="item-top">
-        <img src="${item.img}" alt="${item.name}">
+        <img src="${item.img}">
         <div class="item-text">
           <b>${item.name}</b>
           <p>${item.description}</p>
           <p class='property'>${item.property}</p>
         </div>
-    </div>`;
+     </div>`;
 
     if (item.stock !== undefined) div.appendChild(stockEl);
     div.appendChild(button);
@@ -169,22 +173,6 @@ function renderShop() {
   });
 
   updateUI();
-}
-
-function updateUI() {
-  counterValue.textContent = coins;
-
-  document.querySelectorAll('.item').forEach((div, i) => {
-    const btn = div.querySelector('button');
-    const item = shopItems[i];
-
-    if (item.stock !== undefined && item.stock <= 0)
-      btn.style.color = 'gray';
-    else if (coins >= item.cost)
-      btn.style.color = 'lime';
-    else
-      btn.style.color = 'red';
-  });
 }
 
 // ------------------------------
@@ -204,11 +192,11 @@ function spawnFloatingCoin(x, y, value) {
     floatEl.style.opacity = '0';
   });
 
-  setTimeout(() => { floatEl.remove(); }, 800);
+  setTimeout(() => floatEl.remove(), 800);
 }
 
 // ------------------------------
-// МУЛЬТИ-ТAЧ CLICK
+// МУЛЬТИ ТАЧ CLICK
 // ------------------------------
 clickButton.addEventListener('touchstart', e => {
   if (!dataLoaded) return;
@@ -220,13 +208,12 @@ clickButton.addEventListener('touchstart', e => {
 
   coins += gain;
 
-  // Анимация монетки
   const rect = clickImg.getBoundingClientRect();
   const x = rect.left + rect.width / 2 - 7;
   const y = rect.top;
+
   spawnFloatingCoin(x, y, gain);
 
-  // Анимация кнопки
   clickImg.src = "img/click2.png";
   clickImg.style.transform = "scale(0.9)";
   setTimeout(() => {
@@ -236,10 +223,10 @@ clickButton.addEventListener('touchstart', e => {
 
   updateUI();
   saveData();
-}, { passive: false });
+}, { passive:false });
 
-// ------------------------------
-renderShop();
 loadData();
-clickerPanel.style.display = 'block';
+clickerPanel.style.display = "block";
+
+}); // DOMContentLoaded END
 </script>
