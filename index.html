@@ -220,22 +220,22 @@ function spawnFloatingCoin(x, y, value) {
   floatEl.style.top = y + 'px';
   floatEl.innerHTML = `${value}<img src="img/anti-coin.png" width="14" height="14">`;
   document.body.appendChild(floatEl);
-  requestAnimationFrame(()=>{ floatEl.style.transform='translateY(-60px)'; floatEl.style.opacity='0'; });
-  setTimeout(()=>{ floatEl.remove(); }, 800);
+  requestAnimationFrame(() => { floatEl.style.transform = 'translateY(-60px)'; floatEl.style.opacity='0'; });
+  setTimeout(() => { floatEl.remove(); }, 800);
 }
 
-// заменяем click на touchstart для мульти-тач
+// мульти-тач на кликер: спавн монет для каждого пальца у точки касания
 clickButton.addEventListener('touchstart', e => {
   if (!dataLoaded) return;
-  e.preventDefault(); // предотвращаем масштабирование/скролл
-  const touches = e.touches.length; // количество пальцев одновременно
-  coins += clickPower * touches;
+  e.preventDefault(); // отключаем масштабирование/скролл
 
-  const rect = clickImg.getBoundingClientRect();
-  const x = rect.left + rect.width / 2 - 7;
-  const y = rect.top;
+  const touches = e.touches;
+  for (let i = 0; i < touches.length; i++) {
+    const t = touches[i];
+    coins += clickPower;
 
-  spawnFloatingCoin(x, y, clickPower * touches);
+    spawnFloatingCoin(t.clientX, t.clientY, clickPower);
+  }
 
   clickImg.src = "img/click2.png";
   clickImg.style.transform = "scale(0.9)";
