@@ -58,10 +58,26 @@
     opacity: 1;
     transition: all 0.8s ease-out;
   }
+
+  #googleSignIn, #googleSignOut { 
+    margin-bottom: 10px; 
+    padding: 8px 12px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    color: #fff; 
+    border: none; 
+  }
+  #googleSignIn { background: #4285F4; }
+  #googleSignOut { background: #DB4437; }
 </style>
 </head>
 <body>
 <h1>AnTI Shop</h1>
+
+<button id="googleSignIn">Войти через Google</button>
+<button id="googleSignOut" style="display:none;">Выйти</button>
 
 <div id="menu">
   <button id="clickerTab" class="active">Кликер</button>
@@ -86,6 +102,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",
@@ -99,6 +116,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
 
 let userId = localStorage.getItem("userId");
 if (!userId) { userId = "user_" + Math.random().toString(36).substr(2, 9); localStorage.setItem("userId", userId); }
@@ -115,6 +134,8 @@ const clickerPanel = document.getElementById('clickerPanel');
 const shopPanel = document.getElementById('shopPanel');
 const clickerTab = document.getElementById('clickerTab');
 const shopTab = document.getElementById('shopTab');
+const googleButton = document.getElementById('googleSignIn');
+const googleOutButton = document.getElementById('googleSignOut');
 
 clickerTab.addEventListener('click', () => { clickerPanel.style.display='block'; shopPanel.style.display='none'; clickerTab.classList.add('active'); shopTab.classList.remove('active'); });
 shopTab.addEventListener('click', () => { clickerPanel.style.display='none'; shopPanel.style.display='block'; shopTab.classList.add('active'); clickerTab.classList.remove('active'); });
@@ -229,6 +250,46 @@ clickButton.addEventListener('click', e => {
   coins += clickPower;
   updateUI();
   saveData();
+});
+
+// Google Sign-In
+googleButton.addEventListener('click', () => {
+  signInWithPopup(auth, provider)
+    .then(result => {
+      const user = result.user;
+      userId = user.uid;
+      localStorage.setItem("userId", userId);
+      loadData();
+      renderShop();
+    })
+    .catch(error => { console.error("Ошибка входа через Google:", error); });
+});
+
+// Google Sign-Out
+googleOutButton.addEventListener('click', () => {
+  signOut(auth).then(() => {
+    userId = "user_" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("userId", userId);
+    coins = 0;
+    clickPower = 1;
+    dataLoaded = false;
+    updateUI();
+    renderShop();
+  });
+});
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    userId = user.uid;
+    localStorage.setItem("userId", userId);
+    googleButton.style.display = 'none';
+    googleOutButton.style.display = 'inline-block';
+    loadData();
+    renderShop();
+  } else {
+    googleButton.style.display = 'inline-block';
+    googleOutButton.style.display = 'none';
+  }
 });
 
 renderShop();
