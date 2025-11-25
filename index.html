@@ -21,8 +21,8 @@
   .active { background: #555; }
 
   #clickerPanel { display: none; position: relative; }
-  #clickButton { margin-top: 20px; border: none; background: none; cursor: pointer; outline: none; }
-  #clickButton img { display: block; margin: 0 auto; }
+  #clickButton { margin-top: 20px; border: none; background: none; cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; user-select: none; }
+  #clickButton img { display: block; margin: 0 auto; transition: transform 0.15s ease; }
 
   #shopPanel { display: none; }
   #shop { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
@@ -46,8 +46,6 @@
 
   .price { display: inline-flex; align-items: center; gap: 2px; font-size: 16px; }
   .price img { width: 18px; height: 18px; }
-
-  .click-animation { transition: transform 0.15s ease; }
 
   .floating-coin {
     position: absolute;
@@ -75,7 +73,7 @@
     <span id="counterValue">0</span><img src="img/anti-coin.png">
   </div>
   <button id="clickButton">
-    <img id="clickImg" src="img/click1.png" width="200">
+    <img id="clickImg" src="img/click1.png" width="200" draggable="false">
   </button>
 </div>
 
@@ -118,18 +116,8 @@ const shopPanel = document.getElementById('shopPanel');
 const clickerTab = document.getElementById('clickerTab');
 const shopTab = document.getElementById('shopTab');
 
-clickerTab.addEventListener('click', () => {
-  clickerPanel.style.display = 'block';
-  shopPanel.style.display = 'none';
-  clickerTab.classList.add('active');
-  shopTab.classList.remove('active');
-});
-shopTab.addEventListener('click', () => {
-  clickerPanel.style.display = 'none';
-  shopPanel.style.display = 'block';
-  shopTab.classList.add('active');
-  clickerTab.classList.remove('active');
-});
+clickerTab.addEventListener('click', () => { clickerPanel.style.display='block'; shopPanel.style.display='none'; clickerTab.classList.add('active'); shopTab.classList.remove('active'); });
+shopTab.addEventListener('click', () => { clickerPanel.style.display='none'; shopPanel.style.display='block'; shopTab.classList.add('active'); clickerTab.classList.remove('active'); });
 
 const shopItems = [
   { id:1, name:'Оторванная пуговица', cost:50, description:'Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.', property:'Прибавляет +1 к заработку за клик', incrementCost:50, img:'img/item-1.png' },
@@ -221,7 +209,6 @@ function spawnFloatingCoin(x, y, value) {
   floatEl.className = 'floating-coin';
   floatEl.style.left = x + 'px';
   floatEl.style.top = y + 'px';
-  floatEl.style.fontSize = '14px';
   floatEl.innerHTML = `${value}<img src="img/anti-coin.png" width="14" height="14">`;
   document.body.appendChild(floatEl);
   requestAnimationFrame(()=>{ floatEl.style.transform='translateY(-60px)'; floatEl.style.opacity='0'; });
