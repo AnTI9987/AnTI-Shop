@@ -16,18 +16,26 @@ body {
 
 h1 {
     text-align: center;
-    font-size: 26px;
-    margin-bottom: 20px;
 }
 
-/* магазин */
+#click-btn {
+    width: 100%;
+    padding: 20px;
+    margin-top: 15px;
+    background: #222;
+    border: none;
+    border-radius: 12px;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+}
+
 .shop {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* карточка товара */
 .item {
     background: #181818;
     padding: 15px;
@@ -42,14 +50,12 @@ h1 {
     width: 90px;
     height: 90px;
     object-fit: contain;
-    border-radius: 10px;
 }
 
 .item-info {
     flex: 1;
 }
 
-/* кнопка */
 button {
     width: 100%;
     padding: 10px;
@@ -63,41 +69,20 @@ button {
     transition: 0.2s;
 }
 
-/* зелёная кнопка */
 .btn-yes {
     background: #008f32;
 }
 
-/* красная кнопка */
 .btn-no {
     background: #8f0000;
 }
 
-/* текст про наличие */
-.stock-text {
-    margin-top: 8px;
-    font-size: 14px;
+.prop {
+    font-size: 13px;
     opacity: 0.7;
 }
 
-/* адаптив для телефона */
-@media (max-width: 480px) {
-    .item {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .item-img {
-        width: 120px;
-        height: 120px;
-    }
-
-    button {
-        margin-top: 12px;
-    }
-
-    .stock-text {
-        text-align: center;
-    }
+.stock-text {
+    margin-top: 8px;
+    opacity: 0.7;
 }
