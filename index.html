@@ -28,10 +28,21 @@
   #counter img { width: 32px; height: 32px; }
 
   #menu { display: flex; justify-content: center; margin-bottom: 20px; }
-  #menu button { flex: 1; margin: 0 5px; padding: 10px 0; font-size: 18px; color: #fff; background: #555; border: none; border-radius: 8px; }
+  #menu button { 
+    flex: 1; 
+    margin: 0 5px; 
+    padding: 10px 0; 
+    font-size: 18px; 
+    color: #fff; 
+    background: #555; 
+    border: none; 
+    border-radius: 8px; 
+    -webkit-tap-highlight-color: transparent;
+  }
   #menu button.active { background: #332614; }
 
   #clickerPanel { display: none; position: relative; }
+
   #clickButton { 
     margin-top: 20px; 
     border: none; 
@@ -44,32 +55,32 @@
   }
   #clickButton img { display: block; margin: 0 auto; transition: transform 0.15s ease; }
 
-  /* === БЛОКИ ТОВАРОВ (обновлено) === */
-
+  /* === ФОН МАГАЗИНА → ГРАДИЕНТ === */
   #shopPanel { 
     display: none; 
-    background: #FFBE5F; 
     min-height: 100vh; 
     padding: 20px; 
-    box-sizing: border-box; 
+    box-sizing: border-box;
+
+    background: linear-gradient(to bottom, #FFC57B, #C1945D);
   }
 
   #shop { 
     margin-top: 20px; 
     display: flex; 
     flex-direction: column; 
-    gap: 20px;
+    gap: 24px;
   }
 
+  /* === БЛОК ТОВАРА === */
   .item {
     width: 300px;
-    aspect-ratio: 300 / 190; /* ← идеальные пропорции */
-    max-width: 90vw; /* адаптируется под экран */
-
+    aspect-ratio: 300 / 190;
+    max-width: 90vw;
     box-sizing: border-box;
 
-    background-image: url("img/item-frame.png");
-    background-size: 100% 100%; /* рамка масштабируется без съезжания */
+    background-image: url("img/item-frame.png"); /* ← маленькая буква */
+    background-size: 100% 100%;
     background-position: center;
 
     padding: 15px;
@@ -78,6 +89,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    /* ТЕНЬ ДЛЯ КАЖДОГО ТОВАРА */
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
   }
 
   .item-top { 
@@ -101,6 +115,7 @@
   .item .property { font-size: 12px; opacity: 0.7; }
   .item .stock { font-size: 12px; color: red; margin-top: 5px; }
 
+  /* КНОПКА ПОКУПКИ */
   .item button { 
     margin-top: auto;
     font-weight: bold; 
@@ -111,10 +126,24 @@
     background: #332614; 
     color: #fff; 
     border: none; 
-    cursor: pointer; 
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.12s ease, opacity 0.12s ease;
   }
 
-  .price { display: inline-flex; align-items: center; gap: 2px; font-size: 16px; }
+  /* АНИМАЦИЯ НАЖАТИЯ */
+  .item button:active {
+    transform: scale(0.94);
+    opacity: 0.8;
+  }
+
+  /* ЦЕНА */
+  .price { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 4px; 
+    font-size: 16px; 
+  }
   .price img { width: 18px; height: 18px; }
 
   .floating-coin {
@@ -195,7 +224,6 @@ clickerTab.addEventListener('click', () => {
   clickerTab.classList.add('active');
   shopTab.classList.remove('active');
 });
-
 shopTab.addEventListener('click', () => {
   clickerPanel.style.display='none';
   shopPanel.style.display='block';
@@ -243,27 +271,39 @@ function renderShop() {
     div.className = 'item';
 
     const button = document.createElement('button');
+
     const stockEl = document.createElement('p');
     stockEl.className = 'stock';
     if (item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
 
     const updateButtonText = () => {
+      const affordable = coins >= item.cost;
+
       if (item.stock !== undefined && item.stock <= 0) {
         button.innerHTML = 'распродано';
         button.style.color = 'gray';
-        stockEl.textContent = '';
-      } else {
-        button.innerHTML = `<div class="price">Купить за ${item.cost}<img src="img/anti-coin.png"></div>`;
+        return;
       }
+
+      button.innerHTML = `
+        <div class="price" style="color:${affordable ? 'white':'#ff4444'};">
+          ${item.cost}
+          <img src="img/anti-coin.png">
+        </div>
+      `;
     };
 
     button.addEventListener('click', () => {
       if (!dataLoaded) return;
+
       if ((item.stock === undefined || item.stock > 0) && coins >= item.cost) {
         coins -= item.cost;
         if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
         if (item.id === 2 && item.stock > 0) { clickPower += item.power; item.stock -= 1; item.cost += 250; }
-        updateUI(); saveData(); updateButtonText();
+
+        updateUI(); 
+        saveData(); 
+        updateButtonText();
       }
     });
 
