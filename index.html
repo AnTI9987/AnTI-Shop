@@ -35,18 +35,73 @@
   #clickButton { margin-top: 20px; border: none; background: none; cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
   #clickButton img { display: block; margin: 0 auto; transition: transform 0.15s ease; }
 
-  #shopPanel { display: none; background: #FFBE5F; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-  #shop { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
+  /* === НОВЫЕ ПРАВКИ ДЛЯ БЛОКОВ ТОВАРОВ === */
 
-  .item { padding: 15px; background: #513B1E; border-radius: 8px; display: flex; flex-direction: column; align-items: center; text-align: left; }
-  .item-top { display: flex; width: 100%; align-items: center; margin-bottom: 10px; }
-  .item img { width: 60px; height: 60px; margin-right: 15px; border-radius: 5px; }
+  #shopPanel { 
+    display: none; 
+    background: #FFBE5F; 
+    min-height: 100vh; 
+    padding: 20px; 
+    box-sizing: border-box; 
+  }
+
+  #shop { 
+    margin-top: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; /* ← отступ между товарами */
+  }
+
+  .item {
+    width: 350px;
+    height: 210px;
+    box-sizing: border-box;
+
+    background-image: url("img/Item-frame.png");
+    background-size: cover;
+    background-position: center;
+
+    padding: 15px;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .item-top { 
+    display: flex; 
+    width: 100%; 
+    align-items: center; 
+    margin-bottom: 10px; 
+  }
+
+  .item img { 
+    width: 60px; 
+    height: 60px; 
+    margin-right: 15px; 
+    border-radius: 5px; 
+  }
+
   .item-text { flex: 1; }
+
   .item b { display: block; font-size: 18px; }
   .item p { margin: 5px 0; font-size: 14px; }
   .item .property { font-size: 12px; opacity: 0.7; }
   .item .stock { font-size: 12px; color: red; margin-top: 5px; }
-  .item button { margin-top: 10px; font-weight: bold; width: 100%; border-radius: 8px; padding: 10px; font-size: 16px; background: #332614; color: #fff; border: none; cursor: pointer; }
+
+  .item button { 
+    margin-top: auto; /* ← кнопка снизу */
+    font-weight: bold; 
+    width: 100%; 
+    border-radius: 8px; 
+    padding: 10px; 
+    font-size: 16px; 
+    background: #332614; 
+    color: #fff; 
+    border: none; 
+    cursor: pointer; 
+  }
 
   .price { display: inline-flex; align-items: center; gap: 2px; font-size: 16px; }
   .price img { width: 18px; height: 18px; }
@@ -185,8 +240,6 @@ function renderShop() {
         stockEl.textContent = '';
       } else {
         button.innerHTML = `<div class="price">Купить за ${item.cost}<img src="img/anti-coin.png"></div>`;
-        button.style.fontWeight = 'bold';
-        if (item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
       }
     };
 
@@ -195,12 +248,22 @@ function renderShop() {
       if ((item.stock === undefined || item.stock > 0) && coins >= item.cost) {
         coins -= item.cost;
         if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
-        if (item.id === 2 && item.stock > 0) { clickPower += item.power; item.stock -= 1; item.cost += 250; } // рост цены после покупки
+        if (item.id === 2 && item.stock > 0) { clickPower += item.power; item.stock -= 1; item.cost += 250; }
         updateUI(); saveData(); updateButtonText();
       }
     });
 
-    div.innerHTML = `<div class="item-top"><img src="${item.img}" alt="${item.name}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p class='property'>${item.property}</p></div></div>`;
+    div.innerHTML = `
+      <div class="item-top">
+        <img src="${item.img}" alt="${item.name}">
+        <div class="item-text">
+          <b>${item.name}</b>
+          <p>${item.description}</p>
+          <p class='property'>${item.property}</p>
+        </div>
+      </div>
+    `;
+
     if (item.stock !== undefined) div.appendChild(stockEl);
     div.appendChild(button);
     itemsBlock.appendChild(div);
@@ -211,13 +274,6 @@ function renderShop() {
 
 function updateUI() {
   counterValue.textContent = coins;
-  document.querySelectorAll('.item').forEach((div, i) => {
-    const btn = div.querySelector('button');
-    const item = shopItems[i];
-    if (item.stock !== undefined && item.stock <= 0) btn.style.color = 'gray';
-    else if (coins >= item.cost) btn.style.color = 'lime';
-    else btn.style.color = 'red';
-  });
 }
 
 function spawnFloatingCoin(x, y, value) {
