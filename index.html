@@ -1,254 +1,307 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>AnTI Shop</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  :root{
-    --shop-frame-top:#7A4B1D;
-    --shop-frame-bottom:#5B3F1B;
-    --shop-inner-top:#FFBA67;
-    --shop-inner-bottom:#FF7749;
-    --button-brown:#332614;
-  }
+/* ===== ГЛОБАЛЬНО ===== */
 
-  html,body{height:100%; margin:0; padding:0; font-family:'Inter',sans-serif; background:transparent; color:#fff; -webkit-font-smoothing:antialiased;}
-  /* header with single shop icon on right */
-  header{
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:12px 16px;
-    box-sizing:border-box;
-    z-index:50;
-  }
-  header h1{ margin:0; font-size:20px; font-weight:700; letter-spacing:0.5px; }
-  #shopToggle{
-    position:absolute;
-    right:12px;
-    top:8px;
-    width:42px;
-    height:42px;
-    border-radius:8px;
-    border:none;
-    background:transparent;
-    padding:6px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  #shopToggle img{ width:100%; height:100%; object-fit:contain; display:block; }
+body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
 
-  /* panels wrapper */
-  .viewport{ position:relative; width:100%; height:calc(100vh - 56px); overflow:hidden; }
+#app {
+  width: 392px;
+  height: 100vh;
+  background: #0000;
+  overflow: hidden;
+  position: relative;
+}
 
-  /* clicker panel */
-  #clickerPanel{
-    position:absolute; left:0; top:0; bottom:0; width:100%;
-    background: linear-gradient(to bottom, #CEEDFF, #A1E6FF);
-    display:flex; flex-direction:column; align-items:center;
-    padding-top:18px; box-sizing:border-box;
-    transition: opacity 420ms cubic-bezier(.2,.9,.3,1), transform 420ms cubic-bezier(.2,.9,.3,1);
-    will-change: transform, opacity;
-    pointer-events:auto;
-  }
-  /* hidden state for clicker (when showing shop) */
-  #clickerPanel.hidden{
-    opacity:0;
-    transform: translateX(-14px) scale(.995);
-    pointer-events:none;
-  }
+/* ===== КНОПКИ НАВИГАЦИИ ===== */
 
-  /* ground image: full width, top aligns later by JS */
-  #ground{
-    position:absolute;
-    left:0;
-    width:100%;
-    max-height:60vh;
-    overflow:visible;
-    pointer-events:none;
-    z-index:1;
-  }
-  #ground img{ width:100%; display:block; pointer-events:none; }
+#shopBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: none;
+  padding: 0;
+  z-index: 50;
+}
 
-  #counter{
-    margin-top:6px; display:flex; align-items:center; gap:8px; font-size:40px; font-weight:600;
-  }
-  #counter img{ width:30px; height:30px; }
+#shopBtn img {
+  width: 100%;
+  height: 100%;
+}
 
-  /* click area wrapper so ground can be placed relative */
-  #clickArea{
-    position:relative;
-    margin-top:18px;
-    z-index:5; /* above ground */
-    display:flex; align-items:center; justify-content:center; width:100%;
-  }
+/* кнопка НАЗАД в магазине */
+#backBtn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: none;
+  padding: 0;
+  z-index: 50;
+  display: none;
+}
+#backBtn img {
+  width: 100%;
+  height: 100%;
+}
 
-  #clickButton{
-    background:none; border:none; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent;
-    outline:none;
-  }
-  #clickImg{ width:200px; display:block; transition: transform 140ms ease; -webkit-user-drag:none; }
+/* ===== ПАНЕЛИ (кликер и магазин) ===== */
 
-  /* shop panel (slides in from right) */
-  #shopPanel{
-    position:absolute; top:0; bottom:0; right:0; width:100%; max-width:980px;
-    transform: translateX(100%); opacity:0;
-    transition: transform 520ms cubic-bezier(.18,.8,.3,1), opacity 520ms cubic-bezier(.18,.8,.3,1);
-    z-index:40;
-    box-sizing:border-box;
-    display:flex; flex-direction:column;
-    /* outer frame gradient (fills full height) */
-    background: linear-gradient(to bottom, var(--shop-frame-top), var(--shop-frame-bottom));
-  }
-  #shopPanel.visible{
-    transform: translateX(0);
-    opacity:1;
-  }
+#panels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(392px * 2);
+  height: 100%;
+  display: flex;
+  transition: transform 0.55s cubic-bezier(0.35, 0.15, 0.1, 1);
+}
 
-  /* top bar inside shop (back button on left) */
-  #shopTopBar{
-    display:flex; align-items:center; justify-content:flex-start;
-    background: var(--shop-frame-bottom);
-    padding:12px 12px; box-sizing:border-box;
-  }
-  #backButton{
-    width:40px; height:40px; border-radius:8px; border:none; background:transparent; cursor:pointer;
-    -webkit-tap-highlight-color:transparent;
-    display:flex; align-items:center; justify-content:center;
-  }
-  #backButton img{ width:100%; height:100%; display:block; }
+#clickerPanel, #shopPanel {
+  width: 392px;
+  height: 100%;
+  flex-shrink: 0;
+}
 
-  /* inner shop content */
-  #shopInner{
-    background: linear-gradient(to bottom, var(--shop-inner-top), var(--shop-inner-bottom));
-    border-radius:12px 0 0 12px;
-    padding:18px;
-    box-sizing:border-box;
-    flex:1; overflow:auto;
-  }
+/* ----- панель кликера ----- */
+#clickerPanel {
+  background: linear-gradient(to bottom, #CEEDFF, #A1E6FF);
+  padding-top: 20px;
+  position: relative;
+  overflow: hidden;
+}
 
-  #shopList{ display:flex; flex-direction:column; gap:18px; align-items:center; padding-bottom:24px; }
+#counter {
+  font-size: 46px;
+  margin: 14px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
 
-  /* item card */
-  .item{
-    width:300px; max-width:88vw;
-    aspect-ratio: 300 / 190;
-    background-image: url("img/item-frame.png");
-    background-size:100% 100%;
-    background-position:center;
-    padding:12px; box-sizing:border-box;
-    display:flex; flex-direction:column; align-items:flex-start;
-    filter: drop-shadow(0 8px 18px rgba(0,0,0,.35));
-    position:relative;
-  }
-  .item-top{ display:flex; width:100%; gap:12px; align-items:center; }
-  .item-top img{ width:60px; height:60px; border-radius:6px; object-fit:cover; flex-shrink:0; }
-  .item-text{ flex:1; }
-  .item-text b{ display:block; font-size:18px; margin-bottom:4px; }
-  .item-text p{ margin:3px 0; font-size:13px; color:rgba(255,255,255,.95); }
-  .stock{ font-size:12px; color:#ffdede; margin-top:8px; }
+#counter img {
+  width: 32px;
+}
 
-  .buyBtn{
-    margin-top:auto; width:100%; padding:10px; border-radius:8px; border:none; background:var(--button-brown);
-    color:#fff; font-weight:700; font-size:15px; cursor:pointer; -webkit-tap-highlight-color:transparent;
-    transition: transform .12s ease, box-shadow .12s ease;
-  }
-  .buyBtn:active{ transform:scale(.96); box-shadow:0 2px 0 rgba(0,0,0,.2); }
+#clickButtonWrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 
-  .price{ display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:16px; }
-  .price img{ width:18px; height:18px; display:inline-block; }
+#clickButton {
+  background: none;
+  border: none;
+}
 
-  /* floating coin popup */
-  .floating-coin{
-    position:absolute; pointer-events:none; display:flex; align-items:center; gap:6px;
-    font-weight:700; color:lime; z-index:60; transform:translateY(0); opacity:1;
-    transition: transform .8s ease-out, opacity .8s ease-out;
-  }
-  .floating-coin img{ width:16px; height:16px; }
+#clickImg {
+  width: 200px;
+  transition: transform 0.15s ease;
+  -webkit-user-drag: none;
+}
 
-  /* responsive tweaks */
-  @media (min-width:900px){
-    #shopPanel{ width:56vw; right:0; }
-    #clickerPanel{ left:0; width:44vw; }
-    .viewport{ display:flex; }
-    /* when shop visible, clicker stays in place but hidden, shop slides in on right */
-  }
+/* GROUND — фикс шириной */
+#ground {
+  position: absolute;
+  left: 50%;
+  top: calc(100px + 200px / 2); /* центр кликера */
+  transform: translateX(-50%);
+  width: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+#ground img {
+  width: 100%;
+  display: block;
+}
+
+/* ----- панель магазина ----- */
+#shopPanel {
+  background: linear-gradient(to bottom, #7A4B1D, #5B3F1B);
+  padding-top: 70px;
+  overflow-y: auto;
+}
+
+#shopPanelInner {
+  background: linear-gradient(to bottom, #FFBA67, #FF7749);
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 12px;
+  width: 350px;
+  min-height: calc(100vh - 100px);
+}
+
+/* ===== ТОВАРЫ ===== */
+
+.item {
+  width: 300px;
+  aspect-ratio: 300 / 190;
+  background-image: url("img/item-frame.png");
+  background-size: 100% 100%;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
+  margin: 0 auto 18px;
+}
+
+.item-top {
+  display: flex;
+  margin-bottom: 6px;
+}
+
+.item img {
+  width: 60px;
+  height: 60px;
+  margin-right: 12px;
+}
+
+.item-text b {
+  font-size: 18px;
+}
+
+.item-text p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.stock {
+  font-size: 12px;
+  color: #ffdede;
+}
+
+/* ===== кнопка купить ===== */
+.item button {
+  margin-top: auto;
+  width: 100%;
+  padding: 10px;
+  background: #332614;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: transform .12s ease;
+}
+
+.item button:active {
+  transform: scale(0.96);
+}
+
+.price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.price img {
+  width: 18px;
+}
+
+/* ===== всплывающие "+монеты" ===== */
+.floating-coin {
+  position: absolute;
+  font-size: 14px;
+  color: lime;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform .8s ease-out, opacity .8s ease-out;
+}
+
+.floating-coin img {
+  width: 18px;
+}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>AnTI Shop</h1>
-  <button id="shopToggle" aria-label="open shop"><img src="img/shop-icon.png" alt="shop"></button>
-</header>
+<div id="app">
 
-<div class="viewport">
-  <!-- Clicker panel -->
-  <section id="clickerPanel" class="panel active" aria-label="clicker">
-    <div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png" alt="coin"></div>
+  <!-- кнопки -->
+  <button id="shopBtn"><img src="img/shop-icon.png"></button>
+  <button id="backBtn"><img src="img/back-icon.png"></button>
 
-    <div id="clickArea">
+  <!-- две панели -->
+  <div id="panels">
+
+    <!-- КЛИКЕР -->
+    <div id="clickerPanel">
+      <div id="counter">
+        <span id="counterValue">0</span>
+        <img src="img/anti-coin.png">
+      </div>
+
       <div id="clickButtonWrapper">
-        <button id="clickButton" aria-label="click area"><img id="clickImg" src="img/click1.png" alt="clicker"></button>
-        <!-- ground (full width). we'll position it so its top aligns to middle of clickImg -->
-        <div id="ground"><img id="groundImg" src="img/ground.png" alt="ground"></div>
+        <button id="clickButton">
+          <img id="clickImg" src="img/click1.png">
+        </button>
+
+        <div id="ground">
+          <img src="img/ground.png">
+        </div>
       </div>
     </div>
-  </section>
 
-  <!-- Shop panel slides from right -->
-  <aside id="shopPanel" aria-hidden="true">
-    <div id="shopTopBar">
-      <button id="backButton" aria-label="back"><img src="img/back-icon.png" alt="back"></button>
-    </div>
-    <div id="shopInner">
-      <div id="shopList">
-        <!-- items rendered here -->
+    <!-- МАГАЗИН -->
+    <div id="shopPanel">
+      <div id="shopPanelInner">
         <div id="items"></div>
       </div>
     </div>
-  </aside>
+
+  </div>
 </div>
 
+
 <script type="module">
-/* ========= UI: shop toggle / back animation (variant B: clicker fades, shop slides in) ======== */
-const shopToggle = document.getElementById('shopToggle');
-const backButton = document.getElementById('backButton');
-const shopPanel = document.getElementById('shopPanel');
-const clickerPanel = document.getElementById('clickerPanel');
-const headerEl = document.querySelector('header');
 
-// show shop: fade out clicker, slide in shop
-function openShop(){
-  if(shopPanel.classList.contains('visible')) return;
-  // hide clicker visually (fade)
-  clickerPanel.classList.add('hidden');
-  // show shop
-  shopPanel.classList.add('visible');
-  shopPanel.setAttribute('aria-hidden','false');
-  // change header background color to match shop bottom color (as requested)
-  headerEl.style.background = getComputedStyle(document.documentElement).getPropertyValue('--shop-frame-bottom') || '#5B3F1B';
-}
+/* ====== ПЕРЕКЛЮЧЕНИЕ ПАНЕЛЕЙ ====== */
 
-// close shop: reverse
-function closeShop(){
-  if(!shopPanel.classList.contains('visible')) return;
-  clickerPanel.classList.remove('hidden');
-  shopPanel.classList.remove('visible');
-  shopPanel.setAttribute('aria-hidden','true');
-  headerEl.style.background = 'transparent';
-}
-shopToggle.addEventListener('click', openShop);
-backButton.addEventListener('click', closeShop);
+const panels = document.getElementById("panels");
+const shopBtn = document.getElementById("shopBtn");
+const backBtn = document.getElementById("backBtn");
 
-/* ========= Firebase init & game logic (keeps previous behavior) ========== */
+shopBtn.onclick = () => {
+  panels.style.transform = "translateX(-392px)";
+  shopBtn.style.display = "none";
+  backBtn.style.display = "block";
+};
+
+backBtn.onclick = () => {
+  panels.style.transform = "translateX(0)";
+  shopBtn.style.display = "block";
+  backBtn.style.display = "none";
+};
+
+/* ====== FIREBASE ====== */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
@@ -261,13 +314,15 @@ const firebaseConfig = {
   messagingSenderId: "292698259142",
   appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"
 };
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 
-/* user data */
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+
+/* ====== ПЕРЕМЕННЫЕ ====== */
+
 let userId = localStorage.getItem("userId");
-if(!userId){
-  userId = "user_" + Math.random().toString(36).substr(2,9);
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).substring(2, 9);
   localStorage.setItem("userId", userId);
 }
 
@@ -275,216 +330,202 @@ let coins = 0;
 let clickPower = 1;
 let dataLoaded = false;
 
-/* ui refs */
-const counterValue = document.getElementById('counterValue');
-const clickImg = document.getElementById('clickImg');
-const clickButton = document.getElementById('clickButton');
-const itemsBlock = document.getElementById('items');
-const groundImg = document.getElementById('groundImg');
-const groundWrap = document.getElementById('ground');
+const counterValue = document.getElementById("counterValue");
 
-/* shop items */
+/* ====== ТОВАРЫ ====== */
+
+const itemsBlock = document.getElementById("items");
+
 const shopItems = [
-  { id:1, name:'Оторванная пуговица', cost:50, description:'Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.', property:'Прибавляет +1 к заработку за клик', incrementCost:50, img:'img/item-1.png' },
-  { id:2, name:'Страшная штука', cost:250, description:'Оно пугает.', property:'Прибавляет +10 к заработку за клик', power:10, stock:5, img:'img/item-2.png' }
+  { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
+  { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-/* load/save */
-async function loadData(){
-  try {
-    const snapshot = await get(ref(db, "players/" + userId));
-    if(snapshot.exists()){
-      const d = snapshot.val();
-      coins = d.coins ?? 0;
-      clickPower = d.clickPower ?? 1;
-      if(d.shopItems){
-        shopItems.forEach(item=>{
-          if(d.shopItems[item.id]){
+/* ====== ЗАГРУЗКА ИГРОКА ====== */
+
+async function loadData() {
+  const snap = await get(ref(db, "players/" + userId));
+  if (snap.exists()) {
+    const d = snap.val();
+    coins = d.coins ?? 0;
+    clickPower = d.clickPower ?? 1;
+
+    if (d.shopItems) {
+      shopItems.forEach(item => {
+        if (d.shopItems[item.id]) {
+          item.cost = d.shopItems[item.id].cost ?? item.cost;
+          if (item.stock !== undefined)
             item.stock = d.shopItems[item.id].stock ?? item.stock;
-            item.cost = d.shopItems[item.id].cost ?? item.cost;
-          }
-        });
-      }
+        }
+      });
     }
-  } catch(e){
-    console.error("loadData", e);
   }
   dataLoaded = true;
   updateUI();
   renderShop();
-  positionGround(); // position ground after data/UI ready
 }
 
-function saveData(){
-  const shopData = {};
-  shopItems.forEach(i => shopData[i.id] = { stock: i.stock ?? null, cost: i.cost ?? null });
-  update(ref(db, "players/" + userId), { coins, clickPower, shopItems: shopData }).catch(e=>console.error("saveData", e));
+function saveData() {
+  const s = {};
+  shopItems.forEach(i => s[i.id] = { cost: i.cost, stock: i.stock });
+
+  update(ref(db,"players/" + userId), {
+    coins, clickPower, shopItems: s
+  });
 }
 
-/* render shop */
+/* ====== МАГАЗИН ОТРИСОВКА ====== */
+
 function createPriceNode(item){
-  const wrap = document.createElement('div');
-  wrap.className = 'price';
-  const span = document.createElement('span');
-  span.textContent = item.cost;
-  const img = document.createElement('img');
-  img.src = 'img/anti-coin.png';
-  img.alt = 'coin';
-  wrap.appendChild(span);
-  wrap.appendChild(img);
+  const wrap=document.createElement("div");
+  wrap.className="price";
+  wrap.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
   return wrap;
 }
 
 function updateButtonText(item, btn){
   const affordable = coins >= item.cost;
-  btn.innerHTML = '';
-  if(item.stock !== undefined && item.stock <= 0){
-    btn.textContent = 'распродано';
-    btn.style.color = 'gray';
+  btn.innerHTML = "";
+
+  if (item.stock !== undefined && item.stock <= 0) {
+    btn.textContent = "распродано";
     btn.disabled = true;
     return;
   }
-  btn.disabled = false;
+
   const p = createPriceNode(item);
-  p.style.color = affordable ? 'white' : '#ff6666';
+  p.style.color = affordable ? "white" : "#ff6666";
   btn.appendChild(p);
 }
 
 function renderShop(){
-  itemsBlock.innerHTML = '';
-  shopItems.forEach(item=>{
-    const card = document.createElement('div'); card.className = 'item';
-    card.innerHTML = `
+  itemsBlock.innerHTML = "";
+  shopItems.forEach(item => {
+    const d=document.createElement("div");
+    d.className="item";
+
+    d.innerHTML = `
       <div class="item-top">
-        <img src="${item.img}" alt="${item.name}">
+        <img src="${item.img}">
         <div class="item-text">
           <b>${item.name}</b>
           <p>${item.description}</p>
-          <p class="property">${item.property}</p>
+          <p>${item.property}</p>
         </div>
       </div>
     `;
-    if(item.stock !== undefined){
-      const st = document.createElement('p'); st.className='stock'; st.textContent = `В наличии: ${item.stock}`;
-      card.appendChild(st);
+
+    if (item.stock !== undefined) {
+      const s=document.createElement("p");
+      s.className="stock";
+      s.textContent = "В наличии: " + item.stock;
+      d.appendChild(s);
     }
-    const btn = document.createElement('button'); btn.className='buyBtn';
-    card.appendChild(btn);
-    itemsBlock.appendChild(card);
+
+    const btn=document.createElement("button");
+    d.appendChild(btn);
     updateButtonText(item, btn);
 
-    btn.addEventListener('click', ()=>{
-      if(!dataLoaded) return;
-      if(item.stock !== undefined && item.stock <= 0) return;
-      if(coins < item.cost) return;
+    btn.onclick = () => {
+      if (!dataLoaded) return;
+      if (item.stock !== undefined && item.stock <= 0) return;
+      if (coins < item.cost) return;
 
       coins -= item.cost;
-      if(item.id === 1){
+
+      if (item.id === 1) {
         clickPower += 1;
-        item.cost += item.incrementCost ?? 0;
+        item.cost += item.incrementCost;
       }
-      if(item.id === 2){
-        clickPower += item.power ?? 0;
-        item.stock = Math.max(0, (item.stock ?? 0) - 1);
-        item.cost += 250; // рост на 250 после покупки
+      if (item.id === 2) {
+        clickPower += item.power;
+        item.cost += 250;
+        item.stock = Math.max(0, item.stock - 1);
       }
+
       updateUI();
       saveData();
       updateButtonText(item, btn);
-      if(item.stock !== undefined){
-        const sEl = card.querySelector('.stock');
-        if(sEl) sEl.textContent = item.stock > 0 ? `В наличии: ${item.stock}` : '';
+
+      if (item.stock !== undefined) {
+        const st = d.querySelector(".stock");
+        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
       }
-    });
+    };
+
+    itemsBlock.appendChild(d);
   });
 }
 
-/* update UI */
-function updateUI(){
+/* ====== UI ====== */
+
+function updateUI() {
   counterValue.textContent = coins;
-  // update price color
-  document.querySelectorAll('.item').forEach((div, i)=>{
-    const btn = div.querySelector('button');
-    if(btn) updateButtonText(shopItems[i], btn);
-  });
 }
 
-/* floating coin popup (with icon), one per event/touch */
+/* ====== ВСПЛЫВАЮЩИЕ "+монеты" ====== */
+
 function spawnFloatingCoin(x,y,value){
-  const el = document.createElement('div');
-  el.className = 'floating-coin';
-  el.style.left = (x - 18) + 'px';
-  el.style.top = (y - 18) + 'px';
-  el.innerHTML = `<img src="img/anti-coin.png" alt="c">${value}`;
+  const el=document.createElement("div");
+  el.className="floating-coin";
+  el.style.left=(x-10)+"px";
+  el.style.top=(y-10)+"px";
+  el.innerHTML=`<img src="img/anti-coin.png">${value}`;
+
   document.body.appendChild(el);
-  // trigger anim frame for transition
+
   requestAnimationFrame(()=>{
-    el.style.transform = 'translateY(-70px)';
-    el.style.opacity = '0';
+    el.style.transform = "translateY(-60px)";
+    el.style.opacity = "0";
   });
-  setTimeout(()=>el.remove(), 800);
+
+  setTimeout(()=> el.remove(), 800);
 }
 
-/* clicker: handle touchstart (multi-touch) and mouse click */
-clickButton.addEventListener('touchstart', e=>{
-  if(!dataLoaded) return;
+/* ====== КЛИКЕР ====== */
+
+const clickImg = document.getElementById("clickImg");
+const clickButton = document.getElementById("clickButton");
+
+clickButton.addEventListener("touchstart", e => {
+  if (!dataLoaded) return;
   e.preventDefault();
-  const touches = e.changedTouches || e.touches;
-  for(let i=0;i<touches.length;i++){
-    const t = touches[i];
+
+  for (const t of e.changedTouches) {
     coins += clickPower;
     spawnFloatingCoin(t.clientX, t.clientY, clickPower);
   }
-  clickImg.src = 'img/click2.png';
-  clickImg.style.transform = 'scale(0.92)';
-  setTimeout(()=>{ clickImg.src='img/click1.png'; clickImg.style.transform='scale(1)'; }, 150);
-  updateUI(); saveData();
-},{passive:false});
 
-clickButton.addEventListener('click', e=>{
-  if(!dataLoaded) return;
+  clickImg.src = "img/click2.png";
+  clickImg.style.transform = "scale(0.92)";
+  setTimeout(()=>{
+    clickImg.src = "img/click1.png";
+    clickImg.style.transform="scale(1)";
+  },150);
+
+  updateUI();
+  saveData();
+}, { passive:false });
+
+clickButton.onclick = e => {
+  if (!dataLoaded) return;
+
   coins += clickPower;
-  const x = e.clientX || window.innerWidth/2;
-  const y = e.clientY || window.innerHeight/2;
-  spawnFloatingCoin(x,y,clickPower);
-  clickImg.src = 'img/click2.png';
-  clickImg.style.transform = 'scale(0.92)';
-  setTimeout(()=>{ clickImg.src='img/click1.png'; clickImg.style.transform='scale(1)'; }, 150);
-  updateUI(); saveData();
-});
+  spawnFloatingCoin(e.clientX, e.clientY, clickPower);
 
-/* position ground.png so that its TOP aligns with middle of clickImg */
-function positionGround(){
-  // ensure ground image loaded
-  if(!groundImg.complete){
-    groundImg.onload = positionGround;
-    return;
-  }
-  // bounding rects relative to viewport
-  const clickRect = clickImg.getBoundingClientRect();
-  const vpRect = document.querySelector('.viewport').getBoundingClientRect();
-  // desired top of ground relative to viewport:
-  const desiredTop = clickRect.top + (clickRect.height / 2);
-  // set ground element top relative to viewport: groundWrap positioned absolute inside clickerPanel.
-  // compute top relative to clickerPanel (its bounding rect)
-  const clickerRect = clickerPanel.getBoundingClientRect();
-  const topRelative = desiredTop - clickerRect.top;
-  // place ground so that its top equals topRelative
-  groundWrap.style.top = `${topRelative}px`;
-  // make ground full width of clickerPanel
-  groundWrap.style.width = `100%`;
-}
+  clickImg.src = "img/click2.png";
+  clickImg.style.transform="scale(0.92)";
+  setTimeout(()=>{
+    clickImg.src="img/click1.png";
+    clickImg.style.transform="scale(1)";
+  },150);
 
-/* reposition on resize / images load */
-window.addEventListener('resize', positionGround);
-clickImg.addEventListener('load', positionGround);
-groundImg.addEventListener('load', positionGround);
+  updateUI();
+  saveData();
+};
 
-/* kick off */
-renderShop();
 loadData();
-positionGround();
-
 </script>
+
 </body>
 </html>
