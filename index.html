@@ -49,11 +49,11 @@ body {
   height: 100%;
 }
 
-/* кнопка НАЗАД в магазине */
+/* кнопка НАЗАД теперь появляется на ТОМ ЖЕ месте, что и shopBtn */
 #backBtn {
   position: absolute;
   top: 12px;
-  left: 12px;
+  right: 12px; /* ← исправлено */
   width: 48px;
   height: 48px;
   background: none;
@@ -111,6 +111,9 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
+
+  /* ↓↓↓ кликер опущен вниз на 100px ↓↓↓ */
+  margin-top: 100px;
 }
 
 #clickButton {
@@ -128,7 +131,7 @@ body {
 #ground {
   position: absolute;
   left: 50%;
-  top: calc(100px + 200px / 2); /* центр кликера */
+  top: calc(100px + 200px / 2);
   transform: translateX(-50%);
   width: 100%;
   pointer-events: none;
@@ -181,6 +184,12 @@ body {
   margin-right: 12px;
 }
 
+/* предотвратить растягивание монетки в цене */
+.price img {
+  width: 18px !important;
+  height: auto !important;
+}
+
 .item-text b {
   font-size: 18px;
 }
@@ -217,10 +226,6 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-}
-
-.price img {
-  width: 18px;
 }
 
 /* ===== всплывающие "+монеты" ===== */
@@ -341,7 +346,7 @@ const shopItems = [
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-/* ====== ЗАГРУЗКА ИГРОКА ====== */
+/* ====== ЗАГРУЗКА ДАННЫХ ====== */
 
 async function loadData() {
   const snap = await get(ref(db, "players/" + userId));
@@ -374,18 +379,12 @@ function saveData() {
   });
 }
 
-/* ====== МАГАЗИН ОТРИСОВКА ====== */
-
-function createPriceNode(item){
-  const wrap=document.createElement("div");
-  wrap.className="price";
-  wrap.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-  return wrap;
-}
+/* ====== КНОПКИ ЦЕНЫ ====== */
 
 function updateButtonText(item, btn){
   const affordable = coins >= item.cost;
-  btn.innerHTML = "";
+
+  btn.textContent = "";
 
   if (item.stock !== undefined && item.stock <= 0) {
     btn.textContent = "распродано";
@@ -393,8 +392,12 @@ function updateButtonText(item, btn){
     return;
   }
 
-  const p = createPriceNode(item);
-  p.style.color = affordable ? "white" : "#ff6666";
+  const p = document.createElement("div");
+  p.className = "price";
+  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
+
+  if (!affordable) p.style.color = "#ff6666";
+
   btn.appendChild(p);
 }
 
@@ -458,7 +461,6 @@ function renderShop(){
 }
 
 /* ====== UI ====== */
-
 function updateUI() {
   counterValue.textContent = coins;
 }
