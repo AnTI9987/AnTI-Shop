@@ -89,23 +89,22 @@ body {
   top: 140px;
   transform: translateX(-50%);
   width: 100%;
-  pointer-events: none;
   z-index: 0;
 }
-#ground img { width: 100%; }
+#ground img { width: 100%; pointer-events: none; } /* важно: pointer-events none чтобы не перекрывало клик */
 
 #clickButton {
   background: none;
   border: none;
   z-index: 1;
   position: relative;
+  touch-action: manipulation;
 }
 
 #clickImg {
   width: 200px;
   transition: transform 0.15s ease;
   -webkit-user-drag: none;
-  touch-action: manipulation;
   position: relative;
   z-index: 1;
 }
@@ -137,16 +136,10 @@ body {
   margin: 0 auto 18px;
 }
 
-.item-top {
-  display: flex;
-  margin-bottom: 6px;
-}
-
+.item-top { display: flex; margin-bottom: 6px; }
 .item img { width: 60px; height: 60px; margin-right: 12px; }
-
 .item-text b { font-size: 18px; }
 .item-text p { margin: 2px 0; font-size: 14px; }
-
 .stock { font-size: 12px; color: #ffdede; }
 
 .item button {
@@ -160,16 +153,9 @@ body {
   font-size: 16px;
   transition: transform .12s ease;
 }
-
 .item button:active { transform: scale(0.96); }
 
-.price {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
+.price { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .price img { width: 18px; height: 18px; object-fit: contain; }
 
 .floating-coin {
@@ -183,7 +169,6 @@ body {
   transition: transform .8s ease-out, opacity .8s ease-out;
   z-index: 2;
 }
-
 .floating-coin img { width: 18px; height: 18px; object-fit: contain; }
 </style>
 </head>
@@ -260,12 +245,10 @@ async function loadData() {
     const snap = await get(userRef);
     if (!snap.exists()) {
       await set(userRef, { coins: 0, clickPower: 1, shopItems: {} });
-      console.log("создан новый пользователь");
     } else {
       const d = snap.val();
       coins = d.coins ?? 0;
       clickPower = d.clickPower ?? 1;
-
       if (d.shopItems) {
         shopItems.forEach(item => {
           if (d.shopItems[item.id]) {
@@ -275,31 +258,22 @@ async function loadData() {
           }
         });
       }
-      console.log("данные загружены:", d);
     }
     dataLoaded = true;
     updateUI();
     renderShop();
-  } catch(err) {
-    console.error("ошибка загрузки данных:", err);
-  }
+  } catch(err) { console.error(err); }
 }
 
 /* ===== СОХРАНЕНИЕ ДАННЫХ ===== */
 function saveData() {
   if (!dataLoaded) return;
   const shopState = {};
-  shopItems.forEach(i => {
-    shopState[i.id] = { cost: i.cost, stock: i.stock };
-  });
-
-  const userRef = ref(db, "players/" + userId);
-  set(userRef, { coins, clickPower, shopItems: shopState })
-    .then(() => console.log("данные успешно сохранены"))
-    .catch(err => console.error("ошибка при сохранении:", err));
+  shopItems.forEach(i => { shopState[i.id] = { cost: i.cost, stock: i.stock }; });
+  set(ref(db, "players/" + userId), { coins, clickPower, shopItems: shopState });
 }
 
-/* ===== ОБНОВЛЕНИЕ UI ===== */
+/* ===== UPDATE UI ===== */
 function updateButtonText(item, btn){
   btn.innerHTML = "";
   if (item.stock !== undefined && item.stock <= 0) {
@@ -310,9 +284,6 @@ function updateButtonText(item, btn){
   const p = document.createElement("div");
   p.className = "price";
   p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-  p.querySelector("img").style.width = "18px";
-  p.querySelector("img").style.height = "18px";
-  p.querySelector("img").style.objectFit = "contain";
   p.style.color = coins < item.cost ? "#ff3333" : "#fff";
   btn.appendChild(p);
 }
@@ -322,47 +293,33 @@ function renderShop() {
   shopItems.forEach(item => {
     const d = document.createElement("div");
     d.className = "item";
-    d.innerHTML = `
-      <div class="item-top">
-        <img src="${item.img}">
-        <div class="item-text">
-          <b>${item.name}</b>
-          <p>${item.description}</p>
-          <p>${item.property}</p>
-        </div>
-      </div>
-    `;
+    d.innerHTML = `<div class="item-top"><img src="${item.img}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p>${item.property}</p></div></div>`;
     if (item.stock !== undefined) {
       const s = document.createElement("p");
       s.className = "stock";
       s.textContent = "В наличии: " + item.stock;
       d.appendChild(s);
     }
-
     const btn = document.createElement("button");
     d.appendChild(btn);
     updateButtonText(item, btn);
-
     btn.onclick = () => {
       if (!dataLoaded) return;
       if (item.stock !== undefined && item.stock <= 0) return;
       if (coins < item.cost) return;
 
       coins -= item.cost;
-
       if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
       if (item.id === 2) { clickPower += item.power; item.cost += 250; item.stock = Math.max(0, item.stock - 1); }
 
       updateUI();
       saveData();
       updateButtonText(item, btn);
-
       if (item.stock !== undefined) {
         const st = d.querySelector(".stock");
         st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
       }
     };
-
     itemsBlock.appendChild(d);
   });
 }
@@ -382,12 +339,10 @@ function spawnFloatingCoin(x,y,value){
   el.style.top = (y-10) + "px";
   el.innerHTML = `<img src="img/anti-coin.png">${value}`;
   document.body.appendChild(el);
-
   requestAnimationFrame(()=>{
     el.style.transform = "translateY(-60px)";
     el.style.opacity = "0";
   });
-
   setTimeout(()=> el.remove(), 800);
 }
 
@@ -395,61 +350,28 @@ function spawnFloatingCoin(x,y,value){
 const clickImg = document.getElementById("clickImg");
 const clickButton = document.getElementById("clickButton");
 
-clickButton.addEventListener("touchstart", e => {
+function clickHandler(e){
   if (!dataLoaded) return;
-  e.preventDefault();
-
-  for (const t of e.changedTouches) {
-    coins += clickPower;
-    spawnFloatingCoin(t.clientX, t.clientY, clickPower);
-  }
-
-  clickImg.src = "img/click2.png";
-  clickImg.style.transform = "scale(0.92)";
-  setTimeout(()=>{
-    clickImg.src = "img/click1.png";
-    clickImg.style.transform="scale(1)";
-  },150);
-
-  updateUI();
-},{ passive:false });
-
-clickButton.onclick = e => {
-  if (!dataLoaded) return;
-
   coins += clickPower;
-  spawnFloatingCoin(e.clientX, e.clientY, clickPower);
-
+  spawnFloatingCoin(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY, clickPower);
   clickImg.src = "img/click2.png";
   clickImg.style.transform="scale(0.92)";
-  setTimeout(()=>{
-    clickImg.src="img/click1.png";
-    clickImg.style.transform="scale(1)";
-  },150);
-
+  setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150);
   updateUI();
-};
+}
+clickButton.addEventListener("touchstart", clickHandler, {passive:false});
+clickButton.addEventListener("mousedown", clickHandler);
 
 /* ===== PANEL SWITCH ===== */
 const panels = document.getElementById("panels");
 const shopBtn = document.getElementById("shopBtn");
 const backBtn = document.getElementById("backBtn");
 
-shopBtn.onclick = () => {
-  panels.style.transform = "translateX(-392px)";
-  shopBtn.style.display = "none";
-  backBtn.style.display = "block";
-};
-backBtn.onclick = () => {
-  panels.style.transform = "translateX(0)";
-  shopBtn.style.display = "block";
-  backBtn.style.display = "none";
-};
+shopBtn.onclick = () => { panels.style.transform = "translateX(-392px)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
+backBtn.onclick = () => { panels.style.transform="translateX(0)"; shopBtn.style.display="block"; backBtn.style.display="none"; };
 
 /* ===== AUTO-SAVE ===== */
-setInterval(() => {
-  saveData();
-}, 5000); // каждые 5 секунд
+setInterval(()=>saveData(), 5000);
 
 loadData();
 renderShop();
