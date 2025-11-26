@@ -105,7 +105,7 @@ body {
 #ground {
   position: absolute;
   left: 50%;
-  top: calc(200px + 200px / 2);
+  top: calc(200px + 200px / 2 - 200px); /* поднят на 200px вверх */
   transform: translateX(-50%);
   width: 100%;
   pointer-events: none;
@@ -333,9 +333,9 @@ function saveData() {
   });
 }
 
-/* ====== обновление цены на кнопке ====== */
+/* ====== PRICE UPDATE ====== */
 function updateButtonText(item, btn){
-  btn.innerHTML = ""; // ЧИСТИМ, НО НЕ textContent
+  btn.innerHTML = "";
 
   if (item.stock !== undefined && item.stock <= 0) {
     btn.textContent = "распродано";
@@ -355,7 +355,7 @@ function updateButtonText(item, btn){
   btn.appendChild(p);
 }
 
-/* ====== РЕНДЕР МАГАЗИНА ====== */
+/* ====== SHOP ====== */
 function renderShop(){
   itemsBlock.innerHTML = "";
   shopItems.forEach(item => {
@@ -391,13 +391,11 @@ function renderShop(){
 
       coins -= item.cost;
 
-      /* товар №1 — цена растёт на +50, сила клика +1 */
       if (item.id === 1) {
         clickPower += 1;
-        item.cost += item.incrementCost; // +50
+        item.cost += item.incrementCost;
       }
 
-      /* товар №2 */
       if (item.id === 2) {
         clickPower += item.power;
         item.cost += 250;
@@ -422,14 +420,13 @@ function renderShop(){
 function updateUI() {
   counterValue.textContent = coins;
 
-  /* обновляем цены, чтобы покраснели */
   document.querySelectorAll(".item").forEach((el,i)=>{
     const btn = el.querySelector("button");
     updateButtonText(shopItems[i], btn);
   });
 }
 
-/* ====== всплывающие монеты ====== */
+/* ====== FLOATING COINS ====== */
 function spawnFloatingCoin(x,y,value){
   const el=document.createElement("div");
   el.className="floating-coin";
