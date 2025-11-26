@@ -216,8 +216,8 @@ body {
 <div id="app">
 
   <!-- кнопки -->
-  <button id="shopBtn"><img src="img/shop-icon.png"></button>
-  <button id="backBtn"><img src="img/back-icon.png"></button>
+  <button id="shopBtn"><img src="img/shop-icon.png" alt="shop"></button>
+  <button id="backBtn"><img src="img/back-icon.png" alt="back"></button>
 
   <div id="panels">
 
@@ -226,17 +226,17 @@ body {
 
       <div id="counter">
         <span id="counterValue">0</span>
-        <img src="img/anti-coin.png">
+        <img src="img/anti-coin.png" alt="coin">
       </div>
 
       <div id="clickButtonWrapper">
 
         <!-- земля теперь ВПЕРЕДИ -->
-        <div id="ground"><img src="img/ground.png"></div>
+        <div id="ground"><img src="img/ground.png" alt="ground"></div>
 
         <!-- кнопка-кликер поверх -->
-        <button id="clickButton">
-          <img id="clickImg" src="img/click1.png">
+        <button id="clickButton" aria-label="click">
+          <img id="clickImg" src="img/click1.png" alt="click">
         </button>
 
       </div>
@@ -310,36 +310,150 @@ const shopItems = [
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-/* ====== ЗАГРУЗКА ====== */
-async function loadData() {
-  const snap = await get(ref(db, "players/" + userId));
-  if (snap.exists()) {
-    const d = snap.val();
-    coins = d.coins ?? 0;
-    clickPower = d.clickPower ?? 1;
+/* ====== ЛОКАЛЬНЫЙ CACHE (резерв) ====== */
+const LOCAL_KEY = 'anti_shop_save_v1';
 
-    if (d.shopItems) {
-      shopItems.forEach(item => {
-        if (d.shopItems[item.id]) {
-          item.cost = d.shopItems[item.id].cost ?? item.cost;
-          if (item.stock !== undefined)
-            item.stock = d.shopItems[item.id].stock ?? item.stock;
+function saveLocal() {
+  try {
+    const payload = {
+      coins,
+      clickPower,
+      shopItems: shopItems.map(i => ({ id: i.id, cost: i.cost, stock: i.stock ?? null }))
+    };
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.warn("saveLocal failed", e);
+  }
+}
+
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(LOCAL_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn("loadLocal failed", e);
+    return null;
+  }
+}
+
+/* ====== ЗАГРУЗКА (server first, fallback to local) ====== */
+async function loadData() {
+  // сначала пробуем локал — будем использовать только если сервер пуст или недоступен
+  const local = loadLocal();
+
+  try {
+    const snap = await get(ref(db, "players/" + userId));
+    if (snap.exists()) {
+      const d = snap.val();
+      // серверные значения имеют приоритет
+      coins = d.coins ?? (local?.coins ?? 0);
+      clickPower = d.clickPower ?? (local?.clickPower ?? 1);
+      if (d.shopItems) {
+        // d.shopItems может быть объектом {id: {cost,stock}} или массив — пытаемся корректно прочитать
+        shopItems.forEach(it => {
+          if (d.shopItems[it.id]) {
+            it.cost = d.shopItems[it.id].cost ?? it.cost;
+            if (it.stock !== undefined) it.stock = d.shopItems[it.id].stock ?? it.stock;
+          } else if (Array.isArray(d.shopItems)) {
+            const s = d.shopItems.find(x => x && x.id === it.id);
+            if (s) {
+              it.cost = s.cost ?? it.cost;
+              if (it.stock !== undefined) it.stock = s.stock ?? it.stock;
+            }
+          }
+        });
+      } else if (local?.shopItems) {
+        // если сервер не содержит, используем локал
+        local.shopItems.forEach(li => {
+          const it = shopItems.find(x => x.id === li.id);
+          if (it) {
+            it.cost = li.cost ?? it.cost;
+            if (it.stock !== undefined) it.stock = li.stock ?? it.stock;
+          }
+        });
+      }
+    } else {
+      // нет записи на сервере — используем локал если есть
+      if (local) {
+        coins = local.coins ?? 0;
+        clickPower = local.clickPower ?? 1;
+        local.shopItems?.forEach(li => {
+          const it = shopItems.find(x => x.id === li.id);
+          if (it) {
+            it.cost = li.cost ?? it.cost;
+            if (it.stock !== undefined) it.stock = li.stock ?? it.stock;
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.warn("loadData: firebase read failed, using local if present", e);
+    if (local) {
+      coins = local.coins ?? 0;
+      clickPower = local.clickPower ?? 1;
+      local.shopItems?.forEach(li => {
+        const it = shopItems.find(x => x.id === li.id);
+        if (it) {
+          it.cost = li.cost ?? it.cost;
+          if (it.stock !== undefined) it.stock = li.stock ?? it.stock;
         }
       });
     }
   }
+
   dataLoaded = true;
   updateUI();
   renderShop();
 }
 
-function saveData() {
-  const s = {};
-  shopItems.forEach(i => s[i.id] = { cost: i.cost, stock: i.stock });
+/* ====== SAVE (пишем на сервер и в локал) ====== */
+let pendingSave = null;
 
-  update(ref(db,"players/" + userId), {
-    coins, clickPower, shopItems: s
-  });
+async function saveData() {
+  // обновляем локально сразу
+  saveLocal();
+
+  // если есть предыдущее невыполненное сохранение — подождём (не обязателено, но упорядочивает запросы)
+  if (pendingSave) {
+    try { await pendingSave; } catch(_) { /* ignore */ }
+  }
+
+  // собираем payload
+  const shopPayload = {};
+  shopItems.forEach(i => { shopPayload[i.id] = { cost: i.cost, stock: i.stock ?? null }; });
+
+  const payload = { coins, clickPower, shopItems: shopPayload };
+
+  // делаем update и сохраняем промис в pendingSave
+  pendingSave = update(ref(db, "players/" + userId), payload)
+    .then(() => {
+      // успешно записали — ещё раз обновим локал (на случай, если сервер корректировал структуру)
+      saveLocal();
+    })
+    .catch(err => {
+      console.warn("saveData: firebase update failed, data saved locally", err);
+      // на ошибку реагируем только логом — локал уже сохранён
+    })
+    .finally(() => { pendingSave = null; });
+
+  // не ждём здесь завершения (можно, но не нужно)
+  return pendingSave;
+}
+
+// на случай закрытия вкладки — сохраняем в локал синхронно
+window.addEventListener('beforeunload', () => {
+  saveLocal();
+  // если браузер поддерживает sendBeacon — можно попытаться отправить (optional)
+  try {
+    if (navigator.sendBeacon) {
+      const shopPayload = {};
+      shopItems.forEach(i => { shopPayload[i.id] = { cost: i.cost, stock: i.stock ?? null }; });
+      const payload = JSON.stringify({ coins, clickPower, shopItems: shopPayload });
+      // небольшая попытка отправить в виде beacon (не обязано сработать на всех политиках)
+      navigator.sendBeacon(`${location.origin}/_anti_shop_beacon`, payload);
+    }
+  } catch (e) { /* ignore */ }
 }
 
 /* ====== PRICE UPDATE ====== */
@@ -354,17 +468,25 @@ function updateButtonText(item, btn){
 
   const p = document.createElement("div");
   p.className = "price";
-  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
+  // безопасно формируем содержимое
+  const span = document.createElement('span');
+  span.textContent = item.cost;
+  const img = document.createElement('img');
+  img.src = 'img/anti-coin.png';
+  img.alt = 'coin';
+  p.appendChild(span);
+  p.appendChild(img);
 
-  if (coins < item.cost)
+  if (coins < item.cost) {
     p.style.color = "#ff3333";
-  else
+  } else {
     p.style.color = "#ffffff";
+  }
 
   btn.appendChild(p);
 }
 
-/* ====== SHOP ====== */
+/* ====== SHOP RENDER ====== */
 function renderShop(){
   itemsBlock.innerHTML = "";
   shopItems.forEach(item => {
@@ -373,7 +495,7 @@ function renderShop(){
 
     d.innerHTML = `
       <div class="item-top">
-        <img src="${item.img}">
+        <img src="${item.img}" alt="${item.name}">
         <div class="item-text">
           <b>${item.name}</b>
           <p>${item.description}</p>
@@ -402,22 +524,23 @@ function renderShop(){
 
       if (item.id === 1) {
         clickPower += 1;
-        item.cost += item.incrementCost;
+        item.cost += (item.incrementCost ?? 0); // +50 по дефолту
       }
 
       if (item.id === 2) {
-        clickPower += item.power;
+        clickPower += (item.power ?? 0);
         item.cost += 250;
         item.stock = Math.max(0, item.stock - 1);
       }
 
       updateUI();
+      // сохранение: локал + firebase (в фоне)
       saveData();
       updateButtonText(item, btn);
 
       if (item.stock !== undefined) {
         const st = d.querySelector(".stock");
-        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
+        if (st) st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
       }
     };
 
@@ -431,7 +554,7 @@ function updateUI() {
 
   document.querySelectorAll(".item").forEach((el,i)=>{
     const btn = el.querySelector("button");
-    updateButtonText(shopItems[i], btn);
+    if (btn) updateButtonText(shopItems[i], btn);
   });
 }
 
@@ -441,7 +564,7 @@ function spawnFloatingCoin(x,y,value){
   el.className="floating-coin";
   el.style.left=(x-10)+"px";
   el.style.top=(y-10)+"px";
-  el.innerHTML=`<img src="img/anti-coin.png">${value}`;
+  el.innerHTML=`<img src="img/anti-coin.png" alt="c">${value}`;
 
   document.body.appendChild(el);
 
@@ -474,7 +597,7 @@ clickButton.addEventListener("touchstart", e => {
   },150);
 
   updateUI();
-  saveData();
+  saveData(); // сохраняем после клика
 }, { passive:false });
 
 clickButton.onclick = e => {
@@ -494,7 +617,25 @@ clickButton.onclick = e => {
   saveData();
 };
 
-loadData();
+/* ====== ИНИЦИАЛИЗАЦИЯ ====== */
+(async function init() {
+  // сначала попробуем загрузить из локала для быстрой отрисовки интерфейса
+  const local = loadLocal();
+  if (local) {
+    coins = local.coins ?? coins;
+    clickPower = local.clickPower ?? clickPower;
+    local.shopItems?.forEach(li => {
+      const it = shopItems.find(x => x.id === li.id);
+      if (it) { it.cost = li.cost ?? it.cost; if (it.stock !== undefined) it.stock = li.stock ?? it.stock; }
+    });
+    updateUI();
+    renderShop();
+  }
+  // затем подтягиваем серверную версию / или используем локал если сервер недоступен
+  await loadData();
+  // и гарантируем, что локал отражает актуальные данные (если серверные)
+  saveLocal();
+})();
 </script>
 
 </body>
