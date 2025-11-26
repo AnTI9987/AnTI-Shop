@@ -128,7 +128,7 @@ body {
 
 .item {
   width: 300px;
-  height: 180px;
+  height: 180px; /* уменьшили на 10px */
   background-image: url("img/item-frame.png");
   background-size: 100% 100%;
   padding: 12px;
@@ -190,7 +190,7 @@ body {
   align-items: center;
   gap: 4px;
   transition: transform .8s ease-out, opacity .8s ease-out;
-  z-index: 2;
+  z-index: 2; /* поверх клика */
 }
 
 .floating-coin img { width: 18px; height: 18px; object-fit: contain; }
@@ -231,13 +231,13 @@ import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/1
 
 /* ===== FIREBASE CONFIG ===== */
 const firebaseConfig = {
-  apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",
-  authDomain: "anti-shop-d6b33.firebaseapp.com",
-  databaseURL: "https://anti-shop-d6b33-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "anti-shop-d6b33",
-  storageBucket: "anti-shop-d6b33.appspot.com",
-  messagingSenderId: "292698259142",
-  appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"
+  apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
+  authDomain: "anti-shop-99f1d.firebaseapp.com",
+  databaseURL: "https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "anti-shop-99f1d",
+  storageBucket: "anti-shop-99f1d.firebasedata.app",
+  messagingSenderId: "347202416802",
+  appId: "1:347202416802:web:2d2df1b819be9da180e7fb"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -289,7 +289,6 @@ async function loadData() {
     dataLoaded = true;
     updateUI();
     renderShop();
-    startAutoSave(); // старт авто-сохранения после загрузки данных
   } catch(err) {
     console.error("ошибка загрузки данных:", err);
   }
@@ -297,9 +296,6 @@ async function loadData() {
 
 /* ===== СОХРАНЕНИЕ ДАННЫХ ===== */
 function saveData() {
-  if (!dataLoaded) return;
-  console.log("сохраняем данные...");
-
   const shopState = {};
   shopItems.forEach(i => {
     shopState[i.id] = { cost: i.cost, stock: i.stock };
@@ -311,12 +307,10 @@ function saveData() {
     .catch(err => console.error("ошибка при сохранении:", err));
 }
 
-/* ===== АВТОМАТИЧЕСКОЕ СОХРАНЕНИЕ ===== */
-function startAutoSave() {
-  setInterval(() => {
-    saveData();
-  }, 5000); // каждые 5 секунд
-}
+/* ===== АВТО-СОХРАНЕНИЕ КАЖДЫЕ 5 СЕКУНД ===== */
+setInterval(() => {
+  if (dataLoaded) saveData();
+}, 5000);
 
 /* ===== ОБНОВЛЕНИЕ UI ===== */
 function updateButtonText(item, btn){
