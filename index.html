@@ -7,9 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
+
+  /* === ВНЕШНИЙ ФОН С ГРАДИЕНТОМ (ОБВОДКА ВОКРУГ МАГАЗИНА) === */
   body {
     font-family: 'Inter', sans-serif;
-    background: #111;
+    background: linear-gradient(to bottom, #7A4B1D, #5B3F1B);
     color: #fff;
     text-align: center;
     padding: 20px;
@@ -55,14 +57,15 @@
   }
   #clickButton img { display: block; margin: 0 auto; transition: transform 0.15s ease; }
 
-  /* === ФОН МАГАЗИНА → ГРАДИЕНТ === */
+  /* === ФОН МАГАЗИНА (ВНУТРЕННИЙ БЛОК) === */
   #shopPanel { 
     display: none; 
     min-height: 100vh; 
     padding: 20px; 
     box-sizing: border-box;
 
-    background: linear-gradient(to bottom, #FFC57B, #C1945D);
+    background: linear-gradient(to bottom, #FFBA67, #FF7749);
+    border-radius: 12px;
   }
 
   #shop { 
@@ -79,7 +82,7 @@
     max-width: 90vw;
     box-sizing: border-box;
 
-    background-image: url("img/item-frame.png"); /* ← маленькая буква */
+    background-image: url("img/item-frame.png");
     background-size: 100% 100%;
     background-position: center;
 
@@ -90,7 +93,6 @@
     flex-direction: column;
     align-items: center;
 
-    /* ТЕНЬ ДЛЯ КАЖДОГО ТОВАРА */
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
   }
 
@@ -131,13 +133,11 @@
     transition: transform 0.12s ease, opacity 0.12s ease;
   }
 
-  /* АНИМАЦИЯ НАЖАТИЯ */
   .item button:active {
     transform: scale(0.94);
     opacity: 0.8;
   }
 
-  /* ЦЕНА */
   .price { 
     display: inline-flex; 
     align-items: center; 
@@ -186,86 +186,28 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",
-  authDomain: "anti-shop-d6b33.firebaseapp.com",
-  databaseURL: "https://anti-shop-d6b33-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "anti-shop-d6b33",
-  storageBucket: "anti-shop-d6b33.appspot.com",
-  messagingSenderId: "292698259142",
-  appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"
-};
+/* ... firebase config остаётся ... */
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+function updateButtonText(item, button) {
+  const affordable = coins >= item.cost;
 
-let userId = localStorage.getItem("userId");
-if (!userId) { 
-  userId = "user_" + Math.random().toString(36).substr(2, 9); 
-  localStorage.setItem("userId", userId); 
-}
-
-let coins = 0;
-let clickPower = 1;
-let dataLoaded = false;
-
-const counterValue = document.getElementById('counterValue');
-const clickImg = document.getElementById('clickImg');
-const clickButton = document.getElementById('clickButton');
-const itemsBlock = document.getElementById('items');
-const clickerPanel = document.getElementById('clickerPanel');
-const shopPanel = document.getElementById('shopPanel');
-const clickerTab = document.getElementById('clickerTab');
-const shopTab = document.getElementById('shopTab');
-
-clickerTab.addEventListener('click', () => {
-  clickerPanel.style.display='block';
-  shopPanel.style.display='none';
-  clickerTab.classList.add('active');
-  shopTab.classList.remove('active');
-});
-shopTab.addEventListener('click', () => {
-  clickerPanel.style.display='none';
-  shopPanel.style.display='block';
-  shopTab.classList.add('active');
-  clickerTab.classList.remove('active');
-});
-
-const shopItems = [
-  { id:1, name:'Оторванная пуговица', cost:50, description:'Кажется, эта пуговица служила подобием глаза для плюшевой игрушки.', property:'Прибавляет +1 к заработку за клик', incrementCost:50, img:'img/item-1.png' },
-  { id:2, name:'Страшная штука', cost:250, description:'Оно пугает.', property:'Прибавляет +10 к заработку за клик', power:10, stock:5, img:'img/item-2.png' }
-];
-
-async function loadData() {
-  const snapshot = await get(ref(db, "players/" + userId));
-  if (snapshot.exists()) {
-    const data = snapshot.val();
-    coins = data.coins ?? 0;
-    clickPower = data.clickPower ?? 1;
-    if (data.shopItems) {
-      shopItems.forEach(item => {
-        if (data.shopItems[item.id]) {
-          item.stock = data.shopItems[item.id].stock ?? item.stock;
-          if (item.id === 1) item.cost = data.shopItems[item.id].cost ?? item.cost;
-        }
-      });
-    }
+  if (item.stock !== undefined && item.stock <= 0) {
+    button.innerHTML = 'распродано';
+    button.style.color = 'gray';
+    return;
   }
-  dataLoaded = true;
-  updateUI();
-  renderShop();
-}
 
-function saveData() {
-  const shopData = {};
-  shopItems.forEach(item => {
-    shopData[item.id] = { stock: item.stock ?? null, cost: item.cost ?? null };
-  });
-  update(ref(db, "players/" + userId), { coins, clickPower, shopItems: shopData });
+  button.innerHTML = `
+    <div class="price" style="color:${affordable ? 'white':'#ff4444'};">
+      ${item.cost}
+      <img src="img/anti-coin.png">
+    </div>
+  `;
 }
 
 function renderShop() {
   itemsBlock.innerHTML = '';
+
   shopItems.forEach(item => {
     const div = document.createElement('div');
     div.className = 'item';
@@ -276,44 +218,13 @@ function renderShop() {
     stockEl.className = 'stock';
     if (item.stock !== undefined) stockEl.textContent = `В наличии: ${item.stock}`;
 
-    const updateButtonText = () => {
-      const affordable = coins >= item.cost;
-
-      if (item.stock !== undefined && item.stock <= 0) {
-        button.innerHTML = 'распродано';
-        button.style.color = 'gray';
-        return;
-      }
-
-      button.innerHTML = `
-        <div class="price" style="color:${affordable ? 'white':'#ff4444'};">
-          ${item.cost}
-          <img src="img/anti-coin.png">
-        </div>
-      `;
-    };
-
-    button.addEventListener('click', () => {
-      if (!dataLoaded) return;
-
-      if ((item.stock === undefined || item.stock > 0) && coins >= item.cost) {
-        coins -= item.cost;
-        if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
-        if (item.id === 2 && item.stock > 0) { clickPower += item.power; item.stock -= 1; item.cost += 250; }
-
-        updateUI(); 
-        saveData(); 
-        updateButtonText();
-      }
-    });
-
     div.innerHTML = `
       <div class="item-top">
-        <img src="${item.img}" alt="${item.name}">
+        <img src="${item.img}">
         <div class="item-text">
           <b>${item.name}</b>
           <p>${item.description}</p>
-          <p class='property'>${item.property}</p>
+          <p class="property">${item.property}</p>
         </div>
       </div>
     `;
@@ -321,48 +232,38 @@ function renderShop() {
     if (item.stock !== undefined) div.appendChild(stockEl);
     div.appendChild(button);
     itemsBlock.appendChild(div);
-    updateButtonText();
+
+    updateButtonText(item, button);
+
+    button.addEventListener('click', () => {
+      if (coins < item.cost) return;
+      if (item.stock !== undefined && item.stock <= 0) return;
+
+      coins -= item.cost;
+      clickPower += item.power ?? 1;
+
+      if (item.stock !== undefined) item.stock--;
+      if (item.incrementCost) item.cost += item.incrementCost;
+
+      updateUI();
+      saveData();
+      updateButtonText(item, button);
+
+      if (item.stockEl) item.stockEl.textContent = `В наличии: ${item.stock}`;
+    });
   });
-  updateUI();
 }
 
 function updateUI() {
   counterValue.textContent = coins;
+
+  document.querySelectorAll('.item').forEach((div, i) => {
+    const button = div.querySelector("button");
+    updateButtonText(shopItems[i], button);
+  });
 }
 
-function spawnFloatingCoin(x, y, value) {
-  const floatEl = document.createElement('div');
-  floatEl.className = 'floating-coin';
-  floatEl.style.left = x + 'px';
-  floatEl.style.top = y + 'px';
-  floatEl.innerHTML = `${value}<img src="img/anti-coin.png" width="14" height="14">`;
-  document.body.appendChild(floatEl);
-  requestAnimationFrame(() => { floatEl.style.transform = 'translateY(-60px)'; floatEl.style.opacity='0'; });
-  setTimeout(() => { floatEl.remove(); }, 800);
-}
-
-clickButton.addEventListener('touchstart', e => {
-  if (!dataLoaded) return;
-  e.preventDefault();
-
-  const touches = e.touches;
-  for (let i = 0; i < touches.length; i++) {
-    const t = touches[i];
-    coins += clickPower;
-    spawnFloatingCoin(t.clientX, t.clientY, clickPower);
-  }
-
-  clickImg.src = "img/click2.png";
-  clickImg.style.transform = "scale(0.9)";
-  setTimeout(() => { clickImg.src = "img/click1.png"; clickImg.style.transform="scale(1)"; }, 150);
-
-  updateUI();
-  saveData();
-}, { passive: false });
-
-renderShop();
-loadData();
-clickerPanel.style.display = 'block';
+/* Остальной JS остаётся как у тебя (клики, Firebase, мульти-тач и т.д.) */
 </script>
 </body>
 </html>
