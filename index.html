@@ -83,35 +83,40 @@ body {
 
 #counter img { width: 32px; }
 
-/* ↓↓↓ КЛИКЕР ОПУЩЕН ВНИЗ НА ДОП. 100px ↓↓↓ */
+/* ↓↓↓ КЛИКЕР ОПУЩЕН ВНИЗ НА 200px ↓↓↓ */
 #clickButtonWrapper {
   position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
 
-  margin-top: 200px; /* было 100 — теперь +100 */
+  margin-top: 200px;
 }
 
-#clickButton { background: none; border: none; }
+/* земля теперь реально под кликером */
+#ground {
+  position: absolute;
+  left: 50%;
+  top: 140px; /* чуть выше */
+  transform: translateX(-50%);
+  width: 100%;
+  pointer-events: none;
+  z-index: 0; /* земля под всем */
+}
+#ground img { width: 100%; }
+
+#clickButton {
+  background: none;
+  border: none;
+  z-index: 2; /* кликер поверх */
+}
 
 #clickImg {
   width: 200px;
   transition: transform 0.15s ease;
   -webkit-user-drag: none;
+  touch-action: manipulation;
 }
-
-/* ground */
-#ground {
-  position: absolute;
-  left: 50%;
-  top: calc(200px + 200px / 2 - 200px); /* поднят на 200px вверх */
-  transform: translateX(-50%);
-  width: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-#ground img { width: 100%; }
 
 /* ===== ПАНЕЛЬ МАГАЗИНА ===== */
 #shopPanel {
@@ -188,7 +193,6 @@ body {
 
 .price img {
   width: 18px !important;
-  height: auto !important;
 }
 
 /* ===== всплывающие "+монеты" ===== */
@@ -219,17 +223,22 @@ body {
 
     <!-- КЛИКЕР -->
     <div id="clickerPanel">
+
       <div id="counter">
         <span id="counterValue">0</span>
         <img src="img/anti-coin.png">
       </div>
 
       <div id="clickButtonWrapper">
+
+        <!-- земля теперь ВПЕРЕДИ -->
+        <div id="ground"><img src="img/ground.png"></div>
+
+        <!-- кнопка-кликер поверх -->
         <button id="clickButton">
           <img id="clickImg" src="img/click1.png">
         </button>
 
-        <div id="ground"><img src="img/ground.png"></div>
       </div>
     </div>
 
