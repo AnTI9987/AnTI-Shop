@@ -9,78 +9,58 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-body { margin: 0; padding: 0; background: #000; display: flex; justify-content: center; overflow: hidden; font-family: 'Inter', sans-serif; }
-#app { width: 392px; height: 100vh; background: #0000; overflow: hidden; position: relative; }
-
-/* правая кнопка магазина */
-#shopBtn, #backBtn { position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; background: none; border: none; padding: 0; z-index: 50; }
-#backBtn { display: none; }
-#shopBtn img, #backBtn img { width: 100%; height: 100%; }
-
-/* левые кнопки (settings / login) — сделаем стек слева сверху */
-#leftControls { position: absolute; top: 12px; left: 12px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
-.leftBtn { width: 48px; height: 48px; background: none; border: none; padding: 0; }
-.leftBtn img { width: 100%; height: 100%; }
-
-/* панели */
-#panels { position: absolute; top: 0; left: 0; width: calc(392px * 2); height: 100%; display: flex; transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
-#clickerPanel, #shopPanel { width: 392px; height: 100%; flex-shrink: 0; }
-#clickerPanel { background: linear-gradient(to bottom, #CEEDFF, #A1E6FF); padding-top: 20px; position: relative; overflow: hidden; }
-
-#counter { font-size: 46px; margin: 14px 0; display: flex; justify-content: center; align-items: center; gap: 6px; }
-#counter img { width: 32px; height: 32px; object-fit: contain; }
-
-#clickButtonWrapper { position: relative; width: 100%; display: flex; justify-content: center; margin-top: 200px; }
-#ground { position: absolute; left: 50%; top: 140px; transform: translateX(-50%); width: 100%; pointer-events: none; z-index: 0; }
-#ground img { width: 100%; }
-
-#clickButton { background: none; border: none; z-index: 1; position: relative; }
-#clickImg { width: 200px; transition: transform 0.15s ease; -webkit-user-drag: none; touch-action: manipulation; position: relative; z-index: 1; }
-
-#shopPanel { background: linear-gradient(to bottom, #7A4B1D, #5B3F1B); padding-top: 70px; overflow-y: auto; }
-#shopPanelInner { background: linear-gradient(to bottom, #FFBA67, #FF7749); margin: 0 auto; padding: 20px; border-radius: 12px; width: 350px; min-height: calc(100vh - 100px); }
-
-.item { width: 300px; height: 180px; background-image: url("img/item-frame.png"); background-size: 100% 100%; padding: 12px; display: flex; flex-direction: column; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35)); margin: 0 auto 18px; }
-.item-top { display: flex; margin-bottom: 6px; }
-.item img { width: 60px; height: 60px; margin-right: 12px; }
-.item-text b { font-size: 18px; }
-.item-text p { margin: 2px 0; font-size: 14px; }
-
-.stock { font-size: 12px; color: #ffdede; }
-
-.item button { margin-top: auto; width: 100%; padding: 10px; background: #332614; color: #fff; border: none; border-radius: 8px; font-size: 16px; transition: transform .12s ease; }
-.item button:active { transform: scale(0.96); }
-
-.price { display: flex; align-items: center; justify-content: center; gap: 6px; }
-.price img { width: 18px; height: 18px; object-fit: contain; }
-
-.floating-coin { position: absolute; font-size: 14px; color: lime; pointer-events: none; display: flex; align-items: center; gap: 4px; transition: transform .8s ease-out, opacity .8s ease-out; z-index: 2; }
-.floating-coin img { width: 18px; height: 18px; object-fit: contain; }
+body { margin:0; padding:0; background:#000; display:flex; justify-content:center; overflow:hidden; font-family:'Inter',sans-serif; }
+#app { width:392px; height:100vh; background:#0000; overflow:hidden; position:relative; }
+#shopBtn,#backBtn { position:absolute; top:12px; right:12px; width:48px; height:48px; background:none; border:none; padding:0; z-index:50; }
+#backBtn { display:none; }
+#shopBtn img,#backBtn img { width:100%; height:100%; }
+#panels { position:absolute; top:0; left:0; width:calc(392px*2); height:100%; display:flex; transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
+#clickerPanel,#shopPanel { width:392px; height:100%; flex-shrink:0; }
+#clickerPanel { background:linear-gradient(to bottom,#CEEDFF,#A1E6FF); padding-top:20px; position:relative; overflow:hidden; }
+#counter { font-size:46px; margin:14px 0; display:flex; justify-content:center; align-items:center; gap:6px; }
+#counter img { width:32px; height:32px; object-fit:contain; }
+#clickButtonWrapper { position:relative; width:100%; display:flex; justify-content:center; margin-top:200px; }
+#ground { position:absolute; left:50%; top:140px; transform:translateX(-50%); width:100%; pointer-events:none; z-index:0; }
+#ground img { width:100%; }
+#clickButton { background:none; border:none; z-index:1; position:relative; }
+#clickImg { width:200px; transition:transform 0.15s ease; -webkit-user-drag:none; touch-action:manipulation; position:relative; z-index:1; }
+#shopPanel { background:linear-gradient(to bottom,#7A4B1D,#5B3F1B); padding-top:70px; overflow-y:auto; }
+#shopPanelInner { background:linear-gradient(to bottom,#FFBA67,#FF7749); margin:0 auto; padding:20px; border-radius:12px; width:350px; min-height:calc(100vh - 100px); }
+.item { width:300px; height:180px; background-image:url("img/item-frame.png"); background-size:100% 100%; padding:12px; display:flex; flex-direction:column; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35)); margin:0 auto 18px; }
+.item-top { display:flex; margin-bottom:6px; }
+.item img { width:60px; height:60px; margin-right:12px; }
+.item-text b { font-size:18px; }
+.item-text p { margin:2px 0; font-size:14px; }
+.stock { font-size:12px; color:#ffdede; }
+.item button { margin-top:auto; width:100%; padding:10px; background:#332614; color:#fff; border:none; border-radius:8px; font-size:16px; transition:transform .12s ease; }
+.item button:active { transform:scale(0.96); }
+.price { display:flex; align-items:center; justify-content:center; gap:6px; }
+.price img { width:18px; height:18px; object-fit:contain; }
+.floating-coin { position:absolute; font-size:14px; color:lime; pointer-events:none; display:flex; align-items:center; gap:4px; transition:transform .8s ease-out,opacity .8s ease-out; z-index:2; }
+.floating-coin img { width:18px; height:18px; object-fit:contain; }
+#loginBtn { position:absolute; top:70px; left:50%; transform:translateX(-50%); padding:10px 16px; font-size:16px; border:none; border-radius:8px; background:#4285f4; color:#fff; cursor:pointer; z-index:100; }
 </style>
 </head>
 <body>
 
 <div id="app">
-  <!-- left controls: settings + login/logout -->
-  <div id="leftControls">
-    <button id="settingsBtn" class="leftBtn" title="настройки (пока ничего не делает)"><img src="img/settings.png" alt="settings"></button>
-    <button id="authBtn" class="leftBtn" title="войти через Google"><img id="authBtnImg" src="img/login.png" alt="login"></button>
-  </div>
+  <button id="shopBtn"><img src="img/shop-icon.png"></button>
+  <button id="backBtn"><img src="img/back-icon.png"></button>
 
-  <!-- right shop/back -->
-  <button id="shopBtn"><img src="img/shop-icon.png" alt="shop"></button>
-  <button id="backBtn"><img src="img/back-icon.png" alt="back"></button>
+  <button id="loginBtn">Войти через Google</button>
 
   <div id="panels">
     <div id="clickerPanel">
       <div id="counter">
         <span id="counterValue">0</span>
-        <img src="img/anti-coin.png" alt="coin">
+        <img src="img/anti-coin.png">
       </div>
 
       <div id="clickButtonWrapper">
-        <div id="ground"><img src="img/ground.png" alt="ground"></div>
-        <button id="clickButton" aria-label="клик"><img id="clickImg" src="img/click1.png" alt="click"></button>
+        <div id="ground"><img src="img/ground.png"></div>
+        <button id="clickButton">
+          <img id="clickImg" src="img/click1.png">
+        </button>
       </div>
     </div>
 
@@ -93,10 +73,9 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 </div>
 
 <script type="module">
-/* ----- Firebase app + Database + Auth ----- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 /* ===== FIREBASE CONFIG ===== */
 const firebaseConfig = {
@@ -112,138 +91,76 @@ const firebaseConfig = {
 const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
 const auth = getAuth(appFB);
-const provider = new GoogleAuthProvider();
 
-// optional: if you want to force a specific Google OAuth client id (you already gave it), it's handled by firebase console config.
-// client id you gave: 347202416802-cdfm1moq4gtn2ulp4754a7dc6ljms1sk.apps.googleusercontent.com
-
-/* ===== ПЕРЕМЕННЫЕ (state) ===== */
-let userId = localStorage.getItem("anonId") || null; // локальный анонимный id
-if (!userId) {
-  userId = "anon_" + Math.random().toString(36).substring(2, 9);
-  localStorage.setItem("anonId", userId);
-}
-let currentDbId = localStorage.getItem("userId") || userId; // текущий id, под которым читаем/пишем в БД
+/* ===== ПЕРЕМЕННЫЕ ===== */
+let userId = null;
 let coins = 0;
 let clickPower = 1;
 let dataLoaded = false;
-let lastSavedCoins = 0; // для автосохранения
+let lastSavedCoins = 0;
 
-/* элементы DOM */
 const counterValue = document.getElementById("counterValue");
 const itemsBlock = document.getElementById("items");
-const authBtn = document.getElementById("authBtn");
-const authBtnImg = document.getElementById("authBtnImg");
-const settingsBtn = document.getElementById("settingsBtn");
+const loginBtn = document.getElementById("loginBtn");
 
-/* shop items */
 const shopItems = [
   { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-/* ===== AUTH HANDLERS ===== */
+/* ===== GOOGLE LOGIN ===== */
+loginBtn.onclick = async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(err) {
+    console.error("Ошибка входа:", err);
+  }
+};
 
-// подписываемся на изменения статуса авторизации
 onAuthStateChanged(auth, user => {
-  if (user) {
-    // залогинен через Google -> привязываем user.uid
-    currentDbId = user.uid;
-    localStorage.setItem("userId", currentDbId);
-    console.log("вошли как:", user.displayName || user.email, "uid=", currentDbId);
-    // меняем иконку кнопки на "выйти"
-    authBtn.title = "выйти";
-    // если есть фото пользователя — можно подставить avatar (опционально)
-    if (user.photoURL) {
-      authBtnImg.src = user.photoURL;
-      authBtnImg.style.borderRadius = "6px";
-    } else {
-      authBtnImg.src = "img/login.png";
-    }
-    // грузим данные для google-аккаунта
+  if(user) {
+    userId = user.uid;
+    loginBtn.style.display = "none";
     loadData();
   } else {
-    // вышли -> переключаемся на анонимный локальный id, не затираем данные в google
-    console.log("вышли из Google");
-    // очищаем userId в localStorage (но сохраняем anonId)
-    localStorage.removeItem("userId");
-    currentDbId = localStorage.getItem("anonId") || ("anon_" + Math.random().toString(36).substring(2,9));
-    localStorage.setItem("anonId", currentDbId);
-
-    // визуально обнуляем игру на сайте (по условию)
-    coins = 0;
-    clickPower = 1;
-    dataLoaded = true; // чтобы клики работали
-    updateUI();
-    renderShop();
-
-    // поменяем иконку обратно
-    authBtnImg.src = "img/login.png";
-    authBtnImg.style.borderRadius = "";
-    authBtn.title = "войти через Google";
-  }
-});
-
-// обработчик кнопки auth (войти/выйти)
-authBtn.addEventListener("click", async () => {
-  const user = auth.currentUser;
-  if (user) {
-    // уже залогинен — выходим
-    try {
-      await signOut(auth);
-      // при выходе мы НЕ вызываем saveData() для предыдущего user.uid — чтобы не перезаписать данные нулями
-      console.log("выход выполнен");
-    } catch (e) {
-      console.error("ошибка выхода:", e);
-    }
-  } else {
-    // войти через popup
-    try {
-      await signInWithPopup(auth, provider);
-      // signInWithPopup приведёт к onAuthStateChanged и вызову loadData()
-    } catch (e) {
-      console.error("ошибка входа:", e);
-      alert("Ошибка входа: " + (e.message || e));
-    }
+    userId = null;
+    loginBtn.style.display = "block";
   }
 });
 
 /* ===== ЗАГРУЗКА ДАННЫХ ===== */
 async function loadData() {
-  // currentDbId должен быть установлен (onAuthStateChanged ставит user.uid или мы используем anon)
-  const userRef = ref(db, "players/" + currentDbId);
+  if(!userId) return;
+  const userRef = ref(db, "players/" + userId);
   try {
     const snap = await get(userRef);
-
     if (!snap.exists() || !snap.val()) {
-      // создаём дефолтные значения в БД для этого id
-      await set(userRef, { coins: 0, clickPower: 1, shopItems: {} });
+      await set(userRef, { coins:0, clickPower:1, shopItems:{} });
       coins = 0;
       clickPower = 1;
-      console.log("создан новый профиль в БД для id:", currentDbId);
+      console.log("Создан новый пользователь");
     } else {
       const d = snap.val();
       coins = d.coins ?? 0;
       clickPower = d.clickPower ?? 1;
       lastSavedCoins = coins;
-      if (d.shopItems) {
+      if(d.shopItems){
         shopItems.forEach(item => {
-          if (d.shopItems[item.id]) {
+          if(d.shopItems[item.id]){
             item.cost = d.shopItems[item.id].cost ?? item.cost;
-            if (item.stock !== undefined)
+            if(item.stock !== undefined)
               item.stock = d.shopItems[item.id].stock ?? item.stock;
           }
         });
       }
-      console.log("данные загружены для id", currentDbId, d);
+      console.log("Данные загружены:", d);
     }
-
     dataLoaded = true;
     updateUI();
     renderShop();
-  } catch(err) {
-    console.error("ошибка загрузки данных:", err);
-    // в случае ошибки разрешаем играть локально (не перезаписываем чужие данные)
+  } catch(err){
+    console.error("Ошибка загрузки данных:", err);
     coins = 0;
     clickPower = 1;
     lastSavedCoins = coins;
@@ -255,47 +172,38 @@ async function loadData() {
 
 /* ===== СОХРАНЕНИЕ ДАННЫХ ===== */
 function saveData() {
-  if (!dataLoaded) return;
-  // не разрешаем перезаписывать Google-данные нулями при логауте — это контролируется в onAuthStateChanged (мы просто меняем currentDbId)
+  if(!dataLoaded || !userId) return;
   const shopState = {};
   shopItems.forEach(i => {
-    shopState[i.id] = { cost: i.cost };
-    if (i.stock !== undefined) shopState[i.id].stock = i.stock;
+    shopState[i.id] = { cost:i.cost };
+    if(i.stock !== undefined) shopState[i.id].stock = i.stock;
   });
-
-  const userRef = ref(db, "players/" + currentDbId);
+  const userRef = ref(db, "players/" + userId);
   set(userRef, { coins, clickPower, shopItems: shopState })
-    .then(() => {
-      lastSavedCoins = coins;
-      console.log("данные успешно сохранены для id", currentDbId);
-    })
-    .catch(err => console.error("ошибка при сохранении:", err));
+    .then(()=>{ lastSavedCoins = coins; console.log("Данные сохранены"); })
+    .catch(err=>console.error("Ошибка при сохранении:", err));
 }
 
-/* ===== ОБНОВЛЕНИЕ UI / SHOP ===== */
+/* ===== UI, Shop, Clicker, Floating Coins ===== */
 function updateButtonText(item, btn){
-  btn.innerHTML = "";
-  if (item.stock !== undefined && item.stock <= 0) {
-    btn.textContent = "распродано";
-    btn.disabled = true;
-    return;
-  }
-  const p = document.createElement("div");
-  p.className = "price";
-  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-  p.querySelector("img").style.width = "18px";
-  p.querySelector("img").style.height = "18px";
-  p.querySelector("img").style.objectFit = "contain";
-  p.style.color = coins < item.cost ? "#ff3333" : "#fff";
+  btn.innerHTML="";
+  if(item.stock!==undefined && item.stock<=0){ btn.textContent="распродано"; btn.disabled=true; return; }
+  const p=document.createElement("div");
+  p.className="price";
+  p.innerHTML=`${item.cost}<img src="img/anti-coin.png">`;
+  p.querySelector("img").style.width="18px";
+  p.querySelector("img").style.height="18px";
+  p.querySelector("img").style.objectFit="contain";
+  p.style.color = coins<item.cost?"#ff3333":"#fff";
   btn.appendChild(p);
 }
 
-function renderShop() {
-  itemsBlock.innerHTML = "";
-  shopItems.forEach(item => {
-    const d = document.createElement("div");
-    d.className = "item";
-    d.innerHTML = `
+function renderShop(){
+  itemsBlock.innerHTML="";
+  shopItems.forEach(item=>{
+    const d=document.createElement("div");
+    d.className="item";
+    d.innerHTML=`
       <div class="item-top">
         <img src="${item.img}">
         <div class="item-text">
@@ -305,135 +213,79 @@ function renderShop() {
         </div>
       </div>
     `;
-    if (item.stock !== undefined) {
-      const s = document.createElement("p");
-      s.className = "stock";
-      s.textContent = "В наличии: " + item.stock;
+    if(item.stock!==undefined){
+      const s=document.createElement("p");
+      s.className="stock";
+      s.textContent="В наличии: "+item.stock;
       d.appendChild(s);
     }
-
-    const btn = document.createElement("button");
+    const btn=document.createElement("button");
     d.appendChild(btn);
-    updateButtonText(item, btn);
-
-    btn.onclick = () => {
-      if (!dataLoaded) return;
-      if (item.stock !== undefined && item.stock <= 0) return;
-      if (coins < item.cost) return;
-
-      coins -= item.cost;
-
-      if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
-      if (item.id === 2) { clickPower += item.power; item.cost += 250; item.stock = Math.max(0, item.stock - 1); }
-
+    updateButtonText(item,btn);
+    btn.onclick=()=>{
+      if(!dataLoaded) return;
+      if(item.stock!==undefined && item.stock<=0) return;
+      if(coins<item.cost) return;
+      coins-=item.cost;
+      if(item.id===1){ clickPower+=1; item.cost+=item.incrementCost; }
+      if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock=Math.max(0,item.stock-1);}
       updateUI();
-      saveData(); // сохраняем сразу после покупки
-      updateButtonText(item, btn);
-
-      if (item.stock !== undefined) {
-        const st = d.querySelector(".stock");
-        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
+      saveData();
+      updateButtonText(item,btn);
+      if(item.stock!==undefined){
+        const st=d.querySelector(".stock");
+        st.textContent=item.stock>0?"В наличии: "+item.stock:"";
       }
     };
-
     itemsBlock.appendChild(d);
   });
 }
 
-function updateUI() {
-  counterValue.textContent = coins;
+function updateUI(){
+  counterValue.textContent=coins;
   document.querySelectorAll(".item").forEach((el,i)=>{
-    updateButtonText(shopItems[i], el.querySelector("button"));
+    updateButtonText(shopItems[i],el.querySelector("button"));
   });
 }
 
-/* ===== FLOATING COINS ===== */
 function spawnFloatingCoin(x,y,value){
-  const el = document.createElement("div");
-  el.className = "floating-coin";
-  el.style.left = (x-10) + "px";
-  el.style.top = (y-10) + "px";
-  el.innerHTML = `<img src="img/anti-coin.png">${value}`;
+  const el=document.createElement("div");
+  el.className="floating-coin";
+  el.style.left=(x-10)+"px";
+  el.style.top=(y-10)+"px";
+  el.innerHTML=`<img src="img/anti-coin.png">${value}`;
   document.body.appendChild(el);
-
-  requestAnimationFrame(()=>{
-    el.style.transform = "translateY(-60px)";
-    el.style.opacity = "0";
-  });
-
-  setTimeout(()=> el.remove(), 800);
+  requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; });
+  setTimeout(()=>el.remove(),800);
 }
 
-/* ===== CLICKER ===== */
-const clickImg = document.getElementById("clickImg");
-const clickButton = document.getElementById("clickButton");
+const clickImg=document.getElementById("clickImg");
+const clickButton=document.getElementById("clickButton");
+function clickAction(x,y){ if(!dataLoaded) return; coins+=clickPower; spawnFloatingCoin(x,y,clickPower); updateUI(); }
 
-function clickAction(x, y){
-  if (!dataLoaded) return;
-  coins += clickPower;
-  spawnFloatingCoin(x, y, clickPower);
-  updateUI();
-  // НЕ сохраняем при каждом клике — автосейв срабатывает каждые 5 сек, если монеты изменились
-}
-
-clickButton.addEventListener("touchstart", e => {
+clickButton.addEventListener("touchstart",e=>{
   e.preventDefault();
-  for (const t of e.changedTouches) {
-    clickAction(t.clientX, t.clientY);
-  }
-  clickImg.src = "img/click2.png";
-  clickImg.style.transform = "scale(0.92)";
-  setTimeout(()=>{
-    clickImg.src = "img/click1.png";
-    clickImg.style.transform="scale(1)";
-  },150);
-},{ passive:false });
-
-clickButton.onclick = e => {
-  clickAction(e.clientX, e.clientY);
-  clickImg.src = "img/click2.png";
+  for(const t of e.changedTouches) clickAction(t.clientX,t.clientY);
+  clickImg.src="img/click2.png";
   clickImg.style.transform="scale(0.92)";
-  setTimeout(()=>{
-    clickImg.src="img/click1.png";
-    clickImg.style.transform="scale(1)";
-  },150);
+  setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150);
+},{passive:false});
+
+clickButton.onclick=e=>{
+  clickAction(e.clientX,e.clientY);
+  clickImg.src="img/click2.png";
+  clickImg.style.transform="scale(0.92)";
+  setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150);
 };
 
-/* ===== PANEL SWITCH ===== */
-const panels = document.getElementById("panels");
-const shopBtn = document.getElementById("shopBtn");
-const backBtn = document.getElementById("backBtn");
+const panels=document.getElementById("panels");
+const shopBtn=document.getElementById("shopBtn");
+const backBtn=document.getElementById("backBtn");
 
-shopBtn.onclick = () => {
-  panels.style.transform = "translateX(-392px)";
-  shopBtn.style.display = "none";
-  backBtn.style.display = "block";
-};
-backBtn.onclick = () => {
-  panels.style.transform = "translateX(0)";
-  shopBtn.style.display = "block";
-  backBtn.style.display = "none";
-};
+shopBtn.onclick=()=>{ panels.style.transform="translateX(-392px)"; shopBtn.style.display="none"; backBtn.style.display="block"; }
+backBtn.onclick=()=>{ panels.style.transform="translateX(0)"; shopBtn.style.display="block"; backBtn.style.display="none"; }
 
-/* ===== AUTO-SAVE (коины каждые 5 сек при изменении) ===== */
-setInterval(() => {
-  if (dataLoaded && coins !== lastSavedCoins) {
-    saveData();
-  }
-}, 5000);
-
-/* ===== стартовая загрузка ===== */
-// если уже залогинен, onAuthStateChanged вызовет loadData(), иначе подгрузим текущий anon профиль
-if (!auth.currentUser) {
-  // используем локальный anon id (currentDbId уже установлен в начале)
-  currentDbId = localStorage.getItem("userId") || localStorage.getItem("anonId") || currentDbId;
-  // подгрузим (если в БД нет — создастся)
-  loadData();
-} else {
-  // если пользователь уже аутентифицирован (редкий случай), onAuthStateChanged выше сработает
-  // но на всякий случай — вызовем loadData()
-  loadData();
-}
+setInterval(()=>{ if(coins!==lastSavedCoins) saveData(); },5000);
 </script>
 
 </body>
