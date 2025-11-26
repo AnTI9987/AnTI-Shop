@@ -40,7 +40,6 @@ body {
 }
 
 #backBtn { display: none; }
-
 #shopBtn img, #backBtn img { width: 100%; height: 100%; }
 
 #panels {
@@ -138,8 +137,13 @@ body {
   margin: 0 auto 18px;
 }
 
-.item-top { display: flex; margin-bottom: 6px; }
+.item-top {
+  display: flex;
+  margin-bottom: 6px;
+}
+
 .item img { width: 60px; height: 60px; margin-right: 12px; }
+
 .item-text b { font-size: 18px; }
 .item-text p { margin: 2px 0; font-size: 14px; }
 
@@ -156,6 +160,7 @@ body {
   font-size: 16px;
   transition: transform .12s ease;
 }
+
 .item button:active { transform: scale(0.96); }
 
 .price {
@@ -164,6 +169,7 @@ body {
   justify-content: center;
   gap: 6px;
 }
+
 .price img { width: 18px; height: 18px; object-fit: contain; }
 
 .floating-coin {
@@ -177,6 +183,7 @@ body {
   transition: transform .8s ease-out, opacity .8s ease-out;
   z-index: 2;
 }
+
 .floating-coin img { width: 18px; height: 18px; object-fit: contain; }
 </style>
 </head>
@@ -215,13 +222,13 @@ import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/1
 
 /* ===== FIREBASE CONFIG ===== */
 const firebaseConfig = {
-  apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",
-  authDomain: "anti-shop-d6b33.firebaseapp.com",
-  databaseURL: "https://anti-shop-d6b33-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "anti-shop-d6b33",
-  storageBucket: "anti-shop-d6b33.appspot.com",
-  messagingSenderId: "292698259142",
-  appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"
+  apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
+  authDomain: "anti-shop-99f1d.firebaseapp.com",
+  databaseURL: "https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "anti-shop-99f1d",
+  storageBucket: "anti-shop-99f1d.firebasestorage.app",
+  messagingSenderId: "347202416802",
+  appId: "1:347202416802:web:2d2df1b819be9da180e7fb"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -295,21 +302,17 @@ function saveData() {
 /* ===== ОБНОВЛЕНИЕ UI ===== */
 function updateButtonText(item, btn){
   btn.innerHTML = "";
-
   if (item.stock !== undefined && item.stock <= 0) {
     btn.textContent = "распродано";
     btn.disabled = true;
     return;
   }
-
   const p = document.createElement("div");
   p.className = "price";
   p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-
   p.querySelector("img").style.width = "18px";
   p.querySelector("img").style.height = "18px";
   p.querySelector("img").style.objectFit = "contain";
-
   p.style.color = coins < item.cost ? "#ff3333" : "#fff";
   btn.appendChild(p);
 }
@@ -329,7 +332,6 @@ function renderShop() {
         </div>
       </div>
     `;
-
     if (item.stock !== undefined) {
       const s = document.createElement("p");
       s.className = "stock";
@@ -444,14 +446,13 @@ backBtn.onclick = () => {
   backBtn.style.display = "none";
 };
 
-/* ===== LOAD DATA ===== */
-loadData();
-
-/* ===== AUTOSAVE EVERY 10 SEC ===== */
+/* ===== AUTO-SAVE ===== */
 setInterval(() => {
   saveData();
-}, 10000); // 10000ms = 10 секунд
+}, 5000); // каждые 5 секунд
 
+loadData();
+renderShop();
 </script>
 
 </body>
