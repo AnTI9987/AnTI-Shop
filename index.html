@@ -1,323 +1,268 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>AnTI Shop</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clicker</title>
 
 <style>
-body { margin: 0; padding: 0; background: #000; display: flex; justify-content: center; overflow: hidden; font-family: 'Inter', sans-serif; }
-#app { width: 392px; height: 100vh; background: #0000; overflow: hidden; position: relative; }
-#shopBtn, #backBtn { position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; background: none; border: none; padding: 0; z-index: 50; }
-#backBtn { display: none; }
-#shopBtn img, #backBtn img { width: 100%; height: 100%; }
-#panels { position: absolute; top: 0; left: 0; width: calc(392px * 2); height: 100%; display: flex; transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
-#clickerPanel, #shopPanel { width: 392px; height: 100%; flex-shrink: 0; }
-#clickerPanel { background: linear-gradient(to bottom, #CEEDFF, #A1E6FF); padding-top: 20px; position: relative; overflow: hidden; }
-#counter { font-size: 46px; margin: 14px 0; display: flex; justify-content: center; align-items: center; gap: 6px; }
-#counter img { width: 32px; height: 32px; object-fit: contain; }
-#clickButtonWrapper { position: relative; width: 100%; display: flex; justify-content: center; margin-top: 200px; }
-#ground { position: absolute; left: 50%; top: 140px; transform: translateX(-50%); width: 100%; pointer-events: none; z-index: 0; }
-#ground img { width: 100%; }
-#clickButton { background: none; border: none; z-index: 1; position: relative; }
-#clickImg { width: 200px; transition: transform 0.15s ease; -webkit-user-drag: none; touch-action: manipulation; position: relative; z-index: 1; }
-#shopPanel { background: linear-gradient(to bottom, #7A4B1D, #5B3F1B); padding-top: 70px; overflow-y: auto; }
-#shopPanelInner { background: linear-gradient(to bottom, #FFBA67, #FF7749); margin: 0 auto; padding: 20px; border-radius: 12px; width: 350px; min-height: calc(100vh - 100px); }
-.item { width: 300px; height: 180px; background-image: url("img/item-frame.png"); background-size: 100% 100%; padding: 12px; display: flex; flex-direction: column; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35)); margin: 0 auto 18px; }
-.item-top { display: flex; margin-bottom: 6px; }
-.item img { width: 60px; height: 60px; margin-right: 12px; }
-.item-text b { font-size: 18px; }
-.item-text p { margin: 2px 0; font-size: 14px; }
-.stock { font-size: 12px; color: #ffdede; }
-.item button { margin-top: auto; width: 100%; padding: 10px; background: #332614; color: #fff; border: none; border-radius: 8px; font-size: 16px; transition: transform .12s ease; }
-.item button:active { transform: scale(0.96); }
-.price { display: flex; align-items: center; justify-content: center; gap: 6px; }
-.price img { width: 18px; height: 18px; object-fit: contain; }
-.floating-coin { position: absolute; font-size: 14px; color: lime; pointer-events: none; display: flex; align-items: center; gap: 4px; transition: transform .8s ease-out, opacity .8s ease-out; z-index: 2; }
-.floating-coin img { width: 18px; height: 18px; object-fit: contain; }
+    body {
+        margin: 0;
+        background: #111;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        overflow-x: hidden;
+        text-align: center;
+        user-select: none;
+    }
+
+    h1 {
+        margin-top: 20px;
+    }
+
+    #coin {
+        width: 180px;
+        margin-top: 25px;
+        transition: transform 0.05s ease;
+    }
+
+    /* единый стиль для картинок предметов и цен */
+    .item img, .price img {
+        width: 40px;
+        height: 40px;
+        margin-right: 8px;
+    }
+
+    #coinsDisplay {
+        font-size: 22px;
+        margin-top: 10px;
+    }
+
+    #items {
+        margin-top: 25px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .item {
+        display: flex;
+        align-items: center;
+        background: #222;
+        padding: 10px 14px;
+        border-radius: 10px;
+        width: 260px;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .item:hover {
+        background: #333;
+    }
+
+    .item .name {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    .price {
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* плавающие монетки */
+    .floating {
+        position: fixed;
+        font-size: 22px;
+        pointer-events: none;
+        animation: floatUp 0.8s ease-out forwards;
+        color: gold;
+        text-shadow: 0 0 5px #000;
+    }
+
+    @keyframes floatUp {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-60px);
+        }
+    }
 </style>
+
 </head>
 <body>
 
-<div id="app">
-  <button id="shopBtn"><img src="img/shop-icon.png"></button>
-  <button id="backBtn"><img src="img/back-icon.png"></button>
+<h1>Кликер</h1>
+<img id="coin" src="https://i.imgur.com/6Y3JfUw.png">
+<div id="coinsDisplay">Монеты: 0</div>
 
-  <div id="panels">
-    <div id="clickerPanel">
-      <div id="counter">
-        <span id="counterValue">0</span>
-        <img src="img/anti-coin.png">
-      </div>
-
-      <div id="clickButtonWrapper">
-        <div id="ground"><img src="img/ground.png"></div>
-        <button id="clickButton">
-          <img id="clickImg" src="img/click1.png">
-        </button>
-      </div>
-    </div>
-
-    <div id="shopPanel">
-      <div id="shopPanelInner">
-        <div id="items"></div>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="items"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-/* ===== FIREBASE CONFIG ===== */
+/* ===== Firebase ===== */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, set, update, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
-  authDomain: "anti-shop-99f1d.firebaseapp.com",
-  databaseURL: "https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "anti-shop-99f1d",
-  storageBucket: "anti-shop-99f1d.firebasestorage.app",
-  messagingSenderId: "347202416802",
-  appId: "1:347202416802:web:2d2df1b819be9da180e7fb"
+    apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
+    authDomain: "anti-shop-99f1d.firebaseapp.com",
+    databaseURL: "https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "anti-shop-99f1d",
+    storageBucket: "anti-shop-99f1d.firebasestorage.app",
+    messagingSenderId: "347202416802",
+    appId: "1:347202416802:web:2d2df1b819be9da180e7fb"
 };
 
-const appFB = initializeApp(firebaseConfig);
-const db = getDatabase(appFB);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-/* ===== ПЕРЕМЕННЫЕ ===== */
-let userId = localStorage.getItem("userId");
-if (!userId) {
-  userId = "user_" + Math.random().toString(36).substring(2, 9);
-  localStorage.setItem("userId", userId);
-}
+/* ===== Игровое состояние ===== */
 
-let coins = 0;
-let clickPower = 1;
-let dataLoaded = false;
-let lastSavedCoins = 0; // для авто-сохранения только при изменении
+const userId = "player1";
 
-const counterValue = document.getElementById("counterValue");
-const itemsBlock = document.getElementById("items");
+const state = {
+    coins: 0,
+    clickPower: 1,
+    lastSavedCoins: 0
+};
 
-const shopItems = [
-  { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
-  { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
+/* ===== Предметы ===== */
+const ITEMS = [
+    { id: "stick",        name: "Палка",        base: 20,   inc: 1 },
+    { id: "stone",        name: "Камень",       base: 50,   inc: 2 },
+    { id: "iron",         name: "Железо",       base: 150,  inc: 4 },
+    { id: "gold",         name: "Золото",       base: 300,  inc: 6 },
+    { id: "diamond",      name: "Алмаз",        base: 600,  inc: 10 },
+    { id: "netherite",    name: "Незерит",      base: 1200, inc: 20 }
 ];
 
-/* ===== ЗАГРУЗКА ДАННЫХ ===== */
+/* ===== Загрузка данных из Firebase ===== */
+
 async function loadData() {
-  const userRef = ref(db, "players/" + userId);
-  try {
-    const snap = await get(userRef);
-    if (!snap.exists() || !snap.val()) {
-      await set(userRef, { coins: 0, clickPower: 1, shopItems: {} });
-      coins = 0;
-      clickPower = 1;
-      console.log("создан новый пользователь с дефолтными значениями");
-    } else {
-      const d = snap.val();
-      coins = d.coins ?? 0;
-      clickPower = d.clickPower ?? 1;
-      lastSavedCoins = coins;
-      if (d.shopItems) {
-        shopItems.forEach(item => {
-          if (d.shopItems[item.id]) {
-            item.cost = d.shopItems[item.id].cost ?? item.cost;
-            if (item.stock !== undefined)
-              item.stock = d.shopItems[item.id].stock ?? item.stock;
-          }
-        });
-      }
-      console.log("данные загружены:", d);
+    const snapshot = await get(ref(db, "users/" + userId));
+
+    if (!snapshot.exists()) {
+        console.log("Пользователь новый, создаём запись...");
+        saveData();
+        return;
     }
-    dataLoaded = true;
-    updateUI();
-    renderShop();
-  } catch(err) {
-    console.error("ошибка загрузки данных:", err);
-    coins = 0;
-    clickPower = 1;
-    lastSavedCoins = coins;
-    dataLoaded = true;
-    updateUI();
-    renderShop();
-  }
+
+    const data = snapshot.val();
+
+    state.coins = data.coins ?? 0;
+    state.clickPower = data.clickPower ?? 1;
+
+    updateCoinsDisplay();
 }
 
-/* ===== СОХРАНЕНИЕ ДАННЫХ ===== */
+/* ===== Сохранение ===== */
+
 function saveData() {
-  if (!dataLoaded) return;
-  const shopState = {};
-  shopItems.forEach(i => {
-    shopState[i.id] = { cost: i.cost };
-    if (i.stock !== undefined) shopState[i.id].stock = i.stock;
-  });
-
-  const userRef = ref(db, "players/" + userId);
-  set(userRef, { coins, clickPower, shopItems: shopState })
-    .then(() => {
-      lastSavedCoins = coins;
-      console.log("данные успешно сохранены");
-    })
-    .catch(err => console.error("ошибка при сохранении:", err));
+    update(ref(db, "users/" + userId), {
+        coins: state.coins,
+        clickPower: state.clickPower
+    });
 }
 
-/* ===== ОБНОВЛЕНИЕ UI ===== */
-function updateButtonText(item, btn){
-  btn.innerHTML = "";
-  if (item.stock !== undefined && item.stock <= 0) {
-    btn.textContent = "распродано";
-    btn.disabled = true;
-    return;
-  }
-  const p = document.createElement("div");
-  p.className = "price";
-  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-  p.querySelector("img").style.width = "18px";
-  p.querySelector("img").style.height = "18px";
-  p.querySelector("img").style.objectFit = "contain";
-  p.style.color = coins < item.cost ? "#ff3333" : "#fff";
-  btn.appendChild(p);
+/* ===== UI ===== */
+
+const coin = document.getElementById("coin");
+const coinsDisplay = document.getElementById("coinsDisplay");
+const itemsDiv = document.getElementById("items");
+
+function updateCoinsDisplay() {
+    coinsDisplay.textContent = "Монеты: " + state.coins;
 }
 
-function renderShop() {
-  itemsBlock.innerHTML = "";
-  shopItems.forEach(item => {
-    const d = document.createElement("div");
-    d.className = "item";
-    d.innerHTML = `
-      <div class="item-top">
-        <img src="${item.img}">
-        <div class="item-text">
-          <b>${item.name}</b>
-          <p>${item.description}</p>
-          <p>${item.property}</p>
-        </div>
-      </div>
-    `;
-    if (item.stock !== undefined) {
-      const s = document.createElement("p");
-      s.className = "stock";
-      s.textContent = "В наличии: " + item.stock;
-      d.appendChild(s);
-    }
+/* ===== Анимация клика ===== */
 
-    const btn = document.createElement("button");
-    d.appendChild(btn);
-    updateButtonText(item, btn);
+function spawnFloatingCoin(amount, x, y) {
+    const el = document.createElement("div");
+    el.className = "floating";
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    el.textContent = "+" + amount;
 
-    btn.onclick = () => {
-      if (!dataLoaded) return;
-      if (item.stock !== undefined && item.stock <= 0) return;
-      if (coins < item.cost) return;
-
-      coins -= item.cost;
-
-      if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
-      if (item.id === 2) { clickPower += item.power; item.cost += 250; item.stock = Math.max(0, item.stock - 1); }
-
-      updateUI();
-      saveData(); // сохраняем сразу после покупки
-      updateButtonText(item, btn);
-
-      if (item.stock !== undefined) {
-        const st = d.querySelector(".stock");
-        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
-      }
-    };
-
-    itemsBlock.appendChild(d);
-  });
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
 }
 
-function updateUI() {
-  counterValue.textContent = coins;
-  document.querySelectorAll(".item").forEach((el,i)=>{
-    updateButtonText(shopItems[i], el.querySelector("button"));
-  });
-}
+/* ===== Клик монеты ===== */
 
-/* ===== FLOATING COINS ===== */
-function spawnFloatingCoin(x,y,value){
-  const el = document.createElement("div");
-  el.className = "floating-coin";
-  el.style.left = (x-10) + "px";
-  el.style.top = (y-10) + "px";
-  el.innerHTML = `<img src="img/anti-coin.png">${value}`;
-  document.body.appendChild(el);
+coin.addEventListener("click", (e) => {
+    state.coins += state.clickPower;
+    updateCoinsDisplay();
 
-  requestAnimationFrame(()=>{
-    el.style.transform = "translateY(-60px)";
-    el.style.opacity = "0";
-  });
+    const rect = coin.getBoundingClientRect();
+    spawnFloatingCoin(
+        state.clickPower,
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2
+    );
 
-  setTimeout(()=> el.remove(), 800);
-}
-
-/* ===== CLICKER ===== */
-const clickImg = document.getElementById("clickImg");
-const clickButton = document.getElementById("clickButton");
-
-function clickAction(x, y){
-  if (!dataLoaded) return;
-  coins += clickPower;
-  spawnFloatingCoin(x, y, clickPower);
-  updateUI();
-  // убираем сохранение после каждого клика
-}
-
-clickButton.addEventListener("touchstart", e => {
-  e.preventDefault();
-  for (const t of e.changedTouches) {
-    clickAction(t.clientX, t.clientY);
-  }
-  clickImg.src = "img/click2.png";
-  clickImg.style.transform = "scale(0.92)";
-  setTimeout(()=>{
-    clickImg.src = "img/click1.png";
-    clickImg.style.transform="scale(1)";
-  },150);
-},{ passive:false });
-
-clickButton.onclick = e => {
-  clickAction(e.clientX, e.clientY);
-  clickImg.src = "img/click2.png";
-  clickImg.style.transform="scale(0.92)";
-  setTimeout(()=>{
-    clickImg.src="img/click1.png";
-    clickImg.style.transform="scale(1)";
-  },150);
-};
-
-/* ===== PANEL SWITCH ===== */
-const panels = document.getElementById("panels");
-const shopBtn = document.getElementById("shopBtn");
-const backBtn = document.getElementById("backBtn");
-
-shopBtn.onclick = () => {
-  panels.style.transform = "translateX(-392px)";
-  shopBtn.style.display = "none";
-  backBtn.style.display = "block";
-};
-backBtn.onclick = () => {
-  panels.style.transform = "translateX(0)";
-  shopBtn.style.display = "block";
-  backBtn.style.display = "none";
-};
-
-/* ===== AUTO-SAVE КОИНЫ ===== */
-// сохраняем только если монеты изменились
-setInterval(() => {
-  if (coins !== lastSavedCoins) {
     saveData();
-  }
-}, 5000);
+});
 
-loadData(); // внутри loadData уже renderShop вызывается
+/* ===== Отображение предметов ===== */
+
+function createItemElement(item) {
+    const el = document.createElement("div");
+    el.className = "item";
+
+    el.innerHTML = `
+        <div>
+            <div class="name">${item.name}</div>
+            <div class="price">
+                <img src="https://i.imgur.com/6Y3JfUw.png">
+                <span id="price_${item.id}">${item.base}</span>
+            </div>
+        </div>
+        <div>+${item.inc}</div>
+    `;
+
+    el.addEventListener("click", () => buyItem(item));
+
+    return el;
+}
+
+function renderItems() {
+    ITEMS.forEach(item => {
+        itemsDiv.appendChild(createItemElement(item));
+    });
+}
+
+/* ===== Покупка предмета ===== */
+
+function buyItem(item) {
+    const costSpan = document.getElementById("price_" + item.id);
+    let price = parseInt(costSpan.textContent);
+
+    if (state.coins < price) return;
+
+    state.coins -= price;
+    state.clickPower += item.inc;
+
+    // Увеличение цены после покупки
+    price = Math.round(price * 1.2);
+    costSpan.textContent = price;
+
+    updateCoinsDisplay();
+    saveData();
+}
+
+/* ===== Старт ===== */
+
+renderItems();
+loadData();
+
 </script>
-
 </body>
 </html>
