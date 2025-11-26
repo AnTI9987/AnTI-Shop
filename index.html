@@ -128,7 +128,7 @@ body {
 
 .item {
   width: 300px;
-  height: 180px; /* уменьшили на 10px */
+  height: 180px;
   background-image: url("img/item-frame.png");
   background-size: 100% 100%;
   padding: 12px;
@@ -190,7 +190,7 @@ body {
   align-items: center;
   gap: 4px;
   transition: transform .8s ease-out, opacity .8s ease-out;
-  z-index: 2; /* поверх клика */
+  z-index: 2;
 }
 
 .floating-coin img { width: 18px; height: 18px; object-fit: contain; }
@@ -289,6 +289,7 @@ async function loadData() {
     dataLoaded = true;
     updateUI();
     renderShop();
+    startAutoSave(); // старт авто-сохранения после загрузки данных
   } catch(err) {
     console.error("ошибка загрузки данных:", err);
   }
@@ -296,6 +297,9 @@ async function loadData() {
 
 /* ===== СОХРАНЕНИЕ ДАННЫХ ===== */
 function saveData() {
+  if (!dataLoaded) return;
+  console.log("сохраняем данные...");
+
   const shopState = {};
   shopItems.forEach(i => {
     shopState[i.id] = { cost: i.cost, stock: i.stock };
@@ -308,11 +312,11 @@ function saveData() {
 }
 
 /* ===== АВТОМАТИЧЕСКОЕ СОХРАНЕНИЕ ===== */
-setInterval(() => {
-  if (dataLoaded) {
+function startAutoSave() {
+  setInterval(() => {
     saveData();
-  }
-}, 5000); // каждые 5 секунд, можно изменить интервал
+  }, 5000); // каждые 5 секунд
+}
 
 /* ===== ОБНОВЛЕНИЕ UI ===== */
 function updateButtonText(item, btn){
