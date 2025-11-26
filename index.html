@@ -11,7 +11,6 @@
 
 <style>
 /* ===== ГЛОБАЛЬНО ===== */
-
 body {
   margin: 0;
   padding: 0;
@@ -30,9 +29,8 @@ body {
   position: relative;
 }
 
-/* ===== КНОПКИ НАВИГАЦИИ ===== */
-
-#shopBtn {
+/* ===== КНОПКИ ===== */
+#shopBtn, #backBtn {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -44,39 +42,20 @@ body {
   z-index: 50;
 }
 
-#shopBtn img {
-  width: 100%;
-  height: 100%;
+#backBtn { display: none; }
+
+#shopBtn img, #backBtn img {
+  width: 100%; height: 100%;
 }
 
-/* кнопка НАЗАД теперь появляется на ТОМ ЖЕ месте, что и shopBtn */
-#backBtn {
-  position: absolute;
-  top: 12px;
-  right: 12px; /* ← исправлено */
-  width: 48px;
-  height: 48px;
-  background: none;
-  border: none;
-  padding: 0;
-  z-index: 50;
-  display: none;
-}
-#backBtn img {
-  width: 100%;
-  height: 100%;
-}
-
-/* ===== ПАНЕЛИ (кликер и магазин) ===== */
-
+/* ===== ПАНЕЛИ ===== */
 #panels {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: calc(392px * 2);
   height: 100%;
   display: flex;
-  transition: transform 0.55s cubic-bezier(0.35, 0.15, 0.1, 1);
+  transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1);
 }
 
 #clickerPanel, #shopPanel {
@@ -85,7 +64,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ----- панель кликера ----- */
+/* ===== ПАНЕЛЬ КЛИКЕРА ===== */
 #clickerPanel {
   background: linear-gradient(to bottom, #CEEDFF, #A1E6FF);
   padding-top: 20px;
@@ -102,24 +81,19 @@ body {
   gap: 6px;
 }
 
-#counter img {
-  width: 32px;
-}
+#counter img { width: 32px; }
 
+/* ↓↓↓ КЛИКЕР ОПУЩЕН ВНИЗ НА ДОП. 100px ↓↓↓ */
 #clickButtonWrapper {
   position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
 
-  /* ↓↓↓ кликер опущен вниз на 100px ↓↓↓ */
-  margin-top: 100px;
+  margin-top: 200px; /* было 100 — теперь +100 */
 }
 
-#clickButton {
-  background: none;
-  border: none;
-}
+#clickButton { background: none; border: none; }
 
 #clickImg {
   width: 200px;
@@ -127,23 +101,19 @@ body {
   -webkit-user-drag: none;
 }
 
-/* GROUND — фикс шириной */
+/* ground */
 #ground {
   position: absolute;
   left: 50%;
-  top: calc(100px + 200px / 2);
+  top: calc(200px + 200px / 2);
   transform: translateX(-50%);
   width: 100%;
   pointer-events: none;
   z-index: 1;
 }
+#ground img { width: 100%; }
 
-#ground img {
-  width: 100%;
-  display: block;
-}
-
-/* ----- панель магазина ----- */
+/* ===== ПАНЕЛЬ МАГАЗИНА ===== */
 #shopPanel {
   background: linear-gradient(to bottom, #7A4B1D, #5B3F1B);
   padding-top: 70px;
@@ -160,7 +130,6 @@ body {
 }
 
 /* ===== ТОВАРЫ ===== */
-
 .item {
   width: 300px;
   aspect-ratio: 300 / 190;
@@ -184,16 +153,7 @@ body {
   margin-right: 12px;
 }
 
-/* предотвратить растягивание монетки в цене */
-.price img {
-  width: 18px !important;
-  height: auto !important;
-}
-
-.item-text b {
-  font-size: 18px;
-}
-
+.item-text b { font-size: 18px; }
 .item-text p {
   margin: 2px 0;
   font-size: 14px;
@@ -204,7 +164,7 @@ body {
   color: #ffdede;
 }
 
-/* ===== кнопка купить ===== */
+/* кнопка купить */
 .item button {
   margin-top: auto;
   width: 100%;
@@ -217,15 +177,18 @@ body {
   transition: transform .12s ease;
 }
 
-.item button:active {
-  transform: scale(0.96);
-}
+.item button:active { transform: scale(0.96); }
 
 .price {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+}
+
+.price img {
+  width: 18px !important;
+  height: auto !important;
 }
 
 /* ===== всплывающие "+монеты" ===== */
@@ -237,12 +200,11 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
+
   transition: transform .8s ease-out, opacity .8s ease-out;
 }
 
-.floating-coin img {
-  width: 18px;
-}
+.floating-coin img { width: 18px; }
 </style>
 </head>
 <body>
@@ -253,7 +215,6 @@ body {
   <button id="shopBtn"><img src="img/shop-icon.png"></button>
   <button id="backBtn"><img src="img/back-icon.png"></button>
 
-  <!-- две панели -->
   <div id="panels">
 
     <!-- КЛИКЕР -->
@@ -268,9 +229,7 @@ body {
           <img id="clickImg" src="img/click1.png">
         </button>
 
-        <div id="ground">
-          <img src="img/ground.png">
-        </div>
+        <div id="ground"><img src="img/ground.png"></div>
       </div>
     </div>
 
@@ -288,7 +247,6 @@ body {
 <script type="module">
 
 /* ====== ПЕРЕКЛЮЧЕНИЕ ПАНЕЛЕЙ ====== */
-
 const panels = document.getElementById("panels");
 const shopBtn = document.getElementById("shopBtn");
 const backBtn = document.getElementById("backBtn");
@@ -306,7 +264,6 @@ backBtn.onclick = () => {
 };
 
 /* ====== FIREBASE ====== */
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
@@ -324,7 +281,6 @@ const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
 
 /* ====== ПЕРЕМЕННЫЕ ====== */
-
 let userId = localStorage.getItem("userId");
 if (!userId) {
   userId = "user_" + Math.random().toString(36).substring(2, 9);
@@ -338,7 +294,6 @@ let dataLoaded = false;
 const counterValue = document.getElementById("counterValue");
 
 /* ====== ТОВАРЫ ====== */
-
 const itemsBlock = document.getElementById("items");
 
 const shopItems = [
@@ -346,8 +301,7 @@ const shopItems = [
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-/* ====== ЗАГРУЗКА ДАННЫХ ====== */
-
+/* ====== ЗАГРУЗКА ====== */
 async function loadData() {
   const snap = await get(ref(db, "players/" + userId));
   if (snap.exists()) {
@@ -379,12 +333,9 @@ function saveData() {
   });
 }
 
-/* ====== КНОПКИ ЦЕНЫ ====== */
-
+/* ====== обновление цены на кнопке ====== */
 function updateButtonText(item, btn){
-  const affordable = coins >= item.cost;
-
-  btn.textContent = "";
+  btn.innerHTML = ""; // ЧИСТИМ, НО НЕ textContent
 
   if (item.stock !== undefined && item.stock <= 0) {
     btn.textContent = "распродано";
@@ -396,11 +347,15 @@ function updateButtonText(item, btn){
   p.className = "price";
   p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
 
-  if (!affordable) p.style.color = "#ff6666";
+  if (coins < item.cost)
+    p.style.color = "#ff3333";
+  else
+    p.style.color = "#ffffff";
 
   btn.appendChild(p);
 }
 
+/* ====== РЕНДЕР МАГАЗИНА ====== */
 function renderShop(){
   itemsBlock.innerHTML = "";
   shopItems.forEach(item => {
@@ -436,10 +391,13 @@ function renderShop(){
 
       coins -= item.cost;
 
+      /* товар №1 — цена растёт на +50, сила клика +1 */
       if (item.id === 1) {
         clickPower += 1;
-        item.cost += item.incrementCost;
+        item.cost += item.incrementCost; // +50
       }
+
+      /* товар №2 */
       if (item.id === 2) {
         clickPower += item.power;
         item.cost += 250;
@@ -463,10 +421,15 @@ function renderShop(){
 /* ====== UI ====== */
 function updateUI() {
   counterValue.textContent = coins;
+
+  /* обновляем цены, чтобы покраснели */
+  document.querySelectorAll(".item").forEach((el,i)=>{
+    const btn = el.querySelector("button");
+    updateButtonText(shopItems[i], btn);
+  });
 }
 
-/* ====== ВСПЛЫВАЮЩИЕ "+монеты" ====== */
-
+/* ====== всплывающие монеты ====== */
 function spawnFloatingCoin(x,y,value){
   const el=document.createElement("div");
   el.className="floating-coin";
@@ -485,7 +448,6 @@ function spawnFloatingCoin(x,y,value){
 }
 
 /* ====== КЛИКЕР ====== */
-
 const clickImg = document.getElementById("clickImg");
 const clickButton = document.getElementById("clickButton");
 
