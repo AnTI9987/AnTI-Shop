@@ -2,7 +2,7 @@
 <html lang="ru">    
 <head>    
 <meta charset="UTF-8">    
-<meta name="viewport"    
+<meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    
     
 <title>AnTI Shop</title>    
@@ -83,32 +83,29 @@ body {
     
 #counter img { width: 32px; }    
     
-/* ↓↓↓ КЛИКЕР ОПУЩЕН ВНИЗ НА 200px ↓↓↓ */    
 #clickButtonWrapper {    
   position: relative;    
   width: 100%;    
   display: flex;    
   justify-content: center;    
-    
   margin-top: 200px;    
 }    
     
-/* земля теперь реально под кликером */    
 #ground {    
   position: absolute;    
   left: 50%;    
-  top: 140px; /* чуть выше */    
+  top: 140px;    
   transform: translateX(-50%);    
   width: 100%;    
   pointer-events: none;    
-  z-index: 0; /* земля под всем */    
+  z-index: 0;    
 }    
 #ground img { width: 100%; }    
     
 #clickButton {    
   background: none;    
   border: none;    
-  z-index: 2; /* кликер поверх */    
+  z-index: 2;    
 }    
     
 #clickImg {    
@@ -134,7 +131,6 @@ body {
   min-height: calc(100vh - 100px);    
 }    
     
-/* ===== ТОВАРЫ ===== */    
 .item {    
   width: 300px;    
   aspect-ratio: 300 / 190;    
@@ -169,7 +165,6 @@ body {
   color: #ffdede;    
 }    
     
-/* кнопка купить */    
 .item button {    
   margin-top: auto;    
   width: 100%;    
@@ -195,7 +190,6 @@ body {
   width: 18px !important;    
 }    
     
-/* ===== всплывающие "+монеты" ===== */    
 .floating-coin {    
   position: absolute;    
   font-size: 14px;    
@@ -204,7 +198,6 @@ body {
   display: flex;    
   align-items: center;    
   gap: 4px;    
-    
   transition: transform .8s ease-out, opacity .8s ease-out;    
 }    
     
@@ -215,13 +208,10 @@ body {
     
 <div id="app">    
     
-  <!-- кнопки -->    
   <button id="shopBtn"><img src="img/shop-icon.png"></button>    
   <button id="backBtn"><img src="img/back-icon.png"></button>    
     
   <div id="panels">    
-    
-    <!-- КЛИКЕР -->    
     <div id="clickerPanel">    
     
       <div id="counter">    
@@ -230,32 +220,25 @@ body {
       </div>    
     
       <div id="clickButtonWrapper">    
-    
-        <!-- земля теперь ВПЕРЕДИ -->    
         <div id="ground"><img src="img/ground.png"></div>    
-    
-        <!-- кнопка-кликер поверх -->    
         <button id="clickButton">    
           <img id="clickImg" src="img/click1.png">    
         </button>    
-    
       </div>    
     </div>    
     
-    <!-- МАГАЗИН -->    
     <div id="shopPanel">    
       <div id="shopPanelInner">    
         <div id="items"></div>    
       </div>    
     </div>    
-    
   </div>    
 </div>    
     
     
 <script type="module">    
     
-/* ====== ПЕРЕКЛЮЧЕНИЕ ПАНЕЛЕЙ ====== */    
+/* ===== ПЕРЕКЛЮЧЕНИЕ ПАНЕЛЕЙ ===== */    
 const panels = document.getElementById("panels");    
 const shopBtn = document.getElementById("shopBtn");    
 const backBtn = document.getElementById("backBtn");    
@@ -272,77 +255,95 @@ backBtn.onclick = () => {
   backBtn.style.display = "none";    
 };    
     
-/* ====== FIREBASE ====== */    
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";    
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";    
-    
-const firebaseConfig = {    
-  apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",    
-  authDomain: "anti-shop-d6b33.firebaseapp.com",    
-  databaseURL: "https://anti-shop-d6b33-default-rtdb.europe-west1.firebasedatabase.app",    
-  projectId: "anti-shop-d6b33",    
-  storageBucket: "anti-shop-d6b33.appspot.com",    
-  messagingSenderId: "292698259142",    
-  appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"    
-};    
-    
-const appFB = initializeApp(firebaseConfig);    
-const db = getDatabase(appFB);    
-    
-/* ====== ПЕРЕМЕННЫЕ ====== */    
-let userId = localStorage.getItem("userId");    
-if (!userId) {    
-  userId = "user_" + Math.random().toString(36).substring(2, 9);    
-  localStorage.setItem("userId", userId);    
-}    
-    
-let coins = 0;    
-let clickPower = 1;    
-let dataLoaded = false;    
-    
-const counterValue = document.getElementById("counterValue");    
-    
-/* ====== ТОВАРЫ ====== */    
-const itemsBlock = document.getElementById("items");    
-    
-const shopItems = [    
-  { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },    
-  { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }    
-];    
-    
-/* ====== ЗАГРУЗКА ====== */    
-async function loadData() {    
-  const snap = await get(ref(db, "players/" + userId));    
-  if (snap.exists()) {    
-    const d = snap.val();    
-    coins = d.coins ?? 0;    
-    clickPower = d.clickPower ?? 1;    
-    
-    if (d.shopItems) {    
-      shopItems.forEach(item => {    
-        if (d.shopItems[item.id]) {    
-          item.cost = d.shopItems[item.id].cost ?? item.cost;    
-          if (item.stock !== undefined)    
-            item.stock = d.shopItems[item.id].stock ?? item.stock;    
-        }    
-      });    
-    }    
-  }    
-  dataLoaded = true;    
-  updateUI();    
-  renderShop();    
-}    
-    
-function saveData() {    
-  const s = {};    
-  shopItems.forEach(i => s[i.id] = { cost: i.cost, stock: i.stock });    
-    
-  update(ref(db,"players/" + userId), {    
-    coins, clickPower, shopItems: s    
-  });    
-}    
-    
-/* ====== PRICE UPDATE ====== */    
+/* ===== FIREBASE (исправленный блок) ===== */    
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",
+  authDomain: "anti-shop-d6b33.firebaseapp.com",
+  databaseURL: "https://anti-shop-d6b33-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "anti-shop-d6b33",
+  storageBucket: "anti-shop-d6b33.appspot.com",
+  messagingSenderId: "292698259142",
+  appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"
+};
+
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+
+/* ===== ПЕРЕМЕННЫЕ ===== */
+let userId = localStorage.getItem("userId");
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).substring(2, 9);
+  localStorage.setItem("userId", userId);
+}
+
+let coins = 0;
+let clickPower = 1;
+let dataLoaded = false;
+
+const counterValue = document.getElementById("counterValue");
+
+/* ===== ТОВАРЫ ===== */
+const itemsBlock = document.getElementById("items");
+
+const shopItems = [
+  { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
+  { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
+];
+
+/* ===== ЗАГРУЗКА (фикс) ===== */
+async function loadData() {
+  const userRef = ref(db, "players/" + userId);
+  const snap = await get(userRef);
+
+  if (!snap.exists()) {
+    await set(userRef, {
+      coins: 0,
+      clickPower: 1,
+      shopItems: {}
+    });
+  } else {
+    const d = snap.val();
+
+    coins = d.coins ?? 0;
+    clickPower = d.clickPower ?? 1;
+
+    if (d.shopItems) {
+      shopItems.forEach(item => {
+        if (d.shopItems[item.id]) {
+          item.cost = d.shopItems[item.id].cost ?? item.cost;
+          if (item.stock !== undefined)
+            item.stock = d.shopItems[item.id].stock ?? item.stock;
+        }
+      });
+    }
+  }
+
+  dataLoaded = true;
+  updateUI();
+  renderShop();
+}
+
+/* ===== СОХРАНЕНИЕ (фикс) ===== */
+function saveData() {
+  const shopState = {};
+  shopItems.forEach(i => {
+    shopState[i.id] = {
+      cost: i.cost,
+      stock: i.stock
+    };
+  });
+
+  update(ref(db, "players/" + userId), {
+    coins: coins,
+    clickPower: clickPower,
+    shopItems: shopState
+  });
+}
+
+/* ===== PRICE UPDATE ===== */
 function updateButtonText(item, btn){    
   btn.innerHTML = "";    
     
@@ -364,7 +365,7 @@ function updateButtonText(item, btn){
   btn.appendChild(p);    
 }    
     
-/* ====== SHOP ====== */    
+/* ===== SHOP ===== */    
 function renderShop(){    
   itemsBlock.innerHTML = "";    
   shopItems.forEach(item => {    
@@ -425,7 +426,7 @@ function renderShop(){
   });    
 }    
     
-/* ====== UI ====== */    
+/* ===== UI ===== */    
 function updateUI() {    
   counterValue.textContent = coins;    
     
@@ -435,7 +436,7 @@ function updateUI() {
   });    
 }    
     
-/* ====== FLOATING COINS ====== */    
+/* ===== FLOATING ===== */    
 function spawnFloatingCoin(x,y,value){    
   const el=document.createElement("div");    
   el.className="floating-coin";    
@@ -453,7 +454,7 @@ function spawnFloatingCoin(x,y,value){
   setTimeout(()=> el.remove(), 800);    
 }    
     
-/* ====== КЛИКЕР ====== */    
+/* ===== КЛИКЕР ===== */    
 const clickImg = document.getElementById("clickImg");    
 const clickButton = document.getElementById("clickButton");    
     
