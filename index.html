@@ -1,501 +1,501 @@
-<!DOCTYPE html>      
-<html lang="ru">      
-<head>      
-<meta charset="UTF-8">      
-<meta name="viewport"      
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">      
-      
-<title>AnTI Shop</title>      
-      
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">      
-      
-<style>      
-/* ===== ГЛОБАЛЬНО ===== */      
-body {      
-  margin: 0;      
-  padding: 0;      
-  background: #000;      
-  display: flex;      
-  justify-content: center;      
-  overflow: hidden;      
-  font-family: 'Inter', sans-serif;      
-}      
-      
-#app {      
-  width: 392px;      
-  height: 100vh;      
-  background: #0000;      
-  overflow: hidden;      
-  position: relative;      
-}      
-      
-/* ===== КНОПКИ ===== */      
-#shopBtn, #backBtn {      
-  position: absolute;      
-  top: 12px;      
-  right: 12px;      
-  width: 48px;      
-  height: 48px;      
-  background: none;      
-  border: none;      
-  padding: 0;      
-  z-index: 50;      
-}      
-      
-#backBtn { display: none; }      
-      
-#shopBtn img, #backBtn img {      
-  width: 100%; height: 100%;      
-}      
-      
-/* ===== ПАНЕЛИ ===== */      
-#panels {      
-  position: absolute;      
-  top: 0; left: 0;      
-  width: calc(392px * 2);      
-  height: 100%;      
-  display: flex;      
-  transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1);      
-}      
-      
-#clickerPanel, #shopPanel {      
-  width: 392px;      
-  height: 100%;      
-  flex-shrink: 0;      
-}      
-      
-/* ===== ПАНЕЛЬ КЛИКЕРА ===== */      
-#clickerPanel {      
-  background: linear-gradient(to bottom, #CEEDFF, #A1E6FF);      
-  padding-top: 20px;      
-  position: relative;      
-  overflow: hidden;      
-}      
-      
-#counter {      
-  font-size: 46px;      
-  margin: 14px 0;      
-  display: flex;      
-  justify-content: center;      
-  align-items: center;      
-  gap: 6px;      
-}      
-      
-#counter img { width: 32px; }      
-      
-/* ↓↓↓ КЛИКЕР ОПУЩЕН ВНИЗ НА 200px ↓↓↓ */      
-#clickButtonWrapper {      
-  position: relative;      
-  width: 100%;      
-  display: flex;      
-  justify-content: center;      
-      
-  margin-top: 200px;      
-}      
-      
-/* земля теперь реально под кликером */      
-#ground {      
-  position: absolute;      
-  left: 50%;      
-  top: 140px; /* чуть выше */      
-  transform: translateX(-50%);      
-  width: 100%;      
-  pointer-events: none;      
-  z-index: 0; /* земля под всем */      
-}      
-#ground img { width: 100%; }      
-      
-#clickButton {      
-  background: none;      
-  border: none;      
-  z-index: 2; /* кликер поверх */      
-}      
-      
-#clickImg {      
-  width: 200px;      
-  transition: transform 0.15s ease;      
-  -webkit-user-drag: none;      
-  touch-action: manipulation;      
-}      
-      
-/* ===== ПАНЕЛЬ МАГАЗИНА ===== */      
-#shopPanel {      
-  background: linear-gradient(to bottom, #7A4B1D, #5B3F1B);      
-  padding-top: 70px;      
-  overflow-y: auto;      
-}      
-      
-#shopPanelInner {      
-  background: linear-gradient(to bottom, #FFBA67, #FF7749);      
-  margin: 0 auto;      
-  padding: 20px;      
-  border-radius: 12px;      
-  width: 350px;      
-  min-height: calc(100vh - 100px);      
-}      
-      
-/* ===== ТОВАРЫ ===== */      
-.item {      
-  width: 300px;      
-  aspect-ratio: 300 / 190;      
-  background-image: url("img/item-frame.png");      
-  background-size: 100% 100%;      
-  padding: 12px;      
-  display: flex;      
-  flex-direction: column;      
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));      
-  margin: 0 auto 18px;      
-}      
-      
-.item-top {      
-  display: flex;      
-  margin-bottom: 6px;      
-}      
-      
-.item img {      
-  width: 60px;      
-  height: 60px;      
-  margin-right: 12px;      
-}      
-      
-.item-text b { font-size: 18px; }      
-.item-text p {      
-  margin: 2px 0;      
-  font-size: 14px;      
-}      
-      
-.stock {      
-  font-size: 12px;      
-  color: #ffdede;      
-}      
-      
-/* кнопка купить */      
-.item button {      
-  margin-top: auto;      
-  width: 100%;      
-  padding: 10px;      
-  background: #332614;      
-  color: #fff;      
-  border: none;      
-  border-radius: 8px;      
-  font-size: 16px;      
-  transition: transform .12s ease;      
-}      
-      
-.item button:active { transform: scale(0.96); }      
-      
-.price {      
-  display: flex;      
-  align-items: center;      
-  justify-content: center;      
-  gap: 6px;      
-}      
-      
-.price img {      
-  width: 18px !important;      
-}      
-      
-/* ===== всплывающие "+монеты" ===== */      
-.floating-coin {      
-  position: absolute;      
-  font-size: 14px;      
-  color: lime;      
-  pointer-events: none;      
-  display: flex;      
-  align-items: center;      
-  gap: 4px;      
-      
-  transition: transform .8s ease-out, opacity .8s ease-out;      
-}      
-      
-.floating-coin img { width: 18px; }      
-</style>      
-</head>      
-<body>      
-      
-<div id="app">      
-      
-  <!-- кнопки -->      
-  <button id="shopBtn"><img src="img/shop-icon.png"></button>      
-  <button id="backBtn"><img src="img/back-icon.png"></button>      
-      
-  <div id="panels">      
-      
-    <!-- КЛИКЕР -->      
-    <div id="clickerPanel">      
-      
-      <div id="counter">      
-        <span id="counterValue">0</span>      
-        <img src="img/anti-coin.png">      
-      </div>      
-      
-      <div id="clickButtonWrapper">      
-      
-        <!-- земля теперь ВПЕРЕДИ -->      
-        <div id="ground"><img src="img/ground.png"></div>      
-      
-        <!-- кнопка-кликер поверх -->      
-        <button id="clickButton">      
-          <img id="clickImg" src="img/click1.png">      
-        </button>      
-      
-      </div>      
-    </div>      
-      
-    <!-- МАГАЗИН -->      
-    <div id="shopPanel">      
-      <div id="shopPanelInner">      
-        <div id="items"></div>      
-      </div>      
-    </div>      
-      
-  </div>      
-</div>      
-      
-      
-<script type="module">      
-      
-/* ====== ПЕРЕКЛЮЧЕНИЕ ПАНЕЛЕЙ ====== */      
-const panels = document.getElementById("panels");      
-const shopBtn = document.getElementById("shopBtn");      
-const backBtn = document.getElementById("backBtn");      
-      
-shopBtn.onclick = () => {      
-  panels.style.transform = "translateX(-392px)";      
-  shopBtn.style.display = "none";      
-  backBtn.style.display = "block";      
-};      
-      
-backBtn.onclick = () => {      
-  panels.style.transform = "translateX(0)";      
-  shopBtn.style.display = "block";      
-  backBtn.style.display = "none";      
-};      
-      
-/* ====== FIREBASE ====== */      
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";      
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";      
-      
-const firebaseConfig = {      
-  apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",      
-  authDomain: "anti-shop-d6b33.firebaseapp.com",      
-  databaseURL: "https://anti-shop-d6b33-default-rtdb.europe-west1.firebasedatabase.app",      
-  projectId: "anti-shop-d6b33",      
-  storageBucket: "anti-shop-d6b33.appspot.com",      
-  messagingSenderId: "292698259142",      
-  appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"      
-};      
-      
-const appFB = initializeApp(firebaseConfig);      
-const db = getDatabase(appFB);      
-      
-/* ====== ПЕРЕМЕННЫЕ ====== */      
-let userId = localStorage.getItem("userId");      
-if (!userId) {      
-  userId = "user_" + Math.random().toString(36).substring(2, 9);      
-  localStorage.setItem("userId", userId);      
-}      
-      
-let coins = 0;      
-let clickPower = 1;      
-let dataLoaded = false;      
-      
-const counterValue = document.getElementById("counterValue");      
-      
-/* ====== ТОВАРЫ ====== */      
-const itemsBlock = document.getElementById("items");      
-      
-const shopItems = [      
-  { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },      
-  { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }      
-];      
-      
-/* ====== ЗАГРУЗКА ====== */      
-async function loadData() {      
-  const snap = await get(ref(db, "players/" + userId));      
-  if (snap.exists()) {      
-    const d = snap.val();      
-    coins = d.coins ?? 0;      
-    clickPower = d.clickPower ?? 1;      
-      
-    if (d.shopItems) {      
-      shopItems.forEach(item => {      
-        if (d.shopItems[item.id]) {      
-          item.cost = d.shopItems[item.id].cost ?? item.cost;      
-          if (item.stock !== undefined)      
-            item.stock = d.shopItems[item.id].stock ?? item.stock;      
-        }      
-      });      
-    }      
-  }      
-  dataLoaded = true;      
-  updateUI();      
-  renderShop();      
-}      
-      
-function saveData() {      
-  const s = {};      
-  shopItems.forEach(i => s[i.id] = { cost: i.cost, stock: i.stock });      
-      
-  update(ref(db,"players/" + userId), {      
-    coins, clickPower, shopItems: s      
-  });      
-}      
-      
-/* ====== PRICE UPDATE ====== */      
-function updateButtonText(item, btn){      
-  btn.innerHTML = "";      
-      
-  if (item.stock !== undefined && item.stock <= 0) {      
-    btn.textContent = "распродано";      
-    btn.disabled = true;      
-    return;      
-  }      
-      
-  const p = document.createElement("div");      
-  p.className = "price";      
-  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;      
-      
-  if (coins < item.cost)      
-    p.style.color = "#ff3333";      
-  else      
-    p.style.color = "#ffffff";      
-      
-  btn.appendChild(p);      
-}      
-      
-/* ====== SHOP ====== */      
-function renderShop(){      
-  itemsBlock.innerHTML = "";      
-  shopItems.forEach(item => {      
-    const d=document.createElement("div");      
-    d.className="item";      
-      
-    d.innerHTML = `      
-      <div class="item-top">      
-        <img src="${item.img}">      
-        <div class="item-text">      
-          <b>${item.name}</b>      
-          <p>${item.description}</p>      
-          <p>${item.property}</p>      
-        </div>      
-      </div>      
-    `;      
-      
-    if (item.stock !== undefined) {      
-      const s=document.createElement("p");      
-      s.className="stock";      
-      s.textContent = "В наличии: " + item.stock;      
-      d.appendChild(s);      
-    }      
-      
-    const btn=document.createElement("button");      
-    d.appendChild(btn);      
-    updateButtonText(item, btn);      
-      
-    btn.onclick = () => {      
-      if (!dataLoaded) return;      
-      if (item.stock !== undefined && item.stock <= 0) return;      
-      if (coins < item.cost) return;      
-      
-      coins -= item.cost;      
-      
-      if (item.id === 1) {      
-        clickPower += 1;      
-        item.cost += item.incrementCost;      
-      }      
-      
-      if (item.id === 2) {      
-        clickPower += item.power;      
-        item.cost += 250;      
-        item.stock = Math.max(0, item.stock - 1);      
-      }      
-      
-      updateUI();      
-      saveData();      
-      updateButtonText(item, btn);      
-      
-      if (item.stock !== undefined) {      
-        const st = d.querySelector(".stock");      
-        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";      
-      }      
-    };      
-      
-    itemsBlock.appendChild(d);      
-  });      
-}      
-      
-/* ====== UI ====== */      
-function updateUI() {      
-  counterValue.textContent = coins;      
-      
-  document.querySelectorAll(".item").forEach((el,i)=>{      
-    const btn = el.querySelector("button");      
-    updateButtonText(shopItems[i], btn);      
-  });      
-}      
-      
-/* ====== FLOATING COINS ====== */      
-function spawnFloatingCoin(x,y,value){      
-  const el=document.createElement("div");      
-  el.className="floating-coin";      
-  el.style.left=(x-10)+"px";      
-  el.style.top=(y-10)+"px";      
-  el.innerHTML=`<img src="img/anti-coin.png">${value}`;      
-      
-  document.body.appendChild(el);      
-      
-  requestAnimationFrame(()=>{      
-    el.style.transform = "translateY(-60px)";      
-    el.style.opacity = "0";      
-  });      
-      
-  setTimeout(()=> el.remove(), 800);      
-}      
-      
-/* ====== КЛИКЕР ====== */      
-const clickImg = document.getElementById("clickImg");      
-const clickButton = document.getElementById("clickButton");      
-      
-clickButton.addEventListener("touchstart", e => {      
-  if (!dataLoaded) return;      
-  e.preventDefault();      
-      
-  for (const t of e.changedTouches) {      
-    coins += clickPower;      
-    spawnFloatingCoin(t.clientX, t.clientY, clickPower);      
-  }      
-      
-  clickImg.src = "img/click2.png";      
-  clickImg.style.transform = "scale(0.92)";      
-  setTimeout(()=>{      
-    clickImg.src = "img/click1.png";      
-    clickImg.style.transform="scale(1)";      
-  },150);      
-      
-  updateUI();      
-  saveData();      
-}, { passive:false });      
-      
-clickButton.onclick = e => {      
-  if (!dataLoaded) return;      
-      
-  coins += clickPower;      
-  spawnFloatingCoin(e.clientX, e.clientY, clickPower);      
-      
-  clickImg.src = "img/click2.png";      
-  clickImg.style.transform="scale(0.92)";      
-  setTimeout(()=>{      
-    clickImg.src="img/click1.png";      
-    clickImg.style.transform="scale(1)";      
-  },150);      
-      
-  updateUI();      
-  saveData();      
-};      
-      
-loadData();      
-</script>      
-      
-</body>      
+<!DOCTYPE html>    
+<html lang="ru">    
+<head>    
+<meta charset="UTF-8">    
+<meta name="viewport"    
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    
+    
+<title>AnTI Shop</title>    
+    
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">    
+    
+<style>    
+/* ===== ГЛОБАЛЬНО ===== */    
+body {    
+  margin: 0;    
+  padding: 0;    
+  background: #000;    
+  display: flex;    
+  justify-content: center;    
+  overflow: hidden;    
+  font-family: 'Inter', sans-serif;    
+}    
+    
+#app {    
+  width: 392px;    
+  height: 100vh;    
+  background: #0000;    
+  overflow: hidden;    
+  position: relative;    
+}    
+    
+/* ===== КНОПКИ ===== */    
+#shopBtn, #backBtn {    
+  position: absolute;    
+  top: 12px;    
+  right: 12px;    
+  width: 48px;    
+  height: 48px;    
+  background: none;    
+  border: none;    
+  padding: 0;    
+  z-index: 50;    
+}    
+    
+#backBtn { display: none; }    
+    
+#shopBtn img, #backBtn img {    
+  width: 100%; height: 100%;    
+}    
+    
+/* ===== ПАНЕЛИ ===== */    
+#panels {    
+  position: absolute;    
+  top: 0; left: 0;    
+  width: calc(392px * 2);    
+  height: 100%;    
+  display: flex;    
+  transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1);    
+}    
+    
+#clickerPanel, #shopPanel {    
+  width: 392px;    
+  height: 100%;    
+  flex-shrink: 0;    
+}    
+    
+/* ===== ПАНЕЛЬ КЛИКЕРА ===== */    
+#clickerPanel {    
+  background: linear-gradient(to bottom, #CEEDFF, #A1E6FF);    
+  padding-top: 20px;    
+  position: relative;    
+  overflow: hidden;    
+}    
+    
+#counter {    
+  font-size: 46px;    
+  margin: 14px 0;    
+  display: flex;    
+  justify-content: center;    
+  align-items: center;    
+  gap: 6px;    
+}    
+    
+#counter img { width: 32px; }    
+    
+/* ↓↓↓ КЛИКЕР ОПУЩЕН ВНИЗ НА 200px ↓↓↓ */    
+#clickButtonWrapper {    
+  position: relative;    
+  width: 100%;    
+  display: flex;    
+  justify-content: center;    
+    
+  margin-top: 200px;    
+}    
+    
+/* земля теперь реально под кликером */    
+#ground {    
+  position: absolute;    
+  left: 50%;    
+  top: 140px; /* чуть выше */    
+  transform: translateX(-50%);    
+  width: 100%;    
+  pointer-events: none;    
+  z-index: 0; /* земля под всем */    
+}    
+#ground img { width: 100%; }    
+    
+#clickButton {    
+  background: none;    
+  border: none;    
+  z-index: 2; /* кликер поверх */    
+}    
+    
+#clickImg {    
+  width: 200px;    
+  transition: transform 0.15s ease;    
+  -webkit-user-drag: none;    
+  touch-action: manipulation;    
+}    
+    
+/* ===== ПАНЕЛЬ МАГАЗИНА ===== */    
+#shopPanel {    
+  background: linear-gradient(to bottom, #7A4B1D, #5B3F1B);    
+  padding-top: 70px;    
+  overflow-y: auto;    
+}    
+    
+#shopPanelInner {    
+  background: linear-gradient(to bottom, #FFBA67, #FF7749);    
+  margin: 0 auto;    
+  padding: 20px;    
+  border-radius: 12px;    
+  width: 350px;    
+  min-height: calc(100vh - 100px);    
+}    
+    
+/* ===== ТОВАРЫ ===== */    
+.item {    
+  width: 300px;    
+  aspect-ratio: 300 / 190;    
+  background-image: url("img/item-frame.png");    
+  background-size: 100% 100%;    
+  padding: 12px;    
+  display: flex;    
+  flex-direction: column;    
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));    
+  margin: 0 auto 18px;    
+}    
+    
+.item-top {    
+  display: flex;    
+  margin-bottom: 6px;    
+}    
+    
+.item img {    
+  width: 60px;    
+  height: 60px;    
+  margin-right: 12px;    
+}    
+    
+.item-text b { font-size: 18px; }    
+.item-text p {    
+  margin: 2px 0;    
+  font-size: 14px;    
+}    
+    
+.stock {    
+  font-size: 12px;    
+  color: #ffdede;    
+}    
+    
+/* кнопка купить */    
+.item button {    
+  margin-top: auto;    
+  width: 100%;    
+  padding: 10px;    
+  background: #332614;    
+  color: #fff;    
+  border: none;    
+  border-radius: 8px;    
+  font-size: 16px;    
+  transition: transform .12s ease;    
+}    
+    
+.item button:active { transform: scale(0.96); }    
+    
+.price {    
+  display: flex;    
+  align-items: center;    
+  justify-content: center;    
+  gap: 6px;    
+}    
+    
+.price img {    
+  width: 18px !important;    
+}    
+    
+/* ===== всплывающие "+монеты" ===== */    
+.floating-coin {    
+  position: absolute;    
+  font-size: 14px;    
+  color: lime;    
+  pointer-events: none;    
+  display: flex;    
+  align-items: center;    
+  gap: 4px;    
+    
+  transition: transform .8s ease-out, opacity .8s ease-out;    
+}    
+    
+.floating-coin img { width: 18px; }    
+</style>    
+</head>    
+<body>    
+    
+<div id="app">    
+    
+  <!-- кнопки -->    
+  <button id="shopBtn"><img src="img/shop-icon.png"></button>    
+  <button id="backBtn"><img src="img/back-icon.png"></button>    
+    
+  <div id="panels">    
+    
+    <!-- КЛИКЕР -->    
+    <div id="clickerPanel">    
+    
+      <div id="counter">    
+        <span id="counterValue">0</span>    
+        <img src="img/anti-coin.png">    
+      </div>    
+    
+      <div id="clickButtonWrapper">    
+    
+        <!-- земля теперь ВПЕРЕДИ -->    
+        <div id="ground"><img src="img/ground.png"></div>    
+    
+        <!-- кнопка-кликер поверх -->    
+        <button id="clickButton">    
+          <img id="clickImg" src="img/click1.png">    
+        </button>    
+    
+      </div>    
+    </div>    
+    
+    <!-- МАГАЗИН -->    
+    <div id="shopPanel">    
+      <div id="shopPanelInner">    
+        <div id="items"></div>    
+      </div>    
+    </div>    
+    
+  </div>    
+</div>    
+    
+    
+<script type="module">    
+    
+/* ====== ПЕРЕКЛЮЧЕНИЕ ПАНЕЛЕЙ ====== */    
+const panels = document.getElementById("panels");    
+const shopBtn = document.getElementById("shopBtn");    
+const backBtn = document.getElementById("backBtn");    
+    
+shopBtn.onclick = () => {    
+  panels.style.transform = "translateX(-392px)";    
+  shopBtn.style.display = "none";    
+  backBtn.style.display = "block";    
+};    
+    
+backBtn.onclick = () => {    
+  panels.style.transform = "translateX(0)";    
+  shopBtn.style.display = "block";    
+  backBtn.style.display = "none";    
+};    
+    
+/* ====== FIREBASE ====== */    
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";    
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";    
+    
+const firebaseConfig = {    
+  apiKey: "AIzaSyDgG3iDWjGKQVIt7GaYFtDpy5MnMZESxVo",    
+  authDomain: "anti-shop-d6b33.firebaseapp.com",    
+  databaseURL: "https://anti-shop-d6b33-default-rtdb.europe-west1.firebasedatabase.app",    
+  projectId: "anti-shop-d6b33",    
+  storageBucket: "anti-shop-d6b33.appspot.com",    
+  messagingSenderId: "292698259142",    
+  appId: "1:292698259142:web:6dfffb2ba0972195bd61c7"    
+};    
+    
+const appFB = initializeApp(firebaseConfig);    
+const db = getDatabase(appFB);    
+    
+/* ====== ПЕРЕМЕННЫЕ ====== */    
+let userId = localStorage.getItem("userId");    
+if (!userId) {    
+  userId = "user_" + Math.random().toString(36).substring(2, 9);    
+  localStorage.setItem("userId", userId);    
+}    
+    
+let coins = 0;    
+let clickPower = 1;    
+let dataLoaded = false;    
+    
+const counterValue = document.getElementById("counterValue");    
+    
+/* ====== ТОВАРЫ ====== */    
+const itemsBlock = document.getElementById("items");    
+    
+const shopItems = [    
+  { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },    
+  { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }    
+];    
+    
+/* ====== ЗАГРУЗКА ====== */    
+async function loadData() {    
+  const snap = await get(ref(db, "players/" + userId));    
+  if (snap.exists()) {    
+    const d = snap.val();    
+    coins = d.coins ?? 0;    
+    clickPower = d.clickPower ?? 1;    
+    
+    if (d.shopItems) {    
+      shopItems.forEach(item => {    
+        if (d.shopItems[item.id]) {    
+          item.cost = d.shopItems[item.id].cost ?? item.cost;    
+          if (item.stock !== undefined)    
+            item.stock = d.shopItems[item.id].stock ?? item.stock;    
+        }    
+      });    
+    }    
+  }    
+  dataLoaded = true;    
+  updateUI();    
+  renderShop();    
+}    
+    
+function saveData() {    
+  const s = {};    
+  shopItems.forEach(i => s[i.id] = { cost: i.cost, stock: i.stock });    
+    
+  update(ref(db,"players/" + userId), {    
+    coins, clickPower, shopItems: s    
+  });    
+}    
+    
+/* ====== PRICE UPDATE ====== */    
+function updateButtonText(item, btn){    
+  btn.innerHTML = "";    
+    
+  if (item.stock !== undefined && item.stock <= 0) {    
+    btn.textContent = "распродано";    
+    btn.disabled = true;    
+    return;    
+  }    
+    
+  const p = document.createElement("div");    
+  p.className = "price";    
+  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;    
+    
+  if (coins < item.cost)    
+    p.style.color = "#ff3333";    
+  else    
+    p.style.color = "#ffffff";    
+    
+  btn.appendChild(p);    
+}    
+    
+/* ====== SHOP ====== */    
+function renderShop(){    
+  itemsBlock.innerHTML = "";    
+  shopItems.forEach(item => {    
+    const d=document.createElement("div");    
+    d.className="item";    
+    
+    d.innerHTML = `    
+      <div class="item-top">    
+        <img src="${item.img}">    
+        <div class="item-text">    
+          <b>${item.name}</b>    
+          <p>${item.description}</p>    
+          <p>${item.property}</p>    
+        </div>    
+      </div>    
+    `;    
+    
+    if (item.stock !== undefined) {    
+      const s=document.createElement("p");    
+      s.className="stock";    
+      s.textContent = "В наличии: " + item.stock;    
+      d.appendChild(s);    
+    }    
+    
+    const btn=document.createElement("button");    
+    d.appendChild(btn);    
+    updateButtonText(item, btn);    
+    
+    btn.onclick = () => {    
+      if (!dataLoaded) return;    
+      if (item.stock !== undefined && item.stock <= 0) return;    
+      if (coins < item.cost) return;    
+    
+      coins -= item.cost;    
+    
+      if (item.id === 1) {    
+        clickPower += 1;    
+        item.cost += item.incrementCost;    
+      }    
+    
+      if (item.id === 2) {    
+        clickPower += item.power;    
+        item.cost += 250;    
+        item.stock = Math.max(0, item.stock - 1);    
+      }    
+    
+      updateUI();    
+      saveData();    
+      updateButtonText(item, btn);    
+    
+      if (item.stock !== undefined) {    
+        const st = d.querySelector(".stock");    
+        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";    
+      }    
+    };    
+    
+    itemsBlock.appendChild(d);    
+  });    
+}    
+    
+/* ====== UI ====== */    
+function updateUI() {    
+  counterValue.textContent = coins;    
+    
+  document.querySelectorAll(".item").forEach((el,i)=>{    
+    const btn = el.querySelector("button");    
+    updateButtonText(shopItems[i], btn);    
+  });    
+}    
+    
+/* ====== FLOATING COINS ====== */    
+function spawnFloatingCoin(x,y,value){    
+  const el=document.createElement("div");    
+  el.className="floating-coin";    
+  el.style.left=(x-10)+"px";    
+  el.style.top=(y-10)+"px";    
+  el.innerHTML=`<img src="img/anti-coin.png">${value}`;    
+    
+  document.body.appendChild(el);    
+    
+  requestAnimationFrame(()=>{    
+    el.style.transform = "translateY(-60px)";    
+    el.style.opacity = "0";    
+  });    
+    
+  setTimeout(()=> el.remove(), 800);    
+}    
+    
+/* ====== КЛИКЕР ====== */    
+const clickImg = document.getElementById("clickImg");    
+const clickButton = document.getElementById("clickButton");    
+    
+clickButton.addEventListener("touchstart", e => {    
+  if (!dataLoaded) return;    
+  e.preventDefault();    
+    
+  for (const t of e.changedTouches) {    
+    coins += clickPower;    
+    spawnFloatingCoin(t.clientX, t.clientY, clickPower);    
+  }    
+    
+  clickImg.src = "img/click2.png";    
+  clickImg.style.transform = "scale(0.92)";    
+  setTimeout(()=>{    
+    clickImg.src = "img/click1.png";    
+    clickImg.style.transform="scale(1)";    
+  },150);    
+    
+  updateUI();    
+  saveData();    
+}, { passive:false });    
+    
+clickButton.onclick = e => {    
+  if (!dataLoaded) return;    
+    
+  coins += clickPower;    
+  spawnFloatingCoin(e.clientX, e.clientY, clickPower);    
+    
+  clickImg.src = "img/click2.png";    
+  clickImg.style.transform="scale(0.92)";    
+  setTimeout(()=>{    
+    clickImg.src="img/click1.png";    
+    clickImg.style.transform="scale(1)";    
+  },150);    
+    
+  updateUI();    
+  saveData();    
+};    
+    
+loadData();    
+</script>    
+    
+</body>    
 </html>
