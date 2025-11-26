@@ -25,6 +25,8 @@ body {
   gap: 8px;
   background: #0000; /* дефолт */
   transition: background .3s ease;
+  z-index: 10; 
+  position: relative;
 }
 #menu button {
   flex: 1;
@@ -44,22 +46,29 @@ body {
 #clickerPanel {
   background: linear-gradient(to bottom, #CEEDFF, #A1E6FF);
   padding-top: 20px;
-  padding-bottom: 120px; /* место под землю */
+  padding-bottom: 120px;
   position: relative;
+  overflow: hidden;
 }
 
+/* ground под картинкой кликера */
+#clickButtonWrapper {
+  position: relative;
+  display: inline-block;
+}
 #ground {
   position: absolute;
-  bottom: 0; /* прижать к низу панели */
   left: 50%;
-  transform: translateX(-50%);
+  top: 100%;
+  transform: translate(-50%, -50%);
   width: 100%;
   max-width: 500px;
   pointer-events: none;
+  z-index: 1;
 }
 #ground img {
   width: 100%;
-  display: block; /* теперь показывается */
+  display: block;
 }
 
 #counter {
@@ -77,6 +86,8 @@ body {
   background: none;
   border: none;
   user-select: none;
+  position: relative;
+  z-index: 2;
 }
 #clickImg {
   width: 200px;
@@ -86,12 +97,15 @@ body {
 
 /* магазин */
 #shopPanel {
-  padding: 20px;
+  padding: 0;
   box-sizing: border-box;
   background: linear-gradient(to bottom, #7A4B1D, #5B3F1B);
   min-height: 100vh;
   width: 100%;
+  position: relative;
+  padding-top: 60px; /* место под верхнее меню */
 }
+
 #shopPanelInner {
   background: linear-gradient(to bottom, #FFBA67, #FF7749);
   padding: 20px;
@@ -165,11 +179,13 @@ body {
     <span id="counterValue">0</span>
     <img src="img/anti-coin.png" alt="coin">
   </div>
-  <button id="clickButton">
-    <img id="clickImg" src="img/click1.png" alt="">
-  </button>
-  <div id="ground">
-    <img id="groundImg" src="img/ground.png" alt="">
+  <div id="clickButtonWrapper">
+    <button id="clickButton">
+      <img id="clickImg" src="img/click1.png" alt="">
+    </button>
+    <div id="ground">
+      <img id="groundImg" src="img/ground.png" alt="">
+    </div>
   </div>
 </div>
 
@@ -194,14 +210,14 @@ function showClicker() {
   shopTab.classList.remove("active");
   clickerPanel.classList.add("active");
   shopPanel.classList.remove("active");
-  menu.style.background = "#0000"; // только дефолт
+  menu.style.background = "#0000"; 
 }
 function showShop() {
   shopTab.classList.add("active");
   clickerTab.classList.remove("active");
   shopPanel.classList.add("active");
   clickerPanel.classList.remove("active");
-  menu.style.background = "#FF7749"; // верхнее поле окрашено как низ рамки
+  menu.style.background = "#5B3F1B"; 
 }
 
 clickerTab.onclick = showClicker;
@@ -238,7 +254,6 @@ const shopItems = [
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-// загрузка
 async function loadData() {
   const snap = await get(ref(db, "players/"+userId));
   if(snap.exists()){
@@ -265,7 +280,6 @@ function saveData(){
   update(ref(db,"players/"+userId),{coins, clickPower, shopItems:s});
 }
 
-// магазин
 function createPriceNode(item){
   const wrap=document.createElement("div");
   wrap.className="price";
