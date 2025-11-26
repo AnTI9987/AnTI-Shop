@@ -1,77 +1,73 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>AnTI Shop</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  body { margin: 0; padding: 0; background: #000; display: flex; justify-content: center; overflow: hidden; font-family: 'Inter', sans-serif; }
-  #app { width: 392px; height: 100vh; background: #0000; overflow: hidden; position: relative; }
+body { margin: 0; padding: 0; background: #000; display: flex; justify-content: center; overflow: hidden; font-family: 'Inter', sans-serif; }
+#app { width: 392px; height: 100vh; background: #0000; overflow: hidden; position: relative; }
 
-  /* right top shop/back */
-  #shopBtn, #backBtn { position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; background: none; border: none; padding: 0; z-index: 50; }
-  #backBtn { display: none; }
-  #shopBtn img, #backBtn img { width: 100%; height: 100%; }
+/* правая кнопка магазина */
+#shopBtn, #backBtn { position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; background: none; border: none; padding: 0; z-index: 50; }
+#backBtn { display: none; }
+#shopBtn img, #backBtn img { width: 100%; height: 100%; }
 
-  /* left column: settings + login */
-  #leftBtns { position: absolute; top: 12px; left: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 50; }
-  .leftBtn { width: 48px; height: 48px; background: none; border: none; padding: 0; display: block; }
-  .leftBtn img { width: 100%; height: 100%; }
+/* левые кнопки (settings / login) — сделаем стек слева сверху */
+#leftControls { position: absolute; top: 12px; left: 12px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
+.leftBtn { width: 48px; height: 48px; background: none; border: none; padding: 0; }
+.leftBtn img { width: 100%; height: 100%; }
 
-  #panels { position: absolute; top: 0; left: 0; width: calc(392px * 2); height: 100%; display: flex; transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
-  #clickerPanel, #shopPanel { width: 392px; height: 100%; flex-shrink: 0; }
+/* панели */
+#panels { position: absolute; top: 0; left: 0; width: calc(392px * 2); height: 100%; display: flex; transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
+#clickerPanel, #shopPanel { width: 392px; height: 100%; flex-shrink: 0; }
+#clickerPanel { background: linear-gradient(to bottom, #CEEDFF, #A1E6FF); padding-top: 20px; position: relative; overflow: hidden; }
 
-  #clickerPanel { background: linear-gradient(to bottom, #CEEDFF, #A1E6FF); padding-top: 20px; position: relative; overflow: hidden; }
+#counter { font-size: 46px; margin: 14px 0; display: flex; justify-content: center; align-items: center; gap: 6px; }
+#counter img { width: 32px; height: 32px; object-fit: contain; }
 
-  #counter { font-size: 46px; margin: 14px 0; display: flex; justify-content: center; align-items: center; gap: 6px; }
-  #counter img { width: 32px; height: 32px; object-fit: contain; }
+#clickButtonWrapper { position: relative; width: 100%; display: flex; justify-content: center; margin-top: 200px; }
+#ground { position: absolute; left: 50%; top: 140px; transform: translateX(-50%); width: 100%; pointer-events: none; z-index: 0; }
+#ground img { width: 100%; }
 
-  #clickButtonWrapper { position: relative; width: 100%; display: flex; justify-content: center; margin-top: 200px; }
-  #ground { position: absolute; left: 50%; top: 140px; transform: translateX(-50%); width: 100%; pointer-events: none; z-index: 0; }
-  #ground img { width: 100%; }
+#clickButton { background: none; border: none; z-index: 1; position: relative; }
+#clickImg { width: 200px; transition: transform 0.15s ease; -webkit-user-drag: none; touch-action: manipulation; position: relative; z-index: 1; }
 
-  #clickButton { background: none; border: none; z-index: 1; position: relative; }
-  #clickImg { width: 200px; transition: transform 0.15s ease; -webkit-user-drag: none; touch-action: manipulation; position: relative; z-index: 1; }
+#shopPanel { background: linear-gradient(to bottom, #7A4B1D, #5B3F1B); padding-top: 70px; overflow-y: auto; }
+#shopPanelInner { background: linear-gradient(to bottom, #FFBA67, #FF7749); margin: 0 auto; padding: 20px; border-radius: 12px; width: 350px; min-height: calc(100vh - 100px); }
 
-  #shopPanel { background: linear-gradient(to bottom, #7A4B1D, #5B3F1B); padding-top: 70px; overflow-y: auto; }
-  #shopPanelInner { background: linear-gradient(to bottom, #FFBA67, #FF7749); margin: 0 auto; padding: 20px; border-radius: 12px; width: 350px; min-height: calc(100vh - 100px); }
+.item { width: 300px; height: 180px; background-image: url("img/item-frame.png"); background-size: 100% 100%; padding: 12px; display: flex; flex-direction: column; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35)); margin: 0 auto 18px; }
+.item-top { display: flex; margin-bottom: 6px; }
+.item img { width: 60px; height: 60px; margin-right: 12px; }
+.item-text b { font-size: 18px; }
+.item-text p { margin: 2px 0; font-size: 14px; }
 
-  .item { width: 300px; height: 180px; background-image: url("img/item-frame.png"); background-size: 100% 100%; padding: 12px; display: flex; flex-direction: column; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35)); margin: 0 auto 18px; }
-  .item-top { display: flex; margin-bottom: 6px; }
-  .item img { width: 60px; height: 60px; margin-right: 12px; }
-  .item-text b { font-size: 18px; }
-  .item-text p { margin: 2px 0; font-size: 14px; }
-  .stock { font-size: 12px; color: #ffdede; }
+.stock { font-size: 12px; color: #ffdede; }
 
-  .item button { margin-top: auto; width: 100%; padding: 10px; background: #332614; color: #fff; border: none; border-radius: 8px; font-size: 16px; transition: transform .12s ease; }
-  .item button:active { transform: scale(0.96); }
+.item button { margin-top: auto; width: 100%; padding: 10px; background: #332614; color: #fff; border: none; border-radius: 8px; font-size: 16px; transition: transform .12s ease; }
+.item button:active { transform: scale(0.96); }
 
-  .price { display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .price img { width: 18px; height: 18px; object-fit: contain; }
+.price { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.price img { width: 18px; height: 18px; object-fit: contain; }
 
-  .floating-coin { position: absolute; font-size: 14px; color: lime; pointer-events: none; display: flex; align-items: center; gap: 4px; transition: transform .8s ease-out, opacity .8s ease-out; z-index: 2; }
-  .floating-coin img { width: 18px; height: 18px; object-fit: contain; }
-
-  /* small status text under login button */
-  #authStatus { color: #fff; font-size: 12px; text-align: center; margin-top: 4px; opacity: 0.9; width: 48px; }
+.floating-coin { position: absolute; font-size: 14px; color: lime; pointer-events: none; display: flex; align-items: center; gap: 4px; transition: transform .8s ease-out, opacity .8s ease-out; z-index: 2; }
+.floating-coin img { width: 18px; height: 18px; object-fit: contain; }
 </style>
 </head>
 <body>
 
 <div id="app">
-  <!-- left buttons -->
-  <div id="leftBtns">
-    <button id="settingsBtn" class="leftBtn" title="Настройки"><img src="img/settings.png" alt="settings"></button>
-    <div style="display:flex;flex-direction:column;align-items:center;">
-      <button id="loginBtn" class="leftBtn" title="Войти через Google"><img src="img/login.png" alt="login"></button>
-      <div id="authStatus">гость</div>
-    </div>
+  <!-- left controls: settings + login/logout -->
+  <div id="leftControls">
+    <button id="settingsBtn" class="leftBtn" title="настройки (пока ничего не делает)"><img src="img/settings.png" alt="settings"></button>
+    <button id="authBtn" class="leftBtn" title="войти через Google"><img id="authBtnImg" src="img/login.png" alt="login"></button>
   </div>
 
-  <!-- right -->
+  <!-- right shop/back -->
   <button id="shopBtn"><img src="img/shop-icon.png" alt="shop"></button>
   <button id="backBtn"><img src="img/back-icon.png" alt="back"></button>
 
@@ -84,9 +80,7 @@
 
       <div id="clickButtonWrapper">
         <div id="ground"><img src="img/ground.png" alt="ground"></div>
-        <button id="clickButton">
-          <img id="clickImg" src="img/click1.png" alt="click">
-        </button>
+        <button id="clickButton" aria-label="клик"><img id="clickImg" src="img/click1.png" alt="click"></button>
       </div>
     </div>
 
@@ -99,12 +93,12 @@
 </div>
 
 <script type="module">
-/* Firebase SDKs (app, database, auth) */
+/* ----- Firebase app + Database + Auth ----- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-/* ===== FIREBASE CONFIG (твоя) ===== */
+/* ===== FIREBASE CONFIG ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
   authDomain: "anti-shop-99f1d.firebaseapp.com",
@@ -118,120 +112,120 @@ const firebaseConfig = {
 const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
 const auth = getAuth(appFB);
+const provider = new GoogleAuthProvider();
 
-/* ===== GLOBALS & DOM ===== */
-const GUEST_KEY = 'anti_guest_id';
-let guestId = localStorage.getItem(GUEST_KEY);
-if (!guestId) {
-  guestId = "guest_" + Math.random().toString(36).substring(2,9);
-  localStorage.setItem(GUEST_KEY, guestId);
+// optional: if you want to force a specific Google OAuth client id (you already gave it), it's handled by firebase console config.
+// client id you gave: 347202416802-cdfm1moq4gtn2ulp4754a7dc6ljms1sk.apps.googleusercontent.com
+
+/* ===== ПЕРЕМЕННЫЕ (state) ===== */
+let userId = localStorage.getItem("anonId") || null; // локальный анонимный id
+if (!userId) {
+  userId = "anon_" + Math.random().toString(36).substring(2, 9);
+  localStorage.setItem("anonId", userId);
 }
-
-// userId will be either `google_<uid>` or `guest_<id>`
-let userId = "guest_" + guestId;
+let currentDbId = localStorage.getItem("userId") || userId; // текущий id, под которым читаем/пишем в БД
 let coins = 0;
 let clickPower = 1;
 let dataLoaded = false;
-let lastSavedCoins = 0; // track last saved value for interval saves
-let isSignedIn = false;
-let currentUser = null;
+let lastSavedCoins = 0; // для автосохранения
 
+/* элементы DOM */
 const counterValue = document.getElementById("counterValue");
 const itemsBlock = document.getElementById("items");
-
+const authBtn = document.getElementById("authBtn");
+const authBtnImg = document.getElementById("authBtnImg");
 const settingsBtn = document.getElementById("settingsBtn");
-const loginBtn = document.getElementById("loginBtn");
-const authStatus = document.getElementById("authStatus");
 
-const shopBtn = document.getElementById("shopBtn");
-const backBtn = document.getElementById("backBtn");
-
-/* ===== SHOP ITEMS ===== */
+/* shop items */
 const shopItems = [
   { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-/* ===== AUTH UI ===== */
-function updateAuthUI() {
-  if (isSignedIn && currentUser) {
-    // show email (short) and switch icon to logout
-    authStatus.textContent = (currentUser.email || currentUser.displayName || 'user').split('@')[0];
-    loginBtn.querySelector('img').src = 'img/logout.png'; // make sure logout.png exists
-    loginBtn.title = 'Выйти';
-  } else {
-    authStatus.textContent = 'гость';
-    loginBtn.querySelector('img').src = 'img/login.png';
-    loginBtn.title = 'Войти через Google';
-  }
-}
-
 /* ===== AUTH HANDLERS ===== */
-const provider = new GoogleAuthProvider();
 
-// click loginBtn toggles sign in/out
-loginBtn.addEventListener('click', async () => {
-  if (isSignedIn && currentUser) {
-    // sign out
+// подписываемся на изменения статуса авторизации
+onAuthStateChanged(auth, user => {
+  if (user) {
+    // залогинен через Google -> привязываем user.uid
+    currentDbId = user.uid;
+    localStorage.setItem("userId", currentDbId);
+    console.log("вошли как:", user.displayName || user.email, "uid=", currentDbId);
+    // меняем иконку кнопки на "выйти"
+    authBtn.title = "выйти";
+    // если есть фото пользователя — можно подставить avatar (опционально)
+    if (user.photoURL) {
+      authBtnImg.src = user.photoURL;
+      authBtnImg.style.borderRadius = "6px";
+    } else {
+      authBtnImg.src = "img/login.png";
+    }
+    // грузим данные для google-аккаунта
+    loadData();
+  } else {
+    // вышли -> переключаемся на анонимный локальный id, не затираем данные в google
+    console.log("вышли из Google");
+    // очищаем userId в localStorage (но сохраняем anonId)
+    localStorage.removeItem("userId");
+    currentDbId = localStorage.getItem("anonId") || ("anon_" + Math.random().toString(36).substring(2,9));
+    localStorage.setItem("anonId", currentDbId);
+
+    // визуально обнуляем игру на сайте (по условию)
+    coins = 0;
+    clickPower = 1;
+    dataLoaded = true; // чтобы клики работали
+    updateUI();
+    renderShop();
+
+    // поменяем иконку обратно
+    authBtnImg.src = "img/login.png";
+    authBtnImg.style.borderRadius = "";
+    authBtn.title = "войти через Google";
+  }
+});
+
+// обработчик кнопки auth (войти/выйти)
+authBtn.addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (user) {
+    // уже залогинен — выходим
     try {
       await signOut(auth);
-      console.log('signed out');
-      // after sign out onAuthStateChanged will handle switching to guest data
-    } catch (err) {
-      console.error('signOut error', err);
+      // при выходе мы НЕ вызываем saveData() для предыдущего user.uid — чтобы не перезаписать данные нулями
+      console.log("выход выполнен");
+    } catch (e) {
+      console.error("ошибка выхода:", e);
     }
   } else {
-    // sign in
+    // войти через popup
     try {
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the rest
-    } catch (err) {
-      console.error('signIn error', err);
-      alert('Ошибка входа: ' + (err.message || err));
+      // signInWithPopup приведёт к onAuthStateChanged и вызову loadData()
+    } catch (e) {
+      console.error("ошибка входа:", e);
+      alert("Ошибка входа: " + (e.message || e));
     }
   }
 });
 
-// automatically react to auth state changes
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    // signed in
-    isSignedIn = true;
-    currentUser = user;
-    userId = 'google_' + user.uid;
-    console.log('auth signed in', user.uid);
-    updateAuthUI();
-    // load data bound to google uid
-    await loadData();
-  } else {
-    // signed out -> switch to guest
-    isSignedIn = false;
-    currentUser = null;
-    userId = 'guest_' + guestId;
-    console.log('auth signed out, switched to guest:', userId);
-    updateAuthUI();
-    // reset on page to guest data: try load guest data (or create new)
-    await loadData();
-  }
-});
-
-/* ===== LOAD DATA ===== */
+/* ===== ЗАГРУЗКА ДАННЫХ ===== */
 async function loadData() {
-  const userRef = ref(db, "players/" + userId);
+  // currentDbId должен быть установлен (onAuthStateChanged ставит user.uid или мы используем anon)
+  const userRef = ref(db, "players/" + currentDbId);
   try {
     const snap = await get(userRef);
 
     if (!snap.exists() || !snap.val()) {
-      // create defaults server-side for this id
+      // создаём дефолтные значения в БД для этого id
       await set(userRef, { coins: 0, clickPower: 1, shopItems: {} });
       coins = 0;
       clickPower = 1;
-      console.log("создан новый пользователь в БД:", userId);
+      console.log("создан новый профиль в БД для id:", currentDbId);
     } else {
       const d = snap.val();
       coins = d.coins ?? 0;
       clickPower = d.clickPower ?? 1;
-      lastSavedCoins = coins; // sync lastSavedCoins so autosave doesn't immediately fire
+      lastSavedCoins = coins;
       if (d.shopItems) {
         shopItems.forEach(item => {
           if (d.shopItems[item.id]) {
@@ -241,15 +235,15 @@ async function loadData() {
           }
         });
       }
-      console.log("данные загружены для", userId, d);
+      console.log("данные загружены для id", currentDbId, d);
     }
 
     dataLoaded = true;
     updateUI();
     renderShop();
-  } catch (err) {
+  } catch(err) {
     console.error("ошибка загрузки данных:", err);
-    // fallback: allow playing locally (and will save when possible)
+    // в случае ошибки разрешаем играть локально (не перезаписываем чужие данные)
     coins = 0;
     clickPower = 1;
     lastSavedCoins = coins;
@@ -259,25 +253,26 @@ async function loadData() {
   }
 }
 
-/* ===== SAVE DATA ===== */
+/* ===== СОХРАНЕНИЕ ДАННЫХ ===== */
 function saveData() {
   if (!dataLoaded) return;
+  // не разрешаем перезаписывать Google-данные нулями при логауте — это контролируется в onAuthStateChanged (мы просто меняем currentDbId)
   const shopState = {};
   shopItems.forEach(i => {
     shopState[i.id] = { cost: i.cost };
     if (i.stock !== undefined) shopState[i.id].stock = i.stock;
   });
 
-  const userRef = ref(db, "players/" + userId);
+  const userRef = ref(db, "players/" + currentDbId);
   set(userRef, { coins, clickPower, shopItems: shopState })
     .then(() => {
       lastSavedCoins = coins;
-      console.log("данные успешно сохранены для", userId, { coins, clickPower });
+      console.log("данные успешно сохранены для id", currentDbId);
     })
     .catch(err => console.error("ошибка при сохранении:", err));
 }
 
-/* ===== SHOP RENDER & UI ===== */
+/* ===== ОБНОВЛЕНИЕ UI / SHOP ===== */
 function updateButtonText(item, btn){
   btn.innerHTML = "";
   if (item.stock !== undefined && item.stock <= 0) {
@@ -288,8 +283,9 @@ function updateButtonText(item, btn){
   const p = document.createElement("div");
   p.className = "price";
   p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-  const img = p.querySelector("img");
-  if (img) { img.style.width = "18px"; img.style.height = "18px"; img.style.objectFit = "contain"; }
+  p.querySelector("img").style.width = "18px";
+  p.querySelector("img").style.height = "18px";
+  p.querySelector("img").style.objectFit = "contain";
   p.style.color = coins < item.cost ? "#ff3333" : "#fff";
   btn.appendChild(p);
 }
@@ -331,12 +327,12 @@ function renderShop() {
       if (item.id === 2) { clickPower += item.power; item.cost += 250; item.stock = Math.max(0, item.stock - 1); }
 
       updateUI();
-      saveData(); // immediate save after purchase (as requested)
+      saveData(); // сохраняем сразу после покупки
       updateButtonText(item, btn);
 
       if (item.stock !== undefined) {
         const st = d.querySelector(".stock");
-        if (st) st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
+        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
       }
     };
 
@@ -347,8 +343,7 @@ function renderShop() {
 function updateUI() {
   counterValue.textContent = coins;
   document.querySelectorAll(".item").forEach((el,i)=>{
-    const btn = el.querySelector("button");
-    if (btn) updateButtonText(shopItems[i], btn);
+    updateButtonText(shopItems[i], el.querySelector("button"));
   });
 }
 
@@ -378,7 +373,7 @@ function clickAction(x, y){
   coins += clickPower;
   spawnFloatingCoin(x, y, clickPower);
   updateUI();
-  // не сохраняем сразу после каждого клика — авто-сохранение сработает через интервал, если coins изменились
+  // НЕ сохраняем при каждом клике — автосейв срабатывает каждые 5 сек, если монеты изменились
 }
 
 clickButton.addEventListener("touchstart", e => {
@@ -406,6 +401,9 @@ clickButton.onclick = e => {
 
 /* ===== PANEL SWITCH ===== */
 const panels = document.getElementById("panels");
+const shopBtn = document.getElementById("shopBtn");
+const backBtn = document.getElementById("backBtn");
+
 shopBtn.onclick = () => {
   panels.style.transform = "translateX(-392px)";
   shopBtn.style.display = "none";
@@ -417,22 +415,25 @@ backBtn.onclick = () => {
   backBtn.style.display = "none";
 };
 
-/* ===== AUTO-SAVE ONLY WHEN COINS CHANGED ===== */
+/* ===== AUTO-SAVE (коины каждые 5 сек при изменении) ===== */
 setInterval(() => {
-  if (!dataLoaded) return;
-  // если монеты изменились с последней записи — сохраняем
-  if (coins !== lastSavedCoins) {
-    console.log('coins changed', lastSavedCoins, '->', coins, 'saving...');
+  if (dataLoaded && coins !== lastSavedCoins) {
     saveData();
   }
 }, 5000);
 
-/* ===== STARTUP ===== */
-// initial auth UI state
-updateAuthUI();
-// initial load as guest (onAuthStateChanged will override if user already logged in)
-loadData();
-
+/* ===== стартовая загрузка ===== */
+// если уже залогинен, onAuthStateChanged вызовет loadData(), иначе подгрузим текущий anon профиль
+if (!auth.currentUser) {
+  // используем локальный anon id (currentDbId уже установлен в начале)
+  currentDbId = localStorage.getItem("userId") || localStorage.getItem("anonId") || currentDbId;
+  // подгрузим (если в БД нет — создастся)
+  loadData();
+} else {
+  // если пользователь уже аутентифицирован (редкий случай), onAuthStateChanged выше сработает
+  // но на всякий случай — вызовем loadData()
+  loadData();
+}
 </script>
 
 </body>
