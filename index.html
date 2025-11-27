@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <title>AnTI Shop</title>
 
 <!-- Шрифт Figures -->
@@ -75,7 +74,6 @@ body { margin:0; padding:0; background:#000; display:flex; justify-content:cente
 </head>
 <body>
 
-<!-- SPLASH SCREEN -->
 <div id="splashScreen">
   <h1>AnTI-Shop</h1>
   <div id="progressBarContainer"><div id="progressBar"></div></div>
@@ -131,8 +129,15 @@ const splashScreen = document.getElementById("splashScreen");
 const progressBar = document.getElementById("progressBar");
 const progressPercent = document.getElementById("progressPercent");
 let progress = 0;
-function updateProgress(increment){ progress = Math.min(100, progress+increment); progressBar.style.width=progress+"%"; progressPercent.textContent=progress+"%"; }
-function hideSplash(){ splashScreen.style.opacity=0; setTimeout(()=>splashScreen.style.display="none",800); }
+function updateProgress(increment){ 
+  progress = Math.min(100, progress + increment); 
+  progressBar.style.width = progress + "%"; 
+  progressPercent.textContent = progress + "%"; 
+}
+function hideSplash(){ 
+  splashScreen.style.opacity = 0; 
+  setTimeout(()=>splashScreen.style.display="none",800); 
+}
 
 /* VARIABLES */
 let isGuest = true;
@@ -150,10 +155,10 @@ const shopItems = [
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-/* DATA LOAD */
+/* LOAD DATA */
 async function loadData(){
-  if(!isGuest){
-    try{
+  try{
+    if(!isGuest){
       const snap = await get(ref(db,"players/"+userId));
       if(snap.exists()){
         const d = snap.val();
@@ -162,17 +167,20 @@ async function loadData(){
         lastSavedCoins=coins;
         if(d.shopItems) shopItems.forEach(item=>{ if(d.shopItems[item.id]){ item.cost=d.shopItems[item.id].cost??item.cost; if(item.stock!==undefined)item.stock=d.shopItems[item.id].stock??item.stock; }});
       }
-    }catch(e){ console.error(e);}
-  }
+    }
+  }catch(e){ console.error(e);}
   dataLoaded=true;
-  updateUI(); renderShop(); updateProgress(40); hideSplash();
+  updateUI();
+  renderShop();
+  updateProgress(100);
+  setTimeout(hideSplash,500);
 }
+
+/* AUTO LOAD AFTER 3.5 сек */
+setTimeout(()=>{ if(!dataLoaded) loadData(); },3500);
 
 /* SAVE */
 function saveData(){ if(!dataLoaded||isGuest)return; const shopState={}; shopItems.forEach(i=>{ shopState[i.id]={cost:i.cost}; if(i.stock!==undefined)shopState[i.id].stock=i.stock; }); set(ref(db,"players/"+userId),{coins,clickPower,shopItems:shopState}); lastSavedCoins=coins; }
-
-/* UI UPDATE */
-function updateUI(){ counterValue.textContent=coins; document.querySelectorAll('.item button .price').forEach(p=>{ const cost=parseInt(p.textContent); p.style.color=coins<cost?"#ff3333":"#fff"; }); }
 
 /* CLICKER */
 const clickImg=document.getElementById("clickImg"), clickButton=document.getElementById("clickButton");
@@ -181,7 +189,7 @@ function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower);
 clickButton.addEventListener("touchstart",e=>{ e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY);} clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)";},150); },{passive:false});
 clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)";},150); };
 
-/* SHOP */
+/* SHOP RENDER */
 function renderShop(){
   itemsBlock.innerHTML="";
   shopItems.forEach(item=>{
@@ -218,15 +226,15 @@ loginOutBtn.onclick=async()=>{
       const onlineData=await get(onlineRef);
       if(onlineData.exists()){ const d=onlineData.val(); coins=d.coins??coins; clickPower=d.clickPower??clickPower; } else { await set(onlineRef,{coins,clickPower,shopItems:{}});}
       userId=onlineId; isGuest=false; localStorage.setItem("userId",onlineId); loginOutBtn.textContent="Выйти из Аккаунта";
-      updateUI(); saveData(); updateProgress(40);
+      updateUI(); saveData(); updateProgress(100); hideSplash();
     } catch(err){ console.error(err);}
   } else { await signOut(auth); isGuest=true; userId=localUserId; loginOutBtn.textContent="Войти/Зарегистрироваться"; updateUI(); }
 };
 
 /* AUTO LOGIN */
-onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginOutBtn.textContent="Выйти из Аккаунта"; updateProgress(40); loadData(); } else loadData(); });
+onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginOutBtn.textContent="Выйти из Аккаунта"; loadData(); } else loadData(); });
 
-/* PANELS & BUTTONS ANIMATION */
+/* PANELS ANIMATION */
 const panels=document.getElementById("panels");
 const shopBtnEl=document.getElementById("shopBtn");
 const backBtnEl=document.getElementById("backBtn");
@@ -238,4 +246,5 @@ function goBackFromShop(){ panels.style.transform="translateX(-392px)"; shopBtnE
 function goBackFromSettings(){ panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtn.style.left="12px"; backBtnEl.style.left="-60px"; setTimeout(()=>backBtnEl.style.display="none",500);}
 
 shopBtnEl.onclick=goToShop;
-settingsBtn
+settingsBtnEl.onclick=goToSettings;
+back
