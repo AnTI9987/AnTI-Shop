@@ -12,6 +12,46 @@
 body { margin: 0; padding: 0; background: #000; display: flex; justify-content: center; overflow: hidden; font-family: 'Inter', sans-serif; }
 #app { width: 392px; height: 100vh; background: #0000; overflow: hidden; position: relative; }
 
+/* ===== SPLASH SCREEN ===== */
+#splashScreen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: #888;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.8s ease;
+}
+#splashScreen h1 {
+  color: #fff;
+  font-size: 36px;
+  margin-bottom: 40px;
+  font-family: 'Inter', sans-serif;
+}
+#progressBarContainer {
+  width: 300px;
+  height: 24px;
+  background: #555;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+#progressBar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #ffba67, #ff7749);
+  border-radius: 12px;
+  transition: width 0.2s ease;
+}
+#progressPercent {
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ===== MAIN UI ===== */
 #shopBtn, #backBtn, #settingsBtn, #loginBtn {
   position: absolute;
   width: 48px;
@@ -26,10 +66,7 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 #settingsBtn { top: 12px; left: 12px; }
 #loginBtn { top: 70px; left: 12px; } /* под кнопкой настроек */
 
-#shopBtn img, #backBtn img, #settingsBtn img, #loginBtn img {
-  width: 100%;
-  height: 100%;
-}
+#shopBtn img, #backBtn img, #settingsBtn img, #loginBtn img { width: 100%; height: 100%; }
 
 #panels { position: absolute; top: 0; left: 0; width: calc(392px * 2); height: 100%; display: flex; transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
 #clickerPanel, #shopPanel { width: 392px; height: 100%; flex-shrink: 0; }
@@ -66,6 +103,13 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 </head>
 <body>
 
+<!-- SPLASH SCREEN -->
+<div id="splashScreen">
+  <h1>AnTI-Shop</h1>
+  <div id="progressBarContainer"><div id="progressBar"></div></div>
+  <div id="progressPercent">0%</div>
+</div>
+
 <div id="app">
   <button id="settingsBtn"><img src="img/settings.png"></button>
   <button id="loginBtn"><img src="img/login.png"></button>
@@ -74,23 +118,15 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 
   <div id="panels">
     <div id="clickerPanel">
-      <div id="counter">
-        <span id="counterValue">0</span>
-        <img src="img/anti-coin.png">
-      </div>
-
+      <div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
       <div id="clickButtonWrapper">
         <div id="ground"><img src="img/ground.png"></div>
-        <button id="clickButton">
-          <img id="clickImg" src="img/click1.png">
-        </button>
+        <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
       </div>
     </div>
 
     <div id="shopPanel">
-      <div id="shopPanelInner">
-        <div id="items"></div>
-      </div>
+      <div id="shopPanelInner"><div id="items"></div></div>
     </div>
   </div>
 </div>
@@ -116,19 +152,24 @@ const db = getDatabase(appFB);
 const auth = getAuth(appFB);
 const provider = new GoogleAuthProvider();
 
-/* ===== ПЕРЕМЕННЫЕ ===== */
+/* ===== SPLASH SCREEN ===== */
+const splashScreen = document.getElementById("splashScreen");
+const progressBar = document.getElementById("progressBar");
+const progressPercent = document.getElementById("progressPercent");
+let progress = 0;
+function updateProgress(increment){
+  progress = Math.min(100, progress + increment);
+  progressBar.style.width = progress + "%";
+  progressPercent.textContent = progress + "%";
+}
+function hideSplash(){ splashScreen.style.opacity=0; setTimeout(()=>splashScreen.style.display="none",800); }
+
+/* ===== VARIABLES ===== */
 let isGuest = true;
 let localUserId = localStorage.getItem("userId");
-if (!localUserId) {
-  localUserId = "guest_" + Math.random().toString(36).substring(2, 9);
-  localStorage.setItem("userId", localUserId);
-}
-
+if (!localUserId) { localUserId = "guest_" + Math.random().toString(36).substring(2, 9); localStorage.setItem("userId", localUserId); }
 let userId = localUserId;
-let coins = 0;
-let clickPower = 1;
-let dataLoaded = false;
-let lastSavedCoins = 0;
+let coins = 0, clickPower = 1, dataLoaded = false, lastSavedCoins = 0;
 
 const counterValue = document.getElementById("counterValue");
 const itemsBlock = document.getElementById("items");
@@ -138,184 +179,71 @@ const shopItems = [
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
-/* ===== ЗАГРУЗКА ДАННЫХ ===== */
-async function loadData() {
-  if (!isGuest) {
-    const userRef = ref(db, "players/" + userId);
-    try {
-      const snap = await get(userRef);
-      if (snap.exists() && snap.val()) {
+/* ===== DATA LOAD ===== */
+async function loadData(){
+  if(!isGuest){
+    try{
+      const snap = await get(ref(db,"players/"+userId));
+      if(snap.exists()){
         const d = snap.val();
         coins = d.coins ?? 0;
         clickPower = d.clickPower ?? 1;
         lastSavedCoins = coins;
-        if (d.shopItems) {
-          shopItems.forEach(item => {
-            if (d.shopItems[item.id]) {
-              item.cost = d.shopItems[item.id].cost ?? item.cost;
-              if (item.stock !== undefined)
-                item.stock = d.shopItems[item.id].stock ?? item.stock;
-            }
-          });
-        }
+        if(d.shopItems) shopItems.forEach(item=>{ if(d.shopItems[item.id]){ item.cost=d.shopItems[item.id].cost??item.cost; if(item.stock!==undefined)item.stock=d.shopItems[item.id].stock??item.stock; }});
       }
-    } catch(e){ console.error(e); }
+    }catch(e){ console.error(e); }
   }
-  dataLoaded = true;
+  dataLoaded=true;
   updateUI();
   renderShop();
+  updateProgress(40);
+  hideSplash();
 }
 
-/* ===== СОХРАНЕНИЕ ===== */
-function saveData() {
-  if (!dataLoaded || isGuest) return; // гости не сохраняются в базу
-  const shopState = {};
-  shopItems.forEach(i => {
-    shopState[i.id] = { cost: i.cost };
-    if (i.stock !== undefined) shopState[i.id].stock = i.stock;
-  });
-  const userRef = ref(db, "players/" + userId);
-  set(userRef, { coins, clickPower, shopItems: shopState });
-  lastSavedCoins = coins;
-}
+/* ===== SAVE ===== */
+function saveData(){ if(!dataLoaded || isGuest)return; const shopState={}; shopItems.forEach(i=>{ shopState[i.id]={cost:i.cost}; if(i.stock!==undefined)shopState[i.id].stock=i.stock; }); set(ref(db,"players/"+userId),{coins,clickPower,shopItems:shopState}); lastSavedCoins=coins; }
 
 /* ===== UI ===== */
-function updateUI() {
-  counterValue.textContent = coins;
-}
+function updateUI(){ counterValue.textContent=coins; }
+function spawnFloatingCoin(x,y,value){ const el=document.createElement("div"); el.className="floating-coin"; el.style.left=(x-10)+"px"; el.style.top=(y-10)+"px"; el.innerHTML=`<img src="img/anti-coin.png">${value}`; document.body.appendChild(el); requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; }); setTimeout(()=>el.remove(),800); }
 
-/* ===== FLOATING COINS ===== */
-function spawnFloatingCoin(x,y,value){
-  const el = document.createElement("div");
-  el.className = "floating-coin";
-  el.style.left = (x-10) + "px";
-  el.style.top = (y-10) + "px";
-  el.innerHTML = `<img src="img/anti-coin.png">${value}`;
-  document.body.appendChild(el);
-  requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; });
-  setTimeout(()=> el.remove(), 800);
-}
-
-/* ===== КЛИКЕР ===== */
-const clickImg = document.getElementById("clickImg");
-const clickButton = document.getElementById("clickButton");
-function clickAction(x, y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower); updateUI(); }
-clickButton.addEventListener("touchstart",e=>{e.preventDefault();for(const t of e.changedTouches){clickAction(t.clientX,t.clientY);}clickImg.src="img/click2.png";clickImg.style.transform="scale(0.92)";setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},150);},{passive:false});
-clickButton.onclick=e=>{clickAction(e.clientX,e.clientY);clickImg.src="img/click2.png";clickImg.style.transform="scale(0.92)";setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},150);};
+/* ===== CLICKER ===== */
+const clickImg=document.getElementById("clickImg"), clickButton=document.getElementById("clickButton");
+function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower); updateUI(); }
+clickButton.addEventListener("touchstart",e=>{ e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY); } clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); },{passive:false});
+clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); };
 
 /* ===== SHOP ===== */
-function renderShop() {
-  itemsBlock.innerHTML = "";
-  shopItems.forEach(item => {
-    const d = document.createElement("div");
-    d.className = "item";
-    d.innerHTML = `
-      <div class="item-top">
-        <img src="${item.img}">
-        <div class="item-text">
-          <b>${item.name}</b>
-          <p>${item.description}</p>
-          <p>${item.property}</p>
-        </div>
-      </div>
-    `;
-    if (item.stock !== undefined) {
-      const s = document.createElement("p");
-      s.className = "stock";
-      s.textContent = "В наличии: " + item.stock;
-      d.appendChild(s);
-    }
-    const btn = document.createElement("button");
-    d.appendChild(btn);
-    updateButtonText(item, btn);
-    btn.onclick = () => {
-      if (!dataLoaded) return;
-      if (item.stock !== undefined && item.stock <= 0) return;
-      if (coins < item.cost) return;
-
-      coins -= item.cost;
-      if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
-      if (item.id === 2) { clickPower += item.power; item.cost += 250; item.stock = Math.max(0, item.stock - 1); }
-
-      updateUI();
-      saveData();
-      updateButtonText(item, btn);
-
-      if (item.stock !== undefined) {
-        const st = d.querySelector(".stock");
-        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
-      }
-    };
-    itemsBlock.appendChild(d);
-  });
-}
-
-function updateButtonText(item, btn){
-  btn.innerHTML = "";
-  if (item.stock !== undefined && item.stock <= 0) {
-    btn.textContent = "распродано";
-    btn.disabled = true;
-    return;
-  }
-  const p = document.createElement("div");
-  p.className = "price";
-  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-  p.querySelector("img").style.width = "18px";
-  p.querySelector("img").style.height = "18px";
-  p.querySelector("img").style.objectFit = "contain";
-  p.style.color = coins < item.cost ? "#ff3333" : "#fff";
-  btn.appendChild(p);
-}
+function renderShop(){ itemsBlock.innerHTML=""; shopItems.forEach(item=>{ const d=document.createElement("div"); d.className="item"; d.innerHTML=`<div class="item-top"><img src="${item.img}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p>${item.property}</p></div></div>`; if(item.stock!==undefined){ const s=document.createElement("p"); s.className="stock"; s.textContent="В наличии: "+item.stock; d.appendChild(s); } const btn=document.createElement("button"); d.appendChild(btn); updateButtonText(item,btn); btn.onclick=()=>{ if(!dataLoaded)return; if(item.stock!==undefined&&item.stock<=0)return; if(coins<item.cost)return; coins-=item.cost; if(item.id===1){ clickPower+=1; item.cost+=item.incrementCost; } if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock=Math.max(0,item.stock-1); } updateUI(); saveData(); updateButtonText(item,btn); if(item.stock!==undefined){ const st=d.querySelector(".stock"); st.textContent=item.stock>0?"В наличии: "+item.stock:""; } }; itemsBlock.appendChild(d); }); }
+function updateButtonText(item,btn){ btn.innerHTML=""; if(item.stock!==undefined&&item.stock<=0){ btn.textContent="распродано"; btn.disabled=true; return; } const p=document.createElement("div"); p.className="price"; p.innerHTML=`${item.cost}<img src="img/anti-coin.png">`; p.querySelector("img").style.width="18px"; p.querySelector("img").style.height="18px"; p.querySelector("img").style.objectFit="contain"; p.style.color=coins<item.cost?"#ff3333":"#fff"; btn.appendChild(p); }
 
 /* ===== AUTO-SAVE ===== */
 setInterval(()=>{ if(coins!==lastSavedCoins) saveData(); },5000);
 
 /* ===== LOGIN ===== */
-const loginBtn = document.getElementById("loginBtn");
-loginBtn.onclick = async ()=>{
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    const onlineId = user.uid;
-
-    const onlineRef = ref(db, "players/" + onlineId);
-    const onlineData = await get(onlineRef);
-
-    if (onlineData.exists()) {
-      const d = onlineData.val();
-      coins = d.coins ?? coins;
-      clickPower = d.clickPower ?? clickPower;
-    } else {
-      await set(onlineRef, { coins, clickPower, shopItems: {} });
-    }
-
-    userId = onlineId;
-    isGuest = false;
-    localStorage.setItem("userId", onlineId);
-    loginBtn.style.display = "none";
-    updateUI();
-    saveData();
-  } catch(err) { console.error(err); }
+const loginBtn=document.getElementById("loginBtn");
+loginBtn.onclick=async()=>{
+  try{
+    const result = await signInWithPopup(auth,provider);
+    const user=result.user;
+    const onlineId=user.uid;
+    const onlineRef=ref(db,"players/"+onlineId);
+    const onlineData=await get(onlineRef);
+    if(onlineData.exists()){ const d=onlineData.val(); coins=d.coins??coins; clickPower=d.clickPower??clickPower; } else { await set(onlineRef,{coins,clickPower,shopItems:{}}); }
+    userId=onlineId; isGuest=false; localStorage.setItem("userId",onlineId); loginBtn.style.display="none";
+    updateUI(); saveData(); updateProgress(40);
+  } catch(err){ console.error(err); }
 };
 
-/* ===== AUTO LOGIN IF ALREADY SIGNED IN ===== */
-onAuthStateChanged(auth, user => {
-  if(user){
-    userId = user.uid;
-    isGuest = false;
-    loginBtn.style.display = "none";
-    loadData();
-  }
-});
+/* ===== AUTO LOGIN ===== */
+onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginBtn.style.display="none"; updateProgress(40); loadData(); } else loadData(); });
 
 /* ===== PANELS ===== */
-const panels = document.getElementById("panels");
-const shopBtn = document.getElementById("shopBtn");
-const backBtn = document.getElementById("backBtn");
-shopBtn.onclick = ()=>{ panels.style.transform="translateX(-392px)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
-backBtn.onclick = ()=>{ panels.style.transform="translateX(0)"; shopBtn.style.display="block"; backBtn.style.display="none"; };
-
-loadData();
+const panels=document.getElementById("panels");
+const shopBtn=document.getElementById("shopBtn");
+const backBtn=document.getElementById("backBtn");
+shopBtn.onclick=()=>{ panels.style.transform="translateX(-392px)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
+backBtn.onclick=()=>{ panels.style.transform="translateX(0)"; shopBtn.style.display="block"; backBtn.style.display="none"; };
 </script>
 </body>
 </html>
