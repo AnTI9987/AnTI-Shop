@@ -97,7 +97,6 @@ if (!userId) {
 let coins = 0;
 let clickPower = 1;
 let dataLoaded = false;
-let lastSavedCoins = 0; // для авто-сохранения только при изменении
 
 const counterValue = document.getElementById("counterValue");
 const itemsBlock = document.getElementById("items");
@@ -112,6 +111,7 @@ async function loadData() {
   const userRef = ref(db, "players/" + userId);
   try {
     const snap = await get(userRef);
+
     if (!snap.exists() || !snap.val()) {
       await set(userRef, { coins: 0, clickPower: 1, shopItems: {} });
       coins = 0;
@@ -121,7 +121,7 @@ async function loadData() {
       const d = snap.val();
       coins = d.coins ?? 0;
       clickPower = d.clickPower ?? 1;
-      lastSavedCoins = coins;
+
       if (d.shopItems) {
         shopItems.forEach(item => {
           if (d.shopItems[item.id]) {
@@ -133,14 +133,15 @@ async function loadData() {
       }
       console.log("данные загружены:", d);
     }
+
     dataLoaded = true;
     updateUI();
     renderShop();
+
   } catch(err) {
     console.error("ошибка загрузки данных:", err);
     coins = 0;
     clickPower = 1;
-    lastSavedCoins = coins;
     dataLoaded = true;
     updateUI();
     renderShop();
@@ -158,10 +159,7 @@ function saveData() {
 
   const userRef = ref(db, "players/" + userId);
   set(userRef, { coins, clickPower, shopItems: shopState })
-    .then(() => {
-      lastSavedCoins = coins;
-      console.log("данные успешно сохранены");
-    })
+    .then(() => console.log("данные успешно сохранены"))
     .catch(err => console.error("ошибка при сохранении:", err));
 }
 
@@ -266,7 +264,7 @@ function clickAction(x, y){
   coins += clickPower;
   spawnFloatingCoin(x, y, clickPower);
   updateUI();
-  // убираем сохранение после каждого клика
+  saveData(); // сохраняем сразу после клика
 }
 
 clickButton.addEventListener("touchstart", e => {
@@ -308,12 +306,9 @@ backBtn.onclick = () => {
   backBtn.style.display = "none";
 };
 
-/* ===== AUTO-SAVE КОИНЫ ===== */
-// сохраняем только если монеты изменились
+/* ===== AUTO-SAVE ===== */
 setInterval(() => {
-  if (coins !== lastSavedCoins) {
-    saveData();
-  }
+  saveData();
 }, 5000);
 
 loadData(); // внутри loadData уже renderShop вызывается
