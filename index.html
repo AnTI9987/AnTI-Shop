@@ -25,7 +25,10 @@ body { margin:0; padding:0; background:#000; display:flex; justify-content:cente
 #progressPercent { color:#fff; font-family:'Figures', sans-serif; }
 
 /* BUTTONS */
-#shopBtn, #backBtn, #settingsBtn, #loginBtn { position:absolute; width:48px; height:48px; background:none; border:none; padding:0; z-index:50; transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1), right 0.55s cubic-bezier(0.35,0.15,0.1,1); }
+#shopBtn, #backBtn, #settingsBtn, #loginBtn {
+  position:absolute; width:48px; height:48px; background:none; border:none; padding:0; z-index:50;
+  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1), right 0.55s cubic-bezier(0.35,0.15,0.1,1);
+}
 #shopBtn { top:12px; right:12px; }
 #backBtn { top:12px; right:12px; display:none; }
 #settingsBtn { top:12px; left:12px; }
@@ -108,7 +111,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
   authDomain: "anti-shop-99f1d.firebaseapp.com",
@@ -124,63 +126,52 @@ const db = getDatabase(appFB);
 const auth = getAuth(appFB);
 const provider = new GoogleAuthProvider();
 
-/* SPLASH SCREEN */
+/* SPLASH */
 const splashScreen = document.getElementById("splashScreen");
 const progressBar = document.getElementById("progressBar");
 const progressPercent = document.getElementById("progressPercent");
-let progress = 0;
-function updateProgress(increment){ 
-  progress = Math.min(100, progress + increment); 
-  progressBar.style.width = progress + "%"; 
-  progressPercent.textContent = progress + "%"; 
-}
-function hideSplash(){ 
-  splashScreen.style.opacity = 0; 
-  setTimeout(()=>splashScreen.style.display="none",800); 
-}
+let progress=0;
+function updateProgress(increment){ progress=Math.min(100,progress+increment); progressBar.style.width=progress+"%"; progressPercent.textContent=progress+"%"; }
+function hideSplash(){ splashScreen.style.opacity=0; setTimeout(()=>splashScreen.style.display="none",800); }
 
 /* VARIABLES */
-let isGuest = true;
-let localUserId = localStorage.getItem("userId");
-if(!localUserId){ localUserId="guest_"+Math.random().toString(36).substring(2,9); localStorage.setItem("userId",localUserId); }
-let userId = localUserId;
-let coins=0, clickPower=1, dataLoaded=false, lastSavedCoins=0;
+let isGuest=true;
+let localUserId=localStorage.getItem("userId");
+if(!localUserId){ localUserId="guest_"+Math.random().toString(36).substring(2,9); localStorage.setItem("userId",localUserId);}
+let userId=localUserId;
+let coins=0,clickPower=1,dataLoaded=false,lastSavedCoins=0;
 
-const counterValue = document.getElementById("counterValue");
-const itemsBlock = document.getElementById("items");
-const loginOutBtn = document.getElementById("loginOutBtn");
+const counterValue=document.getElementById("counterValue");
+const itemsBlock=document.getElementById("items");
+const loginOutBtn=document.getElementById("loginOutBtn");
 
-const shopItems = [
-  { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
-  { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
+const shopItems=[
+  {id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
+  {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}
 ];
 
-/* LOAD DATA */
+/* LOAD */
 async function loadData(){
-  try{
-    if(!isGuest){
-      const snap = await get(ref(db,"players/"+userId));
+  if(!isGuest){
+    try{
+      const snap=await get(ref(db,"players/"+userId));
       if(snap.exists()){
-        const d = snap.val();
+        const d=snap.val();
         coins=d.coins??0;
         clickPower=d.clickPower??1;
         lastSavedCoins=coins;
-        if(d.shopItems) shopItems.forEach(item=>{ if(d.shopItems[item.id]){ item.cost=d.shopItems[item.id].cost??item.cost; if(item.stock!==undefined)item.stock=d.shopItems[item.id].stock??item.stock; }});
+        if(d.shopItems) shopItems.forEach(item=>{ if(d.shopItems[item.id]){ item.cost=d.shopItems[item.id].cost??item.cost; if(item.stock!==undefined)item.stock=d.shopItems[item.id].stock??item.stock;} });
       }
-    }
-  }catch(e){ console.error(e);}
-  dataLoaded=true;
-  updateUI();
-  renderShop();
-  updateProgress(100);
-  setTimeout(hideSplash,500);
+    }catch(e){ console.error(e);}
+  }
+  dataLoaded=true; updateUI(); renderShop(); updateProgress(40); hideSplash();
 }
-
-/* AUTO LOAD AFTER 3.5 сек */
-setTimeout(()=>{ if(!dataLoaded) loadData(); },3500);
 
 /* SAVE */
 function saveData(){ if(!dataLoaded||isGuest)return; const shopState={}; shopItems.forEach(i=>{ shopState[i.id]={cost:i.cost}; if(i.stock!==undefined)shopState[i.id].stock=i.stock; }); set(ref(db,"players/"+userId),{coins,clickPower,shopItems:shopState}); lastSavedCoins=coins; }
+
+/* UI */
+function updateUI(){ counterValue.textContent=coins; document.querySelectorAll('.item button .price').forEach(p=>{ const cost=parseInt(p.textContent); p.style.color=coins<cost?"#ff3333":"#fff"; }); }
 
 /* CLICKER */
 const clickImg=document.getElementById("clickImg"), clickButton=document.getElementById("clickButton");
@@ -189,7 +180,7 @@ function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower);
 clickButton.addEventListener("touchstart",e=>{ e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY);} clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)";},150); },{passive:false});
 clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)";},150); };
 
-/* SHOP RENDER */
+/* SHOP */
 function renderShop(){
   itemsBlock.innerHTML="";
   shopItems.forEach(item=>{
@@ -219,32 +210,37 @@ setInterval(()=>{ if(coins!==lastSavedCoins) saveData(); },5000);
 loginOutBtn.onclick=async()=>{
   if(isGuest){
     try{
-      const result = await signInWithPopup(auth,provider);
+      const result=await signInWithPopup(auth,provider);
       const user=result.user;
       const onlineId=user.uid;
       const onlineRef=ref(db,"players/"+onlineId);
       const onlineData=await get(onlineRef);
       if(onlineData.exists()){ const d=onlineData.val(); coins=d.coins??coins; clickPower=d.clickPower??clickPower; } else { await set(onlineRef,{coins,clickPower,shopItems:{}});}
       userId=onlineId; isGuest=false; localStorage.setItem("userId",onlineId); loginOutBtn.textContent="Выйти из Аккаунта";
-      updateUI(); saveData(); updateProgress(100); hideSplash();
-    } catch(err){ console.error(err);}
-  } else { await signOut(auth); isGuest=true; userId=localUserId; loginOutBtn.textContent="Войти/Зарегистрироваться"; updateUI(); }
+      updateUI(); saveData(); updateProgress(40);
+    }catch(err){ console.error(err);}
+  } else { await signOut(auth); isGuest=true; userId=localUserId; loginOutBtn.textContent="Войти/Зарегистрироваться"; updateUI();}
 };
+onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginOutBtn.textContent="Выйти из Аккаунта"; updateProgress(40); loadData(); } else loadData(); });
 
-/* AUTO LOGIN */
-onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginOutBtn.textContent="Выйти из Аккаунта"; loadData(); } else loadData(); });
-
-/* PANELS ANIMATION */
+/* PANELS & BUTTONS ANIMATION */
 const panels=document.getElementById("panels");
 const shopBtnEl=document.getElementById("shopBtn");
 const backBtnEl=document.getElementById("backBtn");
 const settingsBtnEl=document.getElementById("settingsBtn");
+const loginBtnEl=document.getElementById("loginBtn");
 
 function goToShop(){ panels.style.transform="translateX(-784px)"; shopBtnEl.style.right="-60px"; backBtnEl.style.display="block"; setTimeout(()=>backBtnEl.style.right="12px",50);}
-function goToSettings(){ panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtn.style.left="-60px"; backBtnEl.style.display="block"; setTimeout(()=>backBtnEl.style.left="12px",50);}
+function goToSettings(){ panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; setTimeout(()=>backBtnEl.style.left="12px",50);}
 function goBackFromShop(){ panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; backBtnEl.style.right="-60px"; setTimeout(()=>backBtnEl.style.display="none",500);}
-function goBackFromSettings(){ panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtn.style.left="12px"; backBtnEl.style.left="-60px"; setTimeout(()=>backBtnEl.style.display="none",500);}
+function goBackFromSettings(){ panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtnEl.style.left="12px"; backBtnEl.style.left="-60px"; setTimeout(()=>backBtnEl.style.display="none",500);}
 
 shopBtnEl.onclick=goToShop;
 settingsBtnEl.onclick=goToSettings;
-back
+backBtnEl.onclick=()=>{
+  if(panels.style.transform==="translateX(-784px)") goBackFromShop();
+  else goBackFromSettings();
+};
+</script>
+</body>
+</html>
