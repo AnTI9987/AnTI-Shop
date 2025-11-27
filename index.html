@@ -96,12 +96,15 @@ body {
   margin-top:auto; width:100%; padding:12px;
   background:#332614; color:#fff; border:none;
   border-radius:8px; font-size:18px;
+  display:flex; justify-content:center; align-items:center; gap:6px;
   transition:transform .12s ease;
 }
 
-.price img { width:20px; height:20px; }
+.item button img { width:20px; height:20px; }
 
 .floating-coin { font-size:15px; }
+
+.price-red { color:#ff4d4d; }
 </style>
 </head>
 <body>
@@ -124,7 +127,7 @@ body {
       <button id="loginOutBtn">Войти/Зарегистрироваться</button>
     </div>
     <div id="clickerPanel">
-      <div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
+      <div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png" style="width:44px;height:44px;"></div>
       <div id="clickButtonWrapper">
         <div id="ground"><img src="img/ground.png"></div>
         <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
@@ -138,7 +141,6 @@ body {
 
 <script type="module">
 
-/* FIREBASE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -158,14 +160,13 @@ const db = getDatabase(appFB);
 const auth = getAuth(appFB);
 const provider = new GoogleAuthProvider();
 
-/* LOGIN BUTTON */
-document.getElementById("loginBtn").onclick = async () => {
-  try{
-    await signInWithPopup(auth, provider);
-  } catch(err){
-    console.error(err);
-  }
-};
+/* LOGIN BUTTONS (★ обе кнопки ведут на Google Sign-In) */
+async function loginGoogle() {
+  try { await signInWithPopup(auth, provider); }
+  catch(err){ console.error(err);}
+}
+document.getElementById("loginBtn").onclick = loginGoogle;
+document.getElementById("loginOutBtn").onclick = loginGoogle;
 
 /* SPLASH — ★ чисто визуальный */
 const splashScreen=document.getElementById("splashScreen");
@@ -201,7 +202,6 @@ let coins=0,clickPower=1,dataLoaded=false,lastSavedCoins=0;
 
 const counterValue=document.getElementById("counterValue");
 const itemsBlock=document.getElementById("items");
-const loginOutBtn=document.getElementById("loginOutBtn");
 
 const shopItems=[
   {id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
@@ -245,25 +245,20 @@ function saveData(){
   lastSavedCoins=coins;
 }
 
-/* --- UI UPDATE WITH ANIMATION (★ ПЛАВНОЕ УВЕЛИЧЕНИЕ ЧИСЛА) --- */
+/* UI UPDATE WITH ANIMATION */
 let animatingCoins = false;
-
 function updateUI(){
   if (animatingCoins) return;
-
   animatingCoins = true;
   let start = Number(counterValue.textContent);
   let end = coins;
-
   let t = 0;
   const duration = 400;
-
   function animate(ts){
     t += 16;
     let p = Math.min(1, t / duration);
     let val = Math.floor(start + (end - start) * p);
     counterValue.textContent = val;
-
     if (p < 1) requestAnimationFrame(animate);
     else animatingCoins = false;
   }
@@ -288,11 +283,11 @@ function goToShop(){
   setTimeout(()=>backBtnEl.style.right="12px",50);
 
   backToClickerBtn.style.display = "block";
+  backToClickerBtn.style.right="-60px";
   setTimeout(()=> backToClickerBtn.style.right = "66px", 0);
 
   if(isGuest) loginBtnEl.style.left="-60px";
 }
-
 backToClickerBtn.onclick = () => {
   panels.style.transform="translateX(-392px)";
   backToClickerBtn.style.right="-60px";
@@ -339,7 +334,7 @@ backBtnEl.onclick=()=>{
 };
 
 /* ★ ВЫХОД И СБРОС ЛОКАЛЬНЫХ ДАННЫХ */
-loginOutBtn.onclick = async () => {
+async function logoutAndReset(){
   if (!isGuest){
     await signOut(auth);
   }
@@ -348,12 +343,10 @@ loginOutBtn.onclick = async () => {
   shopItems[0].cost = 50;
   shopItems[1].cost = 250;
   shopItems[1].stock = 5;
-
   localStorage.removeItem("userId");
-  localStorage.removeItem("guest");
-
   location.reload();
-};
+}
+document.getElementById("loginOutBtn").onclick = logoutAndReset;
 
 /* AUTOLOGIN */
 onAuthStateChanged(auth, async user=>{
@@ -375,7 +368,7 @@ document.getElementById("clickButton").onclick=()=>{
   saveData();
 };
 
-/* RENDER SHOP — ничего не менялось */
+/* RENDER SHOP */
 function renderShop(){
   itemsBlock.innerHTML="";
   shopItems.forEach(item=>{
@@ -387,14 +380,19 @@ function renderShop(){
         <div class="item-text">
           <b>${item.name}</b>
           <p>${item.description}</p>
-          <p class="price"><img src="img/anti-coin.png"> ${item.cost}</p>
+          <p>${item.property}</p>
+          ${item.stock!==undefined ? `<p>В наличии: ${item.stock}</p>` : ''}
         </div>
       </div>
-      <button>Купить</button>
+      <button>
+        <img src="img/anti-coin.png">
+        <span class="price-text">${item.cost}</span>
+      </button>
     `;
     const btn=block.querySelector("button");
+    const priceText = btn.querySelector(".price-text");
     btn.onclick=()=>{
-      if(coins>=item.cost){
+      if(coins>=item.cost && (item.stock===undefined || item.stock>0)){
         coins-=item.cost;
         clickPower += item.power ?? 1;
         item.cost += item.incrementCost ?? 50;
@@ -402,6 +400,9 @@ function renderShop(){
         updateUI();
         saveData();
         renderShop();
+      } else {
+        priceText.classList.add("price-red");
+        setTimeout(()=> priceText.classList.remove("price-red"),400);
       }
     };
     itemsBlock.appendChild(block);
