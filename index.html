@@ -18,7 +18,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #backBtn{top:12px;right:12px;display:none;}
 #backToClickerBtn{top:12px;right:-60px;display:none;}
 #settingsBtn{top:12px;left:12px;}
-#loginBtn{top:70px;left:-60px;display:none;}
+#loginBtn{top:70px;left:12px;display:block;}
 #shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{width:100%;height:100%;}
 #panels{position:absolute;top:0;left:0;width:calc(392px*3);height:100%;display:flex;transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1);}
 #settingsPanel,#clickerPanel,#shopPanel{width:392px;height:100%;flex-shrink:0;}
@@ -28,7 +28,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
 #counter img{width:24px;height:24px;}
 #clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}
-#ground{position:absolute;left:50%;top:240px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}
+#ground{position:absolute;left:50%;top:140px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}
 #ground img{width:100%;}
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
 #clickImg{width:220px;transition:transform 0.08s ease;display:block;}
@@ -114,6 +114,7 @@ let coins=0,clickPower=1;
 const counterValue=document.getElementById("counterValue");
 const itemsBlock=document.getElementById("items");
 const loginOutBtn=document.getElementById("loginOutBtn");
+const loginBtnEl=document.getElementById("loginBtn");
 
 const shopItems=[
 {id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
@@ -190,8 +191,18 @@ async function saveProgress(){ if(isGuest) return; const data={coins,clickPower,
 setInterval(saveProgress,5000);
 
 /* LOGIN */
-document.getElementById("loginBtn").onclick=async()=>{ try{ await signInWithPopup(auth,provider); }catch(e){console.error(e);} };
-loginOutBtn.onclick=()=>{ window.location.href="login.html"; };
+loginBtnEl.onclick=async()=>{ try{ await signInWithPopup(auth,provider); }catch(e){console.error(e);} };
+loginOutBtn.onclick=async()=>{
+  if(!isGuest){
+    await signOut(auth);
+    isGuest=true; userId=localUserId; coins=0; clickPower=1;
+    shopItems.forEach(i=>{if(i.id===2)i.stock=5;if(i.id===1)i.cost=50;});
+    animateCounter(0,0);
+    renderShop();
+  }
+  // если гость, сразу ведем на login
+  window.location.href="login.html";
+};
 
 /* AUTH STATE */
 onAuthStateChanged(auth,async user=>{
@@ -200,7 +211,11 @@ onAuthStateChanged(auth,async user=>{
     const snap=await get(ref(db,'users/'+userId));
     if(snap.exists()){ const data=snap.val(); coins=data.coins||0; clickPower=data.clickPower||1; if(data.shopItems) data.shopItems.forEach((si,i)=>{shopItems[i].cost=si.cost; if(shopItems[i].stock!==undefined) shopItems[i].stock=si.stock;}); }
     animateCounter(0,coins); renderShop();
-  } else{ isGuest=true; }
+  } else{
+    isGuest=true;
+    loginBtnEl.style.display="block";
+    loginOutBtn.textContent="Войти/Зарегистрироваться";
+  }
 });
 
 /* PANELS */
@@ -208,7 +223,6 @@ const panels=document.getElementById("panels");
 const shopBtnEl=document.getElementById("shopBtn");
 const backBtnEl=document.getElementById("backBtn");
 const settingsBtnEl=document.getElementById("settingsBtn");
-const loginBtnEl=document.getElementById("loginBtn");
 const backToClickerBtn=document.getElementById("backToClickerBtn");
 panels.style.transform="translateX(-392px)";
 
@@ -225,7 +239,7 @@ function goBackFromShop(){
   setTimeout(()=>backToClickerBtn.style.display="none",400);
   shopBtnEl.style.right="12px";
   settingsBtnEl.style.left="12px";
-  if(isGuest){ loginBtnEl.style.display="block"; setTimeout(()=>loginBtnEl.style.left="12px",50); }
+  if(isGuest){ loginBtnEl.style.left="-60px"; setTimeout(()=>loginBtnEl.style.left="12px",50); }
 }
 function goToSettings(){
   panels.style.transform="translateX(0)";
@@ -237,7 +251,7 @@ function goBackFromSettings(){
   panels.style.transform="translateX(-392px)";
   shopBtnEl.style.right="12px";
   settingsBtnEl.style.left="12px";
-  if(isGuest){ loginBtnEl.style.display="block"; setTimeout(()=>loginBtnEl.style.left="12px",50); }
+  if(isGuest){ loginBtnEl.style.left="-60px"; setTimeout(()=>loginBtnEl.style.left="12px",50); }
   backBtnEl.style.right="-60px";
   setTimeout(()=>backBtnEl.style.display="none",500);
 }
