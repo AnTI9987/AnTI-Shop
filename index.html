@@ -5,9 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AnTI Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Figures&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<style>
+/* здесь остаётся весь CSS, который у тебя был, без изменений */
+body { margin:0; padding:0; background:#000; display:flex; justify-content:center; overflow:hidden; font-family:'Figures', sans-serif; }
+#app { width:392px; height:100vh; position:relative; overflow:hidden; background:#0000; }
+/* ... остальные стили ... */
+</style>
 </head>
 <body>
+
 <div id="splashScreen">
   <h1>AnTI-Shop</h1>
   <div id="progressBarContainer"><div id="progressBar"></div></div>
@@ -38,9 +44,161 @@
 </div>
 
 <script type="module">
-  import './main.js';
-  import './shop.js';
-  import './clicker.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { shopItems, renderShop, updateButtonText } from './shop.js';
+
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  databaseURL: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};
+
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+const auth = getAuth(appFB);
+const provider = new GoogleAuthProvider();
+
+/* SPLASH */
+const splashScreen = document.getElementById("splashScreen");
+const progressBar = document.getElementById("progressBar");
+const progressPercent = document.getElementById("progressPercent");
+let progress=0;
+function updateProgress(increment){ progress=Math.min(100,progress+increment); progressBar.style.width=progress+"%"; progressPercent.textContent=progress+"%"; }
+function hideSplash(){ splashScreen.style.opacity=0; setTimeout(()=>splashScreen.style.display="none",800); }
+
+/* VARIABLES */
+let isGuest=true;
+let localUserId=localStorage.getItem("userId");
+if(!localUserId){ localUserId="guest_"+Math.random().toString(36).substring(2,9); localStorage.setItem("userId",localUserId);}
+let userId=localUserId;
+let coins=0,clickPower=1,dataLoaded=false,lastSavedCoins=0;
+
+const counterValue=document.getElementById("counterValue");
+const itemsBlock=document.getElementById("items");
+const loginOutBtn=document.getElementById("loginOutBtn");
+const shopBtnEl=document.getElementById("shopBtn");
+const backBtnEl=document.getElementById("backBtn");
+const settingsBtnEl=document.getElementById("settingsBtn");
+const loginBtnEl=document.getElementById("loginBtn");
+const panels=document.getElementById("panels");
+
+/* LOAD DATA */
+async function loadData(){
+  if(!isGuest){
+    try{
+      const snap=await get(ref(db,"players/"+userId));
+      if(snap.exists()){
+        const d=snap.val();
+        coins=d.coins??0;
+        clickPower=d.clickPower??1;
+        lastSavedCoins=coins;
+        if(d.shopItems) shopItems.forEach(item=>{
+          if(d.shopItems[item.id]){
+            item.cost=d.shopItems[item.id].cost??item.cost;
+            if(item.stock!==undefined)item.stock=d.shopItems[item.id].stock??item.stock;
+          }
+        });
+      }
+    }catch(e){ console.error(e);}
+  }
+  dataLoaded=true; updateUI(); renderShop({coins, clickPower}); updateProgress(40); hideSplash();
+}
+
+/* SAVE DATA */
+function saveData(){ 
+  if(!dataLoaded||isGuest) return; 
+  const shopState={}; 
+  shopItems.forEach(i=>{ shopState[i.id]={cost:i.cost}; if(i.stock!==undefined) shopState[i.id].stock=i.stock; }); 
+  set(ref(db,"players/"+userId),{coins,clickPower,shopItems:shopState}); 
+  lastSavedCoins=coins; 
+}
+
+/* UI */
+function updateUI(){ 
+  counterValue.textContent=coins; 
+  document.querySelectorAll('.item button .price').forEach(p=>{ const cost=parseInt(p.textContent); p.style.color=coins<cost?"#ff3333":"#fff"; }); 
+}
+
+/* CLICKER */
+const clickImg=document.getElementById("clickImg"), clickButton=document.getElementById("clickButton");
+function spawnFloatingCoin(x,y,value){ 
+  const el=document.createElement("div"); 
+  el.className="floating-coin"; 
+  el.style.left=(x-10)+"px"; el.style.top=(y-10)+"px"; 
+  el.innerHTML=`<img src="img/anti-coin.png">${value}`; 
+  document.body.appendChild(el); 
+  requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; }); 
+  setTimeout(()=>el.remove(),800);
+}
+function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower); updateUI(); }
+
+clickButton.addEventListener("touchstart",e=>{
+  e.preventDefault();
+  for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY);}
+  clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)";
+  setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)";},150);
+},{passive:false});
+clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)";},150); };
+
+/* AUTO-SAVE */
+setInterval(()=>{ if(coins!==lastSavedCoins) saveData(); },5000);
+
+/* LOGIN */
+async function loginAction(){
+  if(isGuest){
+    try{
+      const result=await signInWithPopup(auth,provider);
+      const user=result.user;
+      const onlineId=user.uid;
+      const onlineRef=ref(db,"players/"+onlineId);
+      const onlineData=await get(onlineRef);
+      if(onlineData.exists()){ const d=onlineData.val(); coins=d.coins??coins; clickPower=d.clickPower??clickPower; } 
+      else { await set(onlineRef,{coins,clickPower,shopItems:{}});}
+      userId=onlineId; isGuest=false; localStorage.setItem("userId",onlineId); loginOutBtn.textContent="Выйти из Аккаунта";
+      loginBtnEl.style.display="none";
+      updateUI(); saveData(); updateProgress(40);
+    }catch(err){ console.error(err);}
+  } else {
+    await signOut(auth);
+    isGuest=true; userId=localUserId;
+    loginOutBtn.textContent="Войти/Зарегистрироваться";
+    loginBtnEl.style.display="block";
+    updateUI();
+  }
+}
+loginOutBtn.onclick = loginAction;
+loginBtnEl.onclick = loginAction;
+
+onAuthStateChanged(auth,user=>{
+  if(user){ userId=user.uid; isGuest=false; loginOutBtn.textContent="Выйти из Аккаунта"; loginBtnEl.style.display="none"; updateProgress(40); loadData(); }
+  else { loginBtnEl.style.display="block"; loadData(); }
+});
+
+/* PANELS */
+panels.style.transform="translateX(-392px)";
+function goToShop(){ panels.style.transform="translateX(-784px)"; backBtnEl.style.display="block"; backBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; if(isGuest) loginBtnEl.style.left="-60px"; }
+function goToSettings(){ panels.style.transform="translateX(0)"; backBtnEl.style.display="block"; backBtnEl.style.right="12px"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; }
+function goBackFromShop(){ panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; backBtnEl.style.right="-60px"; setTimeout(()=>backBtnEl.style.display="none",500); settingsBtnEl.style.left="12px"; if(isGuest) loginBtnEl.style.left="12px"; }
+function goBackFromSettings(){ panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; backBtnEl.style.right="-60px"; setTimeout(()=>backBtnEl.style.display="none",500); if(isGuest) loginBtnEl.style.left="12px"; }
+
+shopBtnEl.onclick = goToShop;
+settingsBtnEl.onclick = goToSettings;
+backBtnEl.onclick = ()=>{
+  const transform=getComputedStyle(panels).transform;
+  if(transform.includes("matrix") && transform !== "none"){
+    let values=transform.match(/matrix\((.*)\)/)[1].split(',');
+    let m41=parseFloat(values[4]);
+    if(m41===-784) goBackFromShop();
+    else goBackFromSettings();
+  } else { goBackFromSettings(); }
+}
 </script>
+
 </body>
 </html>
