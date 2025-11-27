@@ -4,21 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AnTI Shop</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 body {
   margin:0; padding:0; background:#000;
-  display:flex; justify-content:center;
+  display:flex; justify-content:center; overflow:hidden;
   font-family:'Montserrat', sans-serif;
-  overflow:hidden;
 }
 
-#app { width:392px; height:100vh; position:relative; overflow:hidden; }
+#app { width:392px; height:100vh; position:relative; overflow:hidden; background:#0000; }
 
-/* SPLASH */
+/* SPLASH SCREEN */
 #splashScreen {
   position:fixed; top:0; left:0; width:100vw; height:100vh;
-  background:#888; display:flex; flex-direction:column; justify-content:center; align-items:center;
+  background-color:#888;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
   z-index:9999; transition:opacity 0.8s ease;
 }
 #splashScreen h1 { color:#fff; font-size:38px; margin-bottom:26px; }
@@ -27,18 +29,21 @@ body {
 #progressPercent { color:#fff; }
 
 /* BUTTONS */
-#shopBtn, #backBtn, #settingsBtn, #loginBtn {
+#shopBtn, #backBtn, #settingsBtn, #loginBtn, #backToClickerBtn {
   position:absolute; width:48px; height:48px; background:none; border:none; padding:0; z-index:50;
+  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1),
+             right 0.55s cubic-bezier(0.35,0.15,0.1,1);
 }
 #shopBtn { top:12px; right:12px; }
-#backBtn { top:12px; left:12px; display:none; }
+#backBtn { top:12px; right:12px; display:none; }
+#backToClickerBtn { top:12px; right:-60px; display:none; }
 #settingsBtn { top:12px; left:12px; }
 #loginBtn { top:70px; left:12px; }
-#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img { width:100%; height:100%; }
+#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img { width:100%; height:100%; }
 
 /* PANELS */
 #panels { position:absolute; top:0; left:0; width:calc(392px*3); height:100%; display:flex; transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
-#settingsPanel, #clickerPanel, #shopPanel { width:392px; height:100%; flex-shrink:0; overflow:hidden; }
+#settingsPanel, #clickerPanel, #shopPanel { width:392px; height:100%; flex-shrink:0; }
 
 /* SETTINGS */
 #settingsPanel {
@@ -49,19 +54,26 @@ body {
 }
 #settingsPanel button {
   margin-top:20px; width:300px; padding:14px;
-  background:#332614; color:#fff; border:none; border-radius:8px; font-size:18px;
+  background:#332614; color:#fff; border:none;
+  border-radius:8px; font-size:18px;
+  transition:transform .12s ease;
 }
 
 /* CLICKER */
-#clickerPanel { background:linear-gradient(to bottom,#CEEDFF,#A1E6FF); position:relative; }
+#clickerPanel { background:linear-gradient(to bottom,#CEEDFF,#A1E6FF); padding-top:20px; position:relative; overflow:hidden; }
 #counter {
-  font-size:36px; color:#fff; position:absolute; top:20px; width:100%; text-align:center; z-index:10; display:flex; justify-content:center; align-items:center; gap:8px;
+  font-size:28px; margin:10px 0;
+  display:flex; justify-content:center; align-items:center; gap:6px;
+  color:#000;
 }
-#clickButtonWrapper { position:absolute; width:100%; bottom:60px; display:flex; justify-content:center; align-items:center; }
-#ground { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:100%; z-index:0; pointer-events:none; }
+#counter img { width:24px; height:24px; }
+
+#clickButtonWrapper { position:relative; width:100%; display:flex; justify-content:center; margin-top:100px; }
+#ground { position:absolute; left:50%; top:140px; transform:translateX(-50%); width:100%; pointer-events:none; z-index:0; }
 #ground img { width:100%; }
-#clickButton { background:none; border:none; position:relative; z-index:1; display:flex; align-items:center; justify-content:center; padding:0; }
-#clickImg { width:180px; user-drag:none; touch-action:manipulation; }
+
+#clickButton { background:none; border:none; z-index:1; position:relative; display:flex; align-items:center; justify-content:center; padding:0; }
+#clickImg { width:180px; transition:transform 0.15s ease; -webkit-user-drag:none; touch-action:manipulation; display:block; }
 
 /* SHOP */
 #shopPanel { background:linear-gradient(to bottom,#7A4B1D,#5B3F1B); padding-top:70px; overflow-y:auto; }
@@ -70,14 +82,16 @@ body {
   margin:0 auto; padding:24px; border-radius:14px;
   width:350px; min-height:calc(100vh - 100px);
 }
-.item { width:310px; height:185px; background-image:url("img/item-frame.png"); background-size:100% 100%; padding:10px 14px; display:flex; flex-direction:column; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35)); margin:0 auto 22px; }
+
+/* SHOP ITEMS */
+.item { width:310px; height:auto; background-image:url("img/item-frame.png"); background-size:100% 100%; padding:10px 14px; display:flex; flex-direction:column; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35)); margin:0 auto 22px; }
 .item-top { display:flex; align-items:center; }
-.item-top img { width:72px; height:72px; margin-right:14px; }
-.item-text b { font-size:20px; }
-.item-text p { margin:3px 0; font-size:16px; }
-.item button { margin-top:auto; width:100%; padding:12px; background:#332614; color:#fff; border:none; border-radius:8px; font-size:18px; }
-.price { display:flex; align-items:center; justify-content:center; gap:8px; }
-.price img { width:20px; height:20px; }
+.item-top img { width:72px; height:72px; margin-right:14px; object-fit:contain; }
+.item-text b { font-size:18px; }
+.item-text p { margin:3px 0; font-size:14px; }
+.item button { margin-top:10px; width:100%; padding:12px; background:#332614; color:#fff; border:none; border-radius:8px; font-size:16px; transition:transform .12s ease; }
+.price { display:flex; align-items:center; justify-content:center; gap:6px; }
+.price img { width:18px; height:18px; }
 
 /* Floating coins */
 .floating-coin { font-size:15px; position:absolute; pointer-events:none; display:flex; align-items:center; gap:6px; color:lime; transition:transform .8s ease-out, opacity .8s ease-out; z-index:60; }
@@ -97,6 +111,7 @@ body {
   <button id="loginBtn"><img src="img/login.png"></button>
   <button id="shopBtn"><img src="img/shop-icon.png"></button>
   <button id="backBtn"><img src="img/back-icon.png"></button>
+  <button id="backToClickerBtn"><img src="img/back-icon.png"></button>
 
   <div id="panels">
     <div id="settingsPanel">
@@ -117,7 +132,6 @@ body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -131,7 +145,6 @@ const firebaseConfig = {
 };
 
 const appFB = initializeApp(firebaseConfig);
-const db = getDatabase(appFB);
 const auth = getAuth(appFB);
 const provider = new GoogleAuthProvider();
 
@@ -143,9 +156,14 @@ let progress = 0;
 function fakeLoad(onDone){
   const interval = setInterval(()=>{
     progress += Math.random()*6;
-    if(progress>=100){ progress=100; clearInterval(interval); setTimeout(()=>{ splashScreen.style.opacity=0; },300); setTimeout(()=>{ splashScreen.style.display="none"; if(onDone) onDone(); },900);}
-    progressBar.style.width = progress + "%";
-    progressPercent.textContent = Math.floor(progress)+"%";
+    if(progress>=100){
+      progress=100;
+      clearInterval(interval);
+      setTimeout(()=>{ splashScreen.style.opacity=0; },300);
+      setTimeout(()=>{ splashScreen.style.display="none"; if(onDone) onDone(); },900);
+    }
+    progressBar.style.width=progress+"%";
+    progressPercent.textContent=Math.floor(progress)+"%";
   },100);
 }
 
@@ -154,7 +172,7 @@ let isGuest=true;
 let localUserId=localStorage.getItem("userId");
 if(!localUserId){ localUserId="guest_"+Math.random().toString(36).substring(2,9); localStorage.setItem("userId",localUserId);}
 let userId=localUserId;
-let coins=0, clickPower=1;
+let coins=0,clickPower=1;
 
 const counterValue=document.getElementById("counterValue");
 const itemsBlock=document.getElementById("items");
@@ -165,12 +183,17 @@ const shopItems=[
   {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}
 ];
 
+/* ANIMATE COUNTER */
 function animateCounter(oldVal,newVal){
-  oldVal = Number(oldVal)||0; newVal = Number(newVal)||0;
-  const frames = 20; let i=0; let current=oldVal; const step=(newVal-oldVal)/frames;
+  oldVal = Number(oldVal)||0;
+  newVal = Number(newVal)||0;
+  const frames=20;
+  let i=0;
+  let current=oldVal;
+  const step=(newVal-oldVal)/frames;
   const interval=setInterval(()=>{
     i++; current+=step;
-    if(i>=frames){ current=newVal; clearInterval(interval); }
+    if(i>=frames){ current=newVal; clearInterval(interval);}
     counterValue.textContent=Math.floor(current);
   },25);
 }
@@ -178,49 +201,84 @@ function animateCounter(oldVal,newVal){
 /* CLICKER */
 const clickImg=document.getElementById("clickImg"), clickButton=document.getElementById("clickButton");
 function spawnFloatingCoin(x,y,value){
-  const el=document.createElement("div"); el.className="floating-coin"; el.style.left=(x-10)+"px"; el.style.top=(y-10)+"px";
-  el.innerHTML=`<img src="img/anti-coin.png">${value}`; document.body.appendChild(el);
+  const el=document.createElement("div");
+  el.className="floating-coin";
+  el.style.left=(x-10)+"px";
+  el.style.top=(y-10)+"px";
+  el.innerHTML=`<img src="img/anti-coin.png">${value}`;
+  document.body.appendChild(el);
   requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; });
   setTimeout(()=>el.remove(),800);
 }
-function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower); animateCounter(parseInt(counterValue.textContent)||0, coins); updatePricesColor(); }
-
-clickButton.addEventListener("touchstart",e=>{ e.preventDefault(); for(const t of e.changedTouches) clickAction(t.clientX,t.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150);},{passive:false});
+function clickAction(x,y){
+  coins+=clickPower;
+  spawnFloatingCoin(x,y,clickPower);
+  animateCounter(parseInt(counterValue.textContent)||0, coins);
+  updatePricesColor();
+}
+clickButton.addEventListener("touchstart", e=>{ e.preventDefault(); for(const t of e.changedTouches) clickAction(t.clientX,t.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150);},{passive:false});
 clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); };
 
 /* SHOP */
 function updateButtonText(item, btn){
-  btn.innerHTML=""; if(item.stock!==undefined && item.stock<=0){ btn.textContent="распродано"; btn.disabled=true; return; }
-  const p=document.createElement("div"); p.className="price"; p.innerHTML=`${item.cost}<img src="img/anti-coin.png">`;
-  p.style.color=(coins<item.cost)?"#ff3333":"#fff"; btn.appendChild(p);
+  btn.innerHTML="";
+  if(item.stock!==undefined && item.stock<=0){ btn.textContent="распродано"; btn.disabled=true; return; }
+  const p=document.createElement("div");
+  p.className="price";
+  p.innerHTML=`${item.cost}<img src="img/anti-coin.png">`;
+  p.style.color = (coins<item.cost) ? "#ff3333":"#fff";
+  btn.appendChild(p);
 }
 function renderShop(){
   itemsBlock.innerHTML="";
   shopItems.forEach(item=>{
-    const d=document.createElement("div"); d.className="item";
-    d.innerHTML=`<div class="item-top"><img src="${item.img}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p>${item.property}</p></div></div>`;
-    if(item.stock!==undefined){ const s=document.createElement("p"); s.textContent="В наличии: "+item.stock; d.appendChild(s); }
-    const btn=document.createElement("button"); updateButtonText(item, btn);
+    const d=document.createElement("div");
+    d.className="item";
+    d.innerHTML=`
+      <div class="item-top">
+        <img src="${item.img}">
+        <div class="item-text"><b>${item.name}</b><p>${item.description}</p><p>${item.property}</p></div>
+      </div>
+    `;
+    if(item.stock!==undefined){
+      const s=document.createElement("p");
+      s.textContent="В наличии: "+item.stock;
+      d.appendChild(s);
+    }
+    const btn=document.createElement("button");
+    d.appendChild(btn);
+    updateButtonText(item,btn);
     btn.addEventListener("click",()=>{
       if(item.stock!==undefined && item.stock<=0) return;
       if(coins<item.cost) return;
-      const oldCoins=coins; coins-=item.cost;
+      const oldCoins=coins;
+      coins-=item.cost;
       if(item.id===1){ clickPower+=1; item.cost+=item.incrementCost; }
       if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock=Math.max(0,item.stock-1); }
-      animateCounter(oldCoins,coins); renderShop(); updatePricesColor();
+      animateCounter(oldCoins,coins);
+      renderShop();
     });
-    d.appendChild(btn); itemsBlock.appendChild(d);
+    itemsBlock.appendChild(d);
   });
 }
-function updatePricesColor(){ document.querySelectorAll('.item .price').forEach(p=>{ const txt=p.textContent; const cost=parseInt(txt)||0; p.style.color=(coins<cost)?"#ff3333":"#fff"; }); }
+function updatePricesColor(){
+  document.querySelectorAll('.item .price').forEach(p=>{
+    const txt=p.childNodes[0]?p.childNodes[0].textContent:p.textContent;
+    const cost=parseInt(txt)||0;
+    p.style.color=(coins<cost)?"#ff3333":"#fff";
+  });
+}
 
 /* LOGIN */
-document.getElementById("loginBtn").onclick=async()=>{ try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);} };
+document.getElementById("loginBtn").onclick=async()=>{ try{ await signInWithPopup(auth,provider); }catch(e){console.error(e);} };
 loginOutBtn.onclick=async()=>{
   if(!isGuest){ await signOut(auth); isGuest=true; userId=localUserId; coins=0; clickPower=1; animateCounter(0,0); loginOutBtn.textContent="Войти/Зарегистрироваться"; document.getElementById("loginBtn").style.display="block"; renderShop(); }
 };
+
+/* AUTH STATE */
 onAuthStateChanged(auth,user=>{
-  if(user){ isGuest=false; userId=user.uid; loginOutBtn.textContent="Выйти из Аккаунта"; document.getElementById("loginBtn").style.display="none"; } else { isGuest=true; document.getElementById("loginBtn").style.display="block"; }
+  if(user){ isGuest=false; userId=user.uid; loginOutBtn.textContent="Выйти из Аккаунта"; document.getElementById("loginBtn").style.display="none"; }
+  else{ isGuest=true; document.getElementById("loginBtn").style.display="block"; }
 });
 
 /* PANELS */
@@ -229,19 +287,22 @@ const shopBtnEl=document.getElementById("shopBtn");
 const backBtnEl=document.getElementById("backBtn");
 const settingsBtnEl=document.getElementById("settingsBtn");
 const loginBtnEl=document.getElementById("loginBtn");
+const backToClickerBtn=document.getElementById("backToClickerBtn");
 panels.style.transform="translateX(-392px)";
 
-function goToShop(){ panels.style.transform="translateX(-784px)"; shopBtnEl.style.right="-60px"; backBtnEl.style.display="block"; setTimeout(()=>backBtnEl.style.left="12px",50); updatePricesColor(); }
-function goToSettings(){ panels.style.transform="translateX(0)"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; setTimeout(()=>backBtnEl.style.left="12px",50); }
-function goBack(){ panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtnEl.style.left="12px"; setTimeout(()=>backBtnEl.style.display="none",500); }
+function goToShop(){ panels.style.transform="translateX(-784px)"; shopBtnEl.style.right="-60px"; backBtnEl.style.display="none"; backToClickerBtn.style.display="block"; setTimeout(()=> backToClickerBtn.style.right="66px",0); updatePricesColor();}
+backToClickerBtn.onclick=()=>{ panels.style.transform="translateX(-392px)"; backToClickerBtn.style.right="-60px"; setTimeout(()=> backToClickerBtn.style.display="none",400);}
+function goToSettings(){ panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; setTimeout(()=>backBtnEl.style.left="12px",50);}
+function goBackFromSettings(){ panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; if(isGuest) loginBtnEl.style.left="12px"; backBtnEl.style.left="-60px"; setTimeout(()=>backBtnEl.style.display="none",500);}
+shopBtnEl.onclick=goToShop; settingsBtnEl.onclick=goToSettings;
+backBtnEl.onclick=()=>{ goBackFromSettings(); };
 
-shopBtnEl.onclick=goToShop; settingsBtnEl.onclick=goToSettings; backBtnEl.onclick=goBack;
-
-/* INIT */
+/* INIT AFTER SPLASH */
 fakeLoad(()=>{
   panels.style.transform="translateX(-392px)";
   renderShop();
   animateCounter(0,coins);
+  updatePricesColor();
 });
 </script>
 </body>
