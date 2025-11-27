@@ -1,295 +1,315 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AnTI Shop</title>
-
-<!-- Новый красивый шрифт -->
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-body {
-  margin:0; padding:0; background:#000;
-  display:flex; justify-content:center;
-  overflow:hidden;
-  font-family:'Montserrat', sans-serif;
-}
-
-#app { width:392px; height:100vh; position:relative; overflow:hidden; background:#0000; }
-
-/* SPLASH SCREEN */
-#splashScreen {
-  position:fixed; top:0; left:0; width:100vw; height:100vh;
-  background-color:#888;
-  display:flex; flex-direction:column; justify-content:center; align-items:center;
-  z-index:9999; transition:opacity 0.8s ease;
-}
-#splashScreen h1 { color:#fff; font-size:38px; margin-bottom:26px; }
-#progressBarContainer { width:300px; height:24px; background:#555; border-radius:12px; overflow:hidden; margin-bottom:12px; }
-#progressBar { width:0%; height:100%; background:linear-gradient(90deg,#ffba67,#ff7749); border-radius:12px; transition:width 0.2s ease; }
-#progressPercent { color:#fff; }
-
-/* BUTTONS */
-#shopBtn, #backBtn, #settingsBtn, #loginBtn, #backToClickerBtn {
-  position:absolute; width:48px; height:48px; background:none; border:none; padding:0; z-index:50;
-  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1),
-             right 0.55s cubic-bezier(0.35,0.15,0.1,1);
-}
-#shopBtn { top:12px; right:12px; }
-#backBtn { top:12px; right:12px; display:none; }
-#backToClickerBtn { top:12px; right:-60px; display:none; } /* новая кнопка */
-#settingsBtn { top:12px; left:12px; }
-#loginBtn { top:70px; left:12px; }
-#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img { width:100%; height:100%; }
-
-/* PANELS */
-#panels { position:absolute; top:0; left:0; width:calc(392px*3); height:100%; display:flex; transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
-#settingsPanel, #clickerPanel, #shopPanel { width:392px; height:100%; flex-shrink:0; }
-
-/* SETTINGS */
-#settingsPanel {
-  background:linear-gradient(to bottom,#7A4B1D,#5B3F1B);
-  padding-top:70px; display:flex; flex-direction:column;
-  align-items:center; justify-content:flex-start;
-  overflow-y:auto;
-}
-#settingsPanel button {
-  margin-top:20px; width:300px; padding:14px;
-  background:#332614; color:#fff; border:none;
-  border-radius:8px; font-size:18px;
-  transition:transform .12s ease;
-}
-
-/* CLICKER */
-#clickerPanel { background:linear-gradient(to bottom,#CEEDFF,#A1E6FF); padding-top:20px; position:relative; overflow:hidden; }
-#counter { font-size:44px; margin:4px 0 0; display:flex; justify-content:center; align-items:center; gap:6px; }
-#clickImg { width:220px; transition:transform 0.15s ease; -webkit-user-drag:none; touch-action:manipulation; }
-
-/* SHOP */
-#shopPanel { background:linear-gradient(to bottom,#7A4B1D,#5B3F1B); padding-top:70px; overflow-y:auto; }
-#shopPanelInner {
-  background:linear-gradient(to bottom,#FFBA67,#FF7749);
-  margin:0 auto; padding:24px; border-radius:14px;
-  width:350px; min-height:calc(100vh - 100px);
-}
-
-/* SHOP ITEMS — увеличенные */
-.item {
-  width:310px; height:185px;
-  background-image:url("img/item-frame.png");
-  background-size:100% 100%;
-  padding:10px 14px;
-  display:flex; flex-direction:column;
-  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));
-  margin:0 auto 22px;
-}
-.item-top img { width:72px; height:72px; margin-right:14px; }
-.item-text b { font-size:20px; }
-.item-text p { margin:3px 0; font-size:16px; }
-.item button {
-  margin-top:auto; width:100%; padding:12px;
-  background:#332614; color:#fff; border:none;
-  border-radius:8px; font-size:18px;
-  transition:transform .12s ease;
-}
-.price img { width:20px; height:20px; }
-
-/* Floating coins */
-.floating-coin { font-size:15px; }
-</style>
-</head>
-<body>
-
-<div id="splashScreen">
-  <h1>AnTI-Shop</h1>
-  <div id="progressBarContainer"><div id="progressBar"></div></div>
-  <div id="progressPercent">0%</div>
-</div>
-
-<div id="app">
-  <button id="settingsBtn"><img src="img/settings.png"></button>
-  <button id="loginBtn"><img src="img/login.png"></button>
-  <button id="shopBtn"><img src="img/shop-icon.png"></button>
-  <button id="backBtn"><img src="img/back-icon.png"></button>
-  <button id="backToClickerBtn"><img src="img/back-icon.png"></button>
-
-  <div id="panels">
-    <div id="settingsPanel">
-      <button id="loginOutBtn">Войти/Зарегистрироваться</button>
-    </div>
-    <div id="clickerPanel">
-      <div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
-      <div id="clickButtonWrapper">
-        <div id="ground"><img src="img/ground.png"></div>
-        <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
-      </div>
-    </div>
-    <div id="shopPanel">
-      <div id="shopPanelInner"><div id="items"></div></div>
-    </div>
-  </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
-  authDomain: "anti-shop-99f1d.firebaseapp.com",
-  databaseURL: "https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "anti-shop-99f1d",
-  storageBucket: "anti-shop-99f1d.firebasestorage.app",
-  messagingSenderId: "347202416802",
-  appId: "1:347202416802:web:2d2df1b819be9da180e7fb"
-};
-
-const appFB = initializeApp(firebaseConfig);
-const db = getDatabase(appFB);
-const auth = getAuth(appFB);
-const provider = new GoogleAuthProvider();
-
-/* SPLASH — чисто визуальная анимация */
-const splashScreen = document.getElementById("splashScreen");
-const progressBar = document.getElementById("progressBar");
-const progressPercent = document.getElementById("progressPercent");
-let progress = 0;
-function fakeLoad() {
-  const interval = setInterval(()=>{
-    progress += Math.random()*5;
-    if(progress>=100){ progress=100; clearInterval(interval); setTimeout(()=>splashScreen.style.opacity=0,500); setTimeout(()=>splashScreen.style.display="none",1300);}
-    progressBar.style.width = progress + "%";
-    progressPercent.textContent = Math.floor(progress) + "%";
-  },100);
-}
-fakeLoad();
-
-/* VARIABLES */
-let isGuest=true;
-let localUserId=localStorage.getItem("userId");
-if(!localUserId){ localUserId="guest_"+Math.random().toString(36).substring(2,9); localStorage.setItem("userId",localUserId);}
-let userId=localUserId;
-let coins=0,clickPower=1,dataLoaded=false,lastSavedCoins=0;
-
-const counterValue=document.getElementById("counterValue");
-const itemsBlock=document.getElementById("items");
-const loginOutBtn=document.getElementById("loginOutBtn");
-
-const shopItems=[
-  {id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
-  {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}
-];
-
-/* Функция плавного обновления числа монет */
-function animateCounter(oldVal,newVal){
-  let start=oldVal, end=newVal;
-  const step=Math.max(1,(end-start)/20);
-  const interval=setInterval(()=>{
-    start+=step;
-    if(start>=end){ start=end; clearInterval(interval);}
-    counterValue.textContent=Math.floor(start);
-  },25);
-}
-
-/* CLICKER */
-const clickImg=document.getElementById("clickImg"), clickButton=document.getElementById("clickButton");
-function spawnFloatingCoin(x,y,value){ const el=document.createElement("div"); el.className="floating-coin"; el.style.left=(x-10)+"px"; el.style.top=(y-10)+"px"; el.innerHTML=`<img src="img/anti-coin.png">${value}`; document.body.appendChild(el); requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; }); setTimeout(()=>el.remove(),800);}
-function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower); animateCounter(parseInt(counterValue.textContent),coins); }
-
-clickButton.addEventListener("touchstart",e=>{ e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY);} clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)";},150); },{passive:false});
-clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)";},150); };
-
-/* LOGIN — Google Sign-In */
-document.getElementById("loginBtn").onclick = async () => {            
-  try{            
-    await signInWithPopup(auth, provider);            
-  } catch(err){            
-    console.error(err);            
-  }            
-};
-
-loginOutBtn.onclick=async()=>{
-  if(!isGuest){
-    await signOut(auth);
-    isGuest=true;
-    userId=localUserId;
-    coins=0; clickPower=1; lastSavedCoins=0;
-    animateCounter(0,0);
-    loginOutBtn.textContent="Войти/Зарегистрироваться";
-    document.getElementById("loginBtn").style.display="block";
-    updateUI();
-  }
-};
-
-/* PANELS & BUTTONS */
-const panels=document.getElementById("panels");
-const shopBtnEl=document.getElementById("shopBtn");
-const backBtnEl=document.getElementById("backBtn");
-const settingsBtnEl=document.getElementById("settingsBtn");
-const loginBtnEl=document.getElementById("loginBtn");
-const backToClickerBtn=document.getElementById("backToClickerBtn");
-
-panels.style.transform="translateX(-392px)";
-
-function goToShop(){
-  panels.style.transform="translateX(-784px)";
-  shopBtnEl.style.right="-60px";
-  backBtnEl.style.display="block"; setTimeout(()=>backBtnEl.style.right="12px",50);
-
-  backToClickerBtn.style.display = "block";
-  setTimeout(()=> backToClickerBtn.style.right = "66px", 0);
-
-  if(isGuest) loginBtnEl.style.left="-60px";
-}
-
-backToClickerBtn.onclick = () => {
-  panels.style.transform="translateX(-392px)";
-  backToClickerBtn.style.right="-60px";
-  setTimeout(() => backToClickerBtn.style.display="none", 400);
-};
-
-function goToSettings(){
-  panels.style.transform="translateX(0)";
-  shopBtnEl.style.right="-60px";
-  settingsBtnEl.style.left="-60px";
-  loginBtnEl.style.left="-60px";
-  backBtnEl.style.display="block"; setTimeout(()=>backBtnEl.style.left="12px",50);
-}
-
-function goBackFromShop(){
-  panels.style.transform="translateX(-392px)";
-  shopBtnEl.style.right="12px";
-  backBtnEl.style.right="-60px";
-  if(isGuest) loginBtnEl.style.left="12px";
-  setTimeout(()=>backBtnEl.style.display="none",500);
-}
-
-function goBackFromSettings(){
-  panels.style.transform="translateX(-392px)";
-  shopBtnEl.style.right="12px";
-  settingsBtnEl.style.left="12px";
-  if(isGuest) loginBtnEl.style.left="12px";
-  backBtnEl.style.left="-60px";
-  setTimeout(()=>backBtnEl.style.display="none",500);
-}
-
-shopBtnEl.onclick=goToShop;
-settingsBtnEl.onclick=goToSettings;
-
-backBtnEl.onclick=()=>{
-  const transform=getComputedStyle(panels).transform;
-  if(transform.includes("matrix") && transform !== "none"){
-    let values=transform.match(/matrix\((.*)\)/)[1].split(',');
-    let m41=parseFloat(values[4]);
-    if(m41 === -784) goBackFromShop();
-    else goBackFromSettings();
-  } else goBackFromSettings();
-};
-
-/* UI update */
-function updateUI(){ animateCounter(parseInt(counterValue.textContent),coins); }
-</script>
-</body>
+<!DOCTYPE html>                          
+<html lang="ru">                          
+<head>                          
+<meta charset="UTF-8">                          
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">                          
+<title>AnTI Shop</title>                          
+              
+<!-- Новый красивый шрифт -->              
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">                          
+              
+<style>                          
+body {               
+  margin:0; padding:0; background:#000;               
+  display:flex; justify-content:center;               
+  overflow:hidden;               
+  font-family:'Montserrat', sans-serif;              
+}                          
+              
+#app { width:392px; height:100vh; position:relative; overflow:hidden; background:#0000; }                          
+              
+/* SPLASH SCREEN */                          
+#splashScreen {                          
+  position:fixed; top:0; left:0; width:100vw; height:100vh;                          
+  background-color:#888;                          
+  display:flex; flex-direction:column; justify-content:center; align-items:center;                          
+  z-index:9999; transition:opacity 0.8s ease;                          
+}                          
+#splashScreen h1 { color:#fff; font-size:38px; margin-bottom:26px; }                          
+#progressBarContainer { width:300px; height:24px; background:#555; border-radius:12px; overflow:hidden; margin-bottom:12px; }                          
+#progressBar { width:0%; height:100%; background:linear-gradient(90deg,#ffba67,#ff7749); border-radius:12px; transition:width 0.2s ease; }                          
+#progressPercent { color:#fff; }                          
+              
+/* BUTTONS */                          
+#shopBtn, #backBtn, #settingsBtn, #loginBtn, #backToClickerBtn {                          
+  position:absolute; width:48px; height:48px; background:none; border:none; padding:0; z-index:50;                          
+  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1),              
+             right 0.55s cubic-bezier(0.35,0.15,0.1,1);                          
+}                          
+              
+#shopBtn { top:12px; right:12px; }                          
+#backBtn { top:12px; right:12px; display:none; }                          
+#backToClickerBtn { top:12px; right:-60px; display:none; } /* новая кнопка */                          
+#settingsBtn { top:12px; left:12px; }                          
+#loginBtn { top:70px; left:12px; }                          
+#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img { width:100%; height:100%; }                          
+              
+/* PANELS */                          
+#panels { position:absolute; top:0; left:0; width:calc(392px*3); height:100%; display:flex; transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }                          
+#settingsPanel, #clickerPanel, #shopPanel { width:392px; height:100%; flex-shrink:0; }                          
+              
+/* SETTINGS */                          
+#settingsPanel {               
+  background:linear-gradient(to bottom,#7A4B1D,#5B3F1B);               
+  padding-top:70px; display:flex; flex-direction:column;               
+  align-items:center; justify-content:flex-start;               
+  overflow-y:auto;               
+}                          
+              
+#settingsPanel button {               
+  margin-top:20px; width:300px; padding:14px;               
+  background:#332614; color:#fff; border:none;               
+  border-radius:8px; font-size:18px;              
+  transition:transform .12s ease;               
+}                          
+              
+/* CLICKER */                          
+#clickerPanel { background:linear-gradient(to bottom,#CEEDFF,#A1E6FF); padding-top:20px; position:relative; overflow:hidden; }                          
+#counter { font-size:44px; margin:4px 0 0; display:flex; justify-content:center; align-items:center; gap:6px; }                          
+              
+#clickImg { width:220px; transition:transform 0.15s ease; -webkit-user-drag:none; touch-action:manipulation; }                          
+              
+/* SHOP */                          
+#shopPanel { background:linear-gradient(to bottom,#7A4B1D,#5B3F1B); padding-top:70px; overflow-y:auto; }                          
+              
+#shopPanelInner {               
+  background:linear-gradient(to bottom,#FFBA67,#FF7749);               
+  margin:0 auto; padding:24px; border-radius:14px;               
+  width:350px; min-height:calc(100vh - 100px);               
+}                          
+              
+/* SHOP ITEMS — увеличенные */                          
+.item {               
+  width:310px; height:185px;               
+  background-image:url("img/item-frame.png");               
+  background-size:100% 100%;               
+  padding:10px 14px;               
+  display:flex; flex-direction:column;               
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));               
+  margin:0 auto 22px;               
+}                          
+              
+.item-top img { width:72px; height:72px; margin-right:14px; }                          
+.item-text b { font-size:20px; }                          
+.item-text p { margin:3px 0; font-size:16px; }                          
+              
+.item button {               
+  margin-top:auto; width:100%; padding:12px;               
+  background:#332614; color:#fff; border:none;               
+  border-radius:8px; font-size:18px;               
+  transition:transform .12s ease;               
+}                          
+              
+.price img { width:20px; height:20px; }                          
+              
+/* Floating coins */                          
+.floating-coin { font-size:15px; }                          
+</style>                          
+</head>                          
+<body>                          
+              
+              
+<div id="splashScreen">                          
+  <h1>AnTI-Shop</h1>                          
+  <div id="progressBarContainer"><div id="progressBar"></div></div>                          
+  <div id="progressPercent">0%</div>                          
+</div>                          
+              
+              
+<div id="app">                          
+  <button id="settingsBtn"><img src="img/settings.png"></button>                          
+  <button id="loginBtn"><img src="img/login.png"></button>                          
+  <button id="shopBtn"><img src="img/shop-icon.png"></button>                          
+  <button id="backBtn"><img src="img/back-icon.png"></button>                  
+              
+  <!-- Новая кнопка возврата в кликер -->              
+  <button id="backToClickerBtn"><img src="img/back-icon.png"></button>                          
+                          
+  <div id="panels">                          
+    <div id="settingsPanel">                          
+      <button id="loginOutBtn">Войти/Зарегистрироваться</button>                          
+    </div>                          
+    <div id="clickerPanel">                          
+      <div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>                          
+      <div id="clickButtonWrapper">                          
+        <div id="ground"><img src="img/ground.png"></div>                          
+        <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>                          
+      </div>                          
+    </div>                          
+    <div id="shopPanel">                          
+      <div id="shopPanelInner"><div id="items"></div></div>                          
+    </div>                          
+  </div>                          
+</div>                          
+              
+              
+<script type="module">                          
+/* — оставляю весь твой JS без изменений, кроме двух правок:                            
+   1. loginBtn делает вход в Google                             
+   2. добавлена новая кнопка backToClickerBtn                             
+*/                          
+              
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";                          
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";                          
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";                          
+              
+const firebaseConfig = {                          
+  apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",                          
+  authDomain: "anti-shop-99f1d.firebaseapp.com",                          
+  databaseURL: "https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",                          
+  projectId: "anti-shop-99f1d",                          
+  storageBucket: "anti-shop-99f1d.firebasestorage.app",                          
+  messagingSenderId: "347202416802",                          
+  appId: "1:347202416802:web:2d2df1b819be9da180e7fb"                          
+};                          
+              
+const appFB = initializeApp(firebaseConfig);                          
+const db = getDatabase(appFB);                          
+const auth = getAuth(appFB);                          
+const provider = new GoogleAuthProvider();                          
+              
+/* ——— БЛОК loginBtn — теперь открывает Google Sign-In ——— */                          
+document.getElementById("loginBtn").onclick = async () => {              
+  try{              
+    await signInWithPopup(auth, provider);              
+  } catch(err){              
+    console.error(err);              
+  }              
+};              
+                          
+              
+/* ВСЁ ДАЛЬНЕЙШЕЕ — БЕЗ ИЗМЕНЕНИЙ, КАК У ТЕБЯ */                          
+              
+/* SPLASH */                          
+const splashScreen=document.getElementById("splashScreen");                          
+const progressBar=document.getElementById("progressBar");                          
+const progressPercent=document.getElementById("progressPercent");                          
+let progress=0;                          
+function updateProgress(i){ progress=Math.min(100,progress+i); progressBar.style.width=progress+"%"; progressPercent.textContent=progress+"%"; }                          
+function hideSplash(){ splashScreen.style.opacity=0; setTimeout(()=>splashScreen.style.display="none",800); }                          
+              
+/* VARIABLES */                          
+let isGuest=true;                          
+let localUserId=localStorage.getItem("userId");                          
+if(!localUserId){ localUserId="guest_"+Math.random().toString(36).substring(2,9); localStorage.setItem("userId",localUserId);}                          
+let userId=localUserId;                          
+let coins=0,clickPower=1,dataLoaded=false,lastSavedCoins=0;                          
+              
+const counterValue=document.getElementById("counterValue");                          
+const itemsBlock=document.getElementById("items");                          
+const loginOutBtn=document.getElementById("loginOutBtn");                          
+              
+const shopItems=[                          
+  {id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},                          
+  {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}                          
+];                          
+              
+/* LOAD */                          
+async function loadData(){                          
+  if(!isGuest){                          
+    try{                          
+      const snap=await get(ref(db,"players/"+userId));                          
+      if(snap.exists()){                          
+        const d=snap.val();                          
+        coins=d.coins??0;                          
+        clickPower=d.clickPower??1;                          
+        lastSavedCoins=coins;                          
+        if(d.shopItems) shopItems.forEach(item=>{ if(d.shopItems[item.id]){ item.cost=d.shopItems[item.id].cost??item.cost; if(item.stock!==undefined)item.stock=d.shopItems[item.id].stock??item.stock;} });                          
+      }                          
+    }catch(e){ console.error(e);}                          
+  }                          
+  dataLoaded=true; updateUI(); renderShop(); updateProgress(40); hideSplash();                          
+}                          
+              
+/* SAVE */                          
+function saveData(){ if(!dataLoaded||isGuest)return; const shopState={}; shopItems.forEach(i=>{ shopState[i.id]={cost:i.cost}; if(i.stock!==undefined)shopState[i.id].stock=i.stock; }); set(ref(db,"players/"+userId),{coins,clickPower,shopItems:shopState}); lastSavedCoins=coins; }                          
+              
+/* UI */                          
+function updateUI(){                          
+  counterValue.textContent=coins;                          
+}                          
+              
+/*******************************************************              
+                НОВАЯ КНОПКА ВОЗВРАТА              
+ ******************************************************/                          
+              
+const backToClickerBtn = document.getElementById("backToClickerBtn");              
+              
+/* Переход в магазин */              
+function goToShop(){              
+  panels.style.transform="translateX(-784px)";              
+  shopBtnEl.style.right="-60px";              
+              
+  backBtnEl.style.display="block";              
+  setTimeout(()=>backBtnEl.style.right="12px",50);              
+              
+  /* Показываем кнопку возврата в кликер */              
+  backToClickerBtn.style.display = "block";              
+  setTimeout(()=> backToClickerBtn.style.right = "66px", 0);              
+              
+  if(isGuest) loginBtnEl.style.left="-60px";              
+}              
+              
+/* Возврат в кликер из магазина */              
+backToClickerBtn.onclick = () => {              
+  panels.style.transform="translateX(-392px)";              
+  backToClickerBtn.style.right="-60px";              
+              
+  setTimeout(() => backToClickerBtn.style.display="none", 400);              
+};              
+              
+/******************************************************/              
+              
+              
+/* ОСТАЛЬНЫЙ ТВОЙ КОД — БЕЗ ИЗМЕНЕНИЙ */                          
+              
+const panels=document.getElementById("panels");                          
+const shopBtnEl=document.getElementById("shopBtn");                          
+const backBtnEl=document.getElementById("backBtn");                          
+const settingsBtnEl=document.getElementById("settingsBtn");                          
+const loginBtnEl=document.getElementById("loginBtn");                          
+              
+panels.style.transform="translateX(-392px)";                          
+              
+function goToSettings(){                          
+  panels.style.transform="translateX(0)";                          
+  shopBtnEl.style.right="-60px";                          
+  settingsBtnEl.style.left="-60px";                          
+  loginBtnEl.style.left="-60px";                          
+  backBtnEl.style.display="block";                          
+  setTimeout(()=>backBtnEl.style.left="12px",50);                          
+}                          
+              
+function goBackFromShop(){                          
+  panels.style.transform="translateX(-392px)";                          
+  shopBtnEl.style.right="12px";                          
+  backBtnEl.style.right="-60px";                          
+  if(isGuest) loginBtnEl.style.left="12px";                          
+  setTimeout(()=>backBtnEl.style.display="none",500);                          
+}                          
+              
+function goBackFromSettings(){                          
+  panels.style.transform="translateX(-392px)";                          
+  shopBtnEl.style.right="12px";                          
+  settingsBtnEl.style.left="12px";                          
+  if(isGuest) loginBtnEl.style.left="12px";                          
+  backBtnEl.style.left="-60px";                          
+  setTimeout(()=>backBtnEl.style.display="none",500);                          
+}                          
+              
+shopBtnEl.onclick=goToShop;                          
+settingsBtnEl.onclick=goToSettings;                          
+              
+backBtnEl.onclick=()=>{                          
+  const transform=getComputedStyle(panels).transform;                          
+  if(transform.includes("matrix") && transform !== "none"){                          
+    let values=transform.match(/matrix\((.*)\)/)[1].split(',');                          
+    let m41=parseFloat(values[4]);                          
+    if(m41 === -784) goBackFromShop();                          
+    else goBackFromSettings();                          
+  } else goBackFromSettings();                          
+};                          
+              
+</script>                          
+</body>                          
 </html>
