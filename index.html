@@ -14,7 +14,6 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 
 #shopBtn, #backBtn, #settingsBtn, #loginBtn {
   position: absolute;
-  top: 12px;
   width: 48px;
   height: 48px;
   background: none;
@@ -22,11 +21,10 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
   padding: 0;
   z-index: 50;
 }
-
-#shopBtn { right: 12px; }
-#backBtn { right: 12px; display: none; }
-#settingsBtn { left: 12px; }
-#loginBtn { left: 70px; }
+#shopBtn { top: 12px; right: 12px; }
+#backBtn { top: 12px; right: 12px; display: none; }
+#settingsBtn { top: 12px; left: 12px; }
+#loginBtn { top: 70px; left: 12px; } /* под кнопкой настроек */
 
 #shopBtn img, #backBtn img, #settingsBtn img, #loginBtn img {
   width: 100%;
@@ -100,7 +98,7 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 /* ===== FIREBASE CONFIG ===== */
 const firebaseConfig = {
@@ -119,12 +117,14 @@ const auth = getAuth(appFB);
 const provider = new GoogleAuthProvider();
 
 /* ===== ПЕРЕМЕННЫЕ ===== */
-let userId = localStorage.getItem("userId");
-if (!userId) {
-  userId = "guest_" + Math.random().toString(36).substring(2, 9);
-  localStorage.setItem("userId", userId);
+let isGuest = true;
+let localUserId = localStorage.getItem("userId");
+if (!localUserId) {
+  localUserId = "guest_" + Math.random().toString(36).substring(2, 9);
+  localStorage.setItem("userId", localUserId);
 }
 
+let userId = localUserId;
 let coins = 0;
 let clickPower = 1;
 let dataLoaded = false;
@@ -140,29 +140,27 @@ const shopItems = [
 
 /* ===== ЗАГРУЗКА ДАННЫХ ===== */
 async function loadData() {
-  const userRef = ref(db, "players/" + userId);
-  try {
-    const snap = await get(userRef);
-    if (!snap.exists() || !snap.val()) {
-      await set(userRef, { coins: 0, clickPower: 1, shopItems: {} });
-      coins = 0; clickPower = 1;
-      console.log("создан новый пользователь");
-    } else {
-      const d = snap.val();
-      coins = d.coins ?? 0;
-      clickPower = d.clickPower ?? 1;
-      lastSavedCoins = coins;
-      if (d.shopItems) {
-        shopItems.forEach(item => {
-          if (d.shopItems[item.id]) {
-            item.cost = d.shopItems[item.id].cost ?? item.cost;
-            if (item.stock !== undefined)
-              item.stock = d.shopItems[item.id].stock ?? item.stock;
-          }
-        });
+  if (!isGuest) {
+    const userRef = ref(db, "players/" + userId);
+    try {
+      const snap = await get(userRef);
+      if (snap.exists() && snap.val()) {
+        const d = snap.val();
+        coins = d.coins ?? 0;
+        clickPower = d.clickPower ?? 1;
+        lastSavedCoins = coins;
+        if (d.shopItems) {
+          shopItems.forEach(item => {
+            if (d.shopItems[item.id]) {
+              item.cost = d.shopItems[item.id].cost ?? item.cost;
+              if (item.stock !== undefined)
+                item.stock = d.shopItems[item.id].stock ?? item.stock;
+            }
+          });
+        }
       }
-    }
-  } catch(e){ console.error(e); }
+    } catch(e){ console.error(e); }
+  }
   dataLoaded = true;
   updateUI();
   renderShop();
@@ -170,7 +168,7 @@ async function loadData() {
 
 /* ===== СОХРАНЕНИЕ ===== */
 function saveData() {
-  if (!dataLoaded) return;
+  if (!dataLoaded || isGuest) return; // гости не сохраняются в базу
   const shopState = {};
   shopItems.forEach(i => {
     shopState[i.id] = { cost: i.cost };
@@ -205,6 +203,70 @@ function clickAction(x, y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower)
 clickButton.addEventListener("touchstart",e=>{e.preventDefault();for(const t of e.changedTouches){clickAction(t.clientX,t.clientY);}clickImg.src="img/click2.png";clickImg.style.transform="scale(0.92)";setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},150);},{passive:false});
 clickButton.onclick=e=>{clickAction(e.clientX,e.clientY);clickImg.src="img/click2.png";clickImg.style.transform="scale(0.92)";setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},150);};
 
+/* ===== SHOP ===== */
+function renderShop() {
+  itemsBlock.innerHTML = "";
+  shopItems.forEach(item => {
+    const d = document.createElement("div");
+    d.className = "item";
+    d.innerHTML = `
+      <div class="item-top">
+        <img src="${item.img}">
+        <div class="item-text">
+          <b>${item.name}</b>
+          <p>${item.description}</p>
+          <p>${item.property}</p>
+        </div>
+      </div>
+    `;
+    if (item.stock !== undefined) {
+      const s = document.createElement("p");
+      s.className = "stock";
+      s.textContent = "В наличии: " + item.stock;
+      d.appendChild(s);
+    }
+    const btn = document.createElement("button");
+    d.appendChild(btn);
+    updateButtonText(item, btn);
+    btn.onclick = () => {
+      if (!dataLoaded) return;
+      if (item.stock !== undefined && item.stock <= 0) return;
+      if (coins < item.cost) return;
+
+      coins -= item.cost;
+      if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
+      if (item.id === 2) { clickPower += item.power; item.cost += 250; item.stock = Math.max(0, item.stock - 1); }
+
+      updateUI();
+      saveData();
+      updateButtonText(item, btn);
+
+      if (item.stock !== undefined) {
+        const st = d.querySelector(".stock");
+        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
+      }
+    };
+    itemsBlock.appendChild(d);
+  });
+}
+
+function updateButtonText(item, btn){
+  btn.innerHTML = "";
+  if (item.stock !== undefined && item.stock <= 0) {
+    btn.textContent = "распродано";
+    btn.disabled = true;
+    return;
+  }
+  const p = document.createElement("div");
+  p.className = "price";
+  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
+  p.querySelector("img").style.width = "18px";
+  p.querySelector("img").style.height = "18px";
+  p.querySelector("img").style.objectFit = "contain";
+  p.style.color = coins < item.cost ? "#ff3333" : "#fff";
+  btn.appendChild(p);
+}
+
 /* ===== AUTO-SAVE ===== */
 setInterval(()=>{ if(coins!==lastSavedCoins) saveData(); },5000);
 
@@ -214,35 +276,39 @@ loginBtn.onclick = async ()=>{
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    console.log("вход:", user.uid);
     const onlineId = user.uid;
-    const localCoins = coins;
-    const localPower = clickPower;
 
     const onlineRef = ref(db, "players/" + onlineId);
     const onlineData = await get(onlineRef);
 
     if (onlineData.exists()) {
       const d = onlineData.val();
-      coins = d.coins ?? 0;
-      clickPower = d.clickPower ?? 1;
-      console.log("загружен прогресс аккаунта");
+      coins = d.coins ?? coins;
+      clickPower = d.clickPower ?? clickPower;
     } else {
-      await set(onlineRef, { coins: localCoins, clickPower: localPower, shopItems: {} });
-      console.log("новый аккаунт — локальный прогресс сохранён");
+      await set(onlineRef, { coins, clickPower, shopItems: {} });
     }
 
-    localStorage.setItem("userId", onlineId);
     userId = onlineId;
+    isGuest = false;
+    localStorage.setItem("userId", onlineId);
     loginBtn.style.display = "none";
     updateUI();
     saveData();
-  } catch(err) {
-    console.error("ошибка входа:", err);
-  }
+  } catch(err) { console.error(err); }
 };
 
-/* ===== ПАНЕЛИ ===== */
+/* ===== AUTO LOGIN IF ALREADY SIGNED IN ===== */
+onAuthStateChanged(auth, user => {
+  if(user){
+    userId = user.uid;
+    isGuest = false;
+    loginBtn.style.display = "none";
+    loadData();
+  }
+});
+
+/* ===== PANELS ===== */
 const panels = document.getElementById("panels");
 const shopBtn = document.getElementById("shopBtn");
 const backBtn = document.getElementById("backBtn");
