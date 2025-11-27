@@ -61,6 +61,7 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
   border: none;
   padding: 0;
   z-index: 50;
+  transition: transform 0.5s ease;
 }
 #shopBtn { top: 12px; right: 12px; }
 #backBtn { top: 12px; right: 12px; display: none; }
@@ -72,6 +73,7 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 #panels { position: absolute; top: 0; left: 0; width: calc(392px * 3); height: 100%; display: flex; transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
 #settingsPanel, #clickerPanel, #shopPanel { width: 392px; height: 100%; flex-shrink: 0; }
 
+/* ===== PANELS ===== */
 #clickerPanel { background: linear-gradient(to bottom, #CEEDFF, #A1E6FF); padding-top: 20px; position: relative; overflow: hidden; }
 #counter { font-size: 46px; margin: 14px 0; display: flex; justify-content: center; align-items: center; gap: 6px; }
 #counter img { width: 32px; height: 32px; object-fit: contain; }
@@ -143,159 +145,70 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-/* ===== FIREBASE CONFIG ===== */
-const firebaseConfig = {
-  apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
-  authDomain: "anti-shop-99f1d.firebaseapp.com",
-  databaseURL: "https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "anti-shop-99f1d",
-  storageBucket: "anti-shop-99f1d.firebasestorage.app",
-  messagingSenderId: "347202416802",
-  appId: "1:347202416802:web:2d2df1b819be9da180e7fb"
-};
+const firebaseConfig = { apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0", authDomain:"anti-shop-99f1d.firebaseapp.com", databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app", projectId:"anti-shop-99f1d", storageBucket:"anti-shop-99f1d.firebasestorage.app", messagingSenderId:"347202416802", appId:"1:347202416802:web:2d2df1b819be9da180e7fb" };
 
 const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
 const auth = getAuth(appFB);
 const provider = new GoogleAuthProvider();
 
-/* ===== SPLASH SCREEN ===== */
-const splashScreen = document.getElementById("splashScreen");
-const progressBar = document.getElementById("progressBar");
-const progressPercent = document.getElementById("progressPercent");
-let progress = 0;
-function updateProgress(increment){
-  progress = Math.min(100, progress + increment);
-  progressBar.style.width = progress + "%";
-  progressPercent.textContent = progress + "%";
-}
+/* SPLASH */
+const splashScreen = document.getElementById("splashScreen"), progressBar = document.getElementById("progressBar"), progressPercent = document.getElementById("progressPercent");
+let progress=0;
+function updateProgress(increment){ progress=Math.min(100,progress+increment); progressBar.style.width=progress+"%"; progressPercent.textContent=progress+"%"; }
 function hideSplash(){ splashScreen.style.opacity=0; setTimeout(()=>splashScreen.style.display="none",800); }
 
-/* ===== VARIABLES ===== */
-let isGuest = true;
-let localUserId = localStorage.getItem("userId");
-if (!localUserId) { localUserId = "guest_" + Math.random().toString(36).substring(2, 9); localStorage.setItem("userId", localUserId); }
-let userId = localUserId;
-let coins = 0, clickPower = 1, dataLoaded = false, lastSavedCoins = 0;
+/* VARIABLES */
+let isGuest=true; let localUserId = localStorage.getItem("userId");
+if(!localUserId){ localUserId="guest_"+Math.random().toString(36).substring(2,9); localStorage.setItem("userId",localUserId);}
+let userId=localUserId;
+let coins=0, clickPower=1, dataLoaded=false, lastSavedCoins=0;
 
-const counterValue = document.getElementById("counterValue");
-const itemsBlock = document.getElementById("items");
-const loginOutBtn = document.getElementById("loginOutBtn");
+const counterValue=document.getElementById("counterValue");
+const itemsBlock=document.getElementById("items");
+const loginOutBtn=document.getElementById("loginOutBtn");
 
-const shopItems = [
-  { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
-  { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
-];
+const shopItems=[{ id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png' },{ id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}];
 
-/* ===== DATA LOAD ===== */
-async function loadData(){
-  if(!isGuest){
-    try{
-      const snap = await get(ref(db,"players/"+userId));
-      if(snap.exists()){
-        const d = snap.val();
-        coins = d.coins ?? 0;
-        clickPower = d.clickPower ?? 1;
-        lastSavedCoins = coins;
-        if(d.shopItems) shopItems.forEach(item=>{ if(d.shopItems[item.id]){ item.cost=d.shopItems[item.id].cost??item.cost; if(item.stock!==undefined)item.stock=d.shopItems[item.id].stock??item.stock; }});
-      }
-    }catch(e){ console.error(e); }
-  }
-  dataLoaded=true;
-  updateUI();
-  renderShop();
-  updateProgress(40);
-  hideSplash();
-}
+/* LOAD DATA */
+async function loadData(){ if(!isGuest){ try{ const snap=await get(ref(db,"players/"+userId)); if(snap.exists()){ const d=snap.val(); coins=d.coins??0; clickPower=d.clickPower??1; lastSavedCoins=coins; if(d.shopItems) shopItems.forEach(item=>{ if(d.shopItems[item.id]){ item.cost=d.shopItems[item.id].cost??item.cost; if(item.stock!==undefined) item.stock=d.shopItems[item.id].stock??item.stock; } }); } }catch(e){ console.error(e);} } dataLoaded=true; updateUI(); renderShop(); updateProgress(40); hideSplash();}
 
-/* ===== SAVE ===== */
-function saveData(){ if(!dataLoaded || isGuest)return; const shopState={}; shopItems.forEach(i=>{ shopState[i.id]={cost:i.cost}; if(i.stock!==undefined)shopState[i.id].stock=i.stock; }); set(ref(db,"players/"+userId),{coins,clickPower,shopItems:shopState}); lastSavedCoins=coins; }
+/* SAVE DATA */
+function saveData(){ if(!dataLoaded||isGuest) return; const shopState={}; shopItems.forEach(i=>{ shopState[i.id]={cost:i.cost}; if(i.stock!==undefined)i.stock=i.stock; }); set(ref(db,"players/"+userId),{coins,clickPower,shopItems:shopState}); lastSavedCoins=coins;}
 
-/* ===== UI ===== */
-function updateUI(){ 
-  counterValue.textContent=coins; 
-  document.querySelectorAll('.item button .price').forEach(p=>{
-    const cost = parseInt(p.textContent);
-    p.style.color = coins < cost ? "#ff3333":"#fff";
-  });
-}
+/* UI UPDATE */
+function updateUI(){ counterValue.textContent=coins; document.querySelectorAll('.item button .price').forEach(p=>{ const cost=parseInt(p.textContent); p.style.color=coins<cost?"#ff3333":"#fff"; });}
 
-/* ===== CLICKER ===== */
+/* CLICKER */
 const clickImg=document.getElementById("clickImg"), clickButton=document.getElementById("clickButton");
 function spawnFloatingCoin(x,y,value){ const el=document.createElement("div"); el.className="floating-coin"; el.style.left=(x-10)+"px"; el.style.top=(y-10)+"px"; el.innerHTML=`<img src="img/anti-coin.png">${value}`; document.body.appendChild(el); requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; }); setTimeout(()=>el.remove(),800); }
-function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower); updateUI(); }
-clickButton.addEventListener("touchstart",e=>{ e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY); } clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); },{passive:false});
+function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower); updateUI();}
+clickButton.addEventListener("touchstart",e=>{ e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY);} clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150);},{passive:false});
 clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); };
 
-/* ===== SHOP ===== */
-function renderShop(){ 
-  itemsBlock.innerHTML=""; 
-  shopItems.forEach(item=>{
-    const d=document.createElement("div"); d.className="item"; 
-    d.innerHTML=`<div class="item-top"><img src="${item.img}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p>${item.property}</p></div></div>`; 
-    if(item.stock!==undefined){ const s=document.createElement("p"); s.className="stock"; s.textContent="В наличии: "+item.stock; d.appendChild(s); } 
-    const btn=document.createElement("button"); d.appendChild(btn); updateButtonText(item,btn); 
-    btn.onclick=()=>{ 
-      if(!dataLoaded)return; 
-      if(item.stock!==undefined&&item.stock<=0)return; 
-      if(coins<item.cost)return; 
-      coins-=item.cost; 
-      if(item.id===1){ clickPower+=1; item.cost+=item.incrementCost; } 
-      if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock=Math.max(0,item.stock-1); } 
-      updateUI(); saveData(); updateButtonText(item,btn); 
-      if(item.stock!==undefined){ const st=d.querySelector(".stock"); st.textContent=item.stock>0?"В наличии: "+item.stock:""; } 
-    }; 
-    itemsBlock.appendChild(d); 
-  }); 
-}
-function updateButtonText(item,btn){ 
-  btn.innerHTML=""; 
-  if(item.stock!==undefined&&item.stock<=0){ btn.textContent="распродано"; btn.disabled=true; return; } 
-  const p=document.createElement("div"); p.className="price"; p.innerHTML=`${item.cost}<img src="img/anti-coin.png">`; 
-  p.querySelector("img").style.width="18px"; 
-  p.querySelector("img").style.height="18px"; 
-  p.querySelector("img").style.objectFit="contain"; 
-  p.style.color=coins<item.cost?"#ff3333":"#fff"; 
-  btn.appendChild(p); 
-}
+/* SHOP */
+function renderShop(){ itemsBlock.innerHTML=""; shopItems.forEach(item=>{ const d=document.createElement("div"); d.className="item"; d.innerHTML=`<div class="item-top"><img src="${item.img}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p>${item.property}</p></div></div>`; if(item.stock!==undefined){ const s=document.createElement("p"); s.className="stock"; s.textContent="В наличии: "+item.stock; d.appendChild(s);} const btn=document.createElement("button"); d.appendChild(btn); updateButtonText(item,btn); btn.onclick=()=>{ if(!dataLoaded)return; if(item.stock!==undefined&&item.stock<=0)return; if(coins<item.cost)return; coins-=item.cost; if(item.id===1){ clickPower+=1; item.cost+=item.incrementCost;} if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock=Math.max(0,item.stock-1);} updateUI(); saveData(); updateButtonText(item,btn); if(item.stock!==undefined){ const st=d.querySelector(".stock"); st.textContent=item.stock>0?"В наличии: "+item.stock:"";} }; itemsBlock.appendChild(d); }); }
+function updateButtonText(item,btn){ btn.innerHTML=""; if(item.stock!==undefined&&item.stock<=0){ btn.textContent="распродано"; btn.disabled=true; return;} const p=document.createElement("div"); p.className="price"; p.innerHTML=`${item.cost}<img src="img/anti-coin.png">`; p.querySelector("img").style.width="18px"; p.querySelector("img").style.height="18px"; p.querySelector("img").style.objectFit="contain"; p.style.color=coins<item.cost?"#ff3333":"#fff"; btn.appendChild(p); }
 
-/* ===== AUTO-SAVE ===== */
+/* AUTO SAVE */
 setInterval(()=>{ if(coins!==lastSavedCoins) saveData(); },5000);
 
-/* ===== LOGIN ===== */
-loginOutBtn.onclick=async()=>{
-  if(isGuest){
-    try{
-      const result = await signInWithPopup(auth,provider);
-      const user=result.user;
-      const onlineId=user.uid;
-      const onlineRef=ref(db,"players/"+onlineId);
-      const onlineData=await get(onlineRef);
-      if(onlineData.exists()){ const d=onlineData.val(); coins=d.coins??coins; clickPower=d.clickPower??clickPower; } else { await set(onlineRef,{coins,clickPower,shopItems:{}}); }
-      userId=onlineId; isGuest=false; localStorage.setItem("userId",onlineId); loginOutBtn.textContent="Выйти из Аккаунта";
-      updateUI(); saveData(); updateProgress(40);
-    } catch(err){ console.error(err); }
-  } else {
-    await signOut(auth); 
-    isGuest=true; 
-    userId=localUserId; 
-    loginOutBtn.textContent="Войти/Зарегистрироваться"; 
-    updateUI();
-  }
-};
+/* LOGIN/LOGOUT */
+loginOutBtn.onclick=async()=>{ if(isGuest){ try{ const result=await signInWithPopup(auth,provider); const user=result.user; const onlineId=user.uid; const onlineRef=ref(db,"players/"+onlineId); const onlineData=await get(onlineRef); if(onlineData.exists()){ const d=onlineData.val(); coins=d.coins??coins; clickPower=d.clickPower??clickPower;} else { await set(onlineRef,{coins,clickPower,shopItems:{}});} userId=onlineId; isGuest=false; localStorage.setItem("userId",onlineId); loginOutBtn.textContent="Выйти из Аккаунта"; updateUI(); saveData(); updateProgress(40);} catch(err){ console.error(err);} } else { await signOut(auth); isGuest=true; userId=localUserId; loginOutBtn.textContent="Войти/Зарегистрироваться"; updateUI(); } }
 
-/* ===== AUTO LOGIN ===== */
-onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginOutBtn.textContent="Выйти из Аккаунта"; updateProgress(40); loadData(); } else loadData(); });
+onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginOutBtn.textContent="Выйти из Аккаунта"; updateProgress(40); loadData();} else loadData(); });
 
-/* ===== PANELS ===== */
+/* PANELS AND BUTTONS ANIMATION */
 const panels=document.getElementById("panels");
-const shopBtn=document.getElementById("shopBtn");
-const backBtn=document.getElementById("backBtn");
-const settingsBtn=document.getElementById("settingsBtn");
+const shopBtnEl=document.getElementById("shopBtn");
+const backBtnEl=document.getElementById("backBtn");
+const settingsBtnEl=document.getElementById("settingsBtn");
+const loginBtnEl=document.getElementById("loginBtn");
 
-shopBtn.onclick=()=>{ panels.style.transform="translateX(-784px)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
-settingsBtn.onclick=()=>{ panels.style.transform="translateX(0)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
-backBtn.onclick=()=>{ panels.style.transform="translateX(-392px)"; shopBtn.style.display="block"; backBtn.style.display="none"; };
-</script>
-</body>
-</html
+function showClicker(){ panels.style.transform="translateX(-392px)"; backBtnEl.style.display="none"; shopBtnEl.style.transform="translateX(0)"; settingsBtnEl.style.transform="translateX(0)"; loginBtnEl.style.transform="translateX(0)"; }
+function showShop(){ panels.style.transform="translateX(-784px)"; shopBtnEl.style.transform="translateX(100px)"; backBtnEl.style.display="block"; backBtnEl.style.transform="translateX(0)"; }
+function showSettings(){ panels.style.transform="translateX(0)"; shopBtnEl.style.transform="translateX(100px)"; backBtnEl.style.display="block"; backBtnEl.style.transform="translateX(0)"; settingsBtnEl.style.transform="translateX(-100px)"; loginBtnEl.style.transform="translateX(-100px)"; }
+
+shopBtnEl.onclick=showShop;
+settingsBtnEl.onclick=showSettings;
+backBtnEl.onclick=()=>{ const transformX=pan
