@@ -38,6 +38,7 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 .price img { width: 18px; height: 18px; object-fit: contain; }
 .floating-coin { position: absolute; font-size: 14px; color: lime; pointer-events: none; display: flex; align-items: center; gap: 4px; transition: transform .8s ease-out, opacity .8s ease-out; z-index: 2; }
 .floating-coin img { width: 18px; height: 18px; object-fit: contain; }
+#loginBtn { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); padding: 16px 24px; font-size: 18px; border:none; border-radius:8px; background:#4285F4; color:#fff; cursor:pointer; z-index:100; }
 </style>
 </head>
 <body>
@@ -69,9 +70,12 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
   </div>
 </div>
 
+<button id="loginBtn">Войти через Google</button>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 /* ===== FIREBASE CONFIG ===== */
 const firebaseConfig = {
@@ -86,36 +90,55 @@ const firebaseConfig = {
 
 const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
+const auth = getAuth(appFB);
+const provider = new GoogleAuthProvider();
 
 /* ===== ПЕРЕМЕННЫЕ ===== */
-let userId = localStorage.getItem("userId");
-if (!userId) {
-  userId = "user_" + Math.random().toString(36).substring(2, 9);
-  localStorage.setItem("userId", userId);
-}
-
+let userId = null;
 let coins = 0;
 let clickPower = 1;
 let dataLoaded = false;
-let lastSavedCoins = 0; // для авто-сохранения только при изменении
+let lastSavedCoins = 0;
 
 const counterValue = document.getElementById("counterValue");
 const itemsBlock = document.getElementById("items");
+const loginBtn = document.getElementById("loginBtn");
 
 const shopItems = [
   { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
   { id:2, name:'Страшная штука', cost:250, description:'Она пугает.', property:'+10 за клик', power:10, stock:5, img:'img/item-2.png' }
 ];
 
+/* ===== LOGIN ===== */
+loginBtn.onclick = () => {
+  signInWithPopup(auth, provider)
+    .then(result => {
+      loginBtn.style.display = "none";
+      userId = result.user.uid;
+      loadData();
+    })
+    .catch(err => console.error(err));
+};
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginBtn.style.display = "none";
+    userId = user.uid;
+    loadData();
+  } else {
+    loginBtn.style.display = "block";
+  }
+});
+
 /* ===== ЗАГРУЗКА ДАННЫХ ===== */
 async function loadData() {
+  if (!userId) return;
   const userRef = ref(db, "players/" + userId);
   try {
     const snap = await get(userRef);
     if (!snap.exists() || !snap.val()) {
       await set(userRef, { coins: 0, clickPower: 1, shopItems: {} });
-      coins = 0;
-      clickPower = 1;
+      coins = 0; clickPower = 1;
       console.log("создан новый пользователь с дефолтными значениями");
     } else {
       const d = snap.val();
@@ -138,185 +161,87 @@ async function loadData() {
     renderShop();
   } catch(err) {
     console.error("ошибка загрузки данных:", err);
-    coins = 0;
-    clickPower = 1;
-    lastSavedCoins = coins;
-    dataLoaded = true;
-    updateUI();
-    renderShop();
+    coins = 0; clickPower = 1; lastSavedCoins = coins; dataLoaded = true;
+    updateUI(); renderShop();
   }
 }
 
 /* ===== СОХРАНЕНИЕ ДАННЫХ ===== */
 function saveData() {
-  if (!dataLoaded) return;
+  if (!dataLoaded || !userId) return;
   const shopState = {};
-  shopItems.forEach(i => {
-    shopState[i.id] = { cost: i.cost };
-    if (i.stock !== undefined) shopState[i.id].stock = i.stock;
-  });
-
+  shopItems.forEach(i => { shopState[i.id] = { cost: i.cost }; if(i.stock!==undefined) shopState[i.id].stock=i.stock; });
   const userRef = ref(db, "players/" + userId);
   set(userRef, { coins, clickPower, shopItems: shopState })
-    .then(() => {
-      lastSavedCoins = coins;
-      console.log("данные успешно сохранены");
-    })
-    .catch(err => console.error("ошибка при сохранении:", err));
+    .then(()=>{ lastSavedCoins = coins; console.log("данные успешно сохранены"); })
+    .catch(err=>console.error("ошибка при сохранении:", err));
 }
 
 /* ===== ОБНОВЛЕНИЕ UI ===== */
 function updateButtonText(item, btn){
-  btn.innerHTML = "";
-  if (item.stock !== undefined && item.stock <= 0) {
-    btn.textContent = "распродано";
-    btn.disabled = true;
-    return;
-  }
-  const p = document.createElement("div");
-  p.className = "price";
-  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-  p.querySelector("img").style.width = "18px";
-  p.querySelector("img").style.height = "18px";
-  p.querySelector("img").style.objectFit = "contain";
-  p.style.color = coins < item.cost ? "#ff3333" : "#fff";
+  btn.innerHTML="";
+  if(item.stock!==undefined && item.stock<=0){ btn.textContent="распродано"; btn.disabled=true; return; }
+  const p=document.createElement("div");
+  p.className="price";
+  p.innerHTML=`${item.cost}<img src="img/anti-coin.png">`;
+  p.querySelector("img").style.width="18px";
+  p.querySelector("img").style.height="18px";
+  p.querySelector("img").style.objectFit="contain";
+  p.style.color = coins<item.cost ? "#ff3333":"#fff";
   btn.appendChild(p);
 }
 
-function renderShop() {
-  itemsBlock.innerHTML = "";
-  shopItems.forEach(item => {
-    const d = document.createElement("div");
-    d.className = "item";
-    d.innerHTML = `
-      <div class="item-top">
-        <img src="${item.img}">
-        <div class="item-text">
-          <b>${item.name}</b>
-          <p>${item.description}</p>
-          <p>${item.property}</p>
-        </div>
-      </div>
-    `;
-    if (item.stock !== undefined) {
-      const s = document.createElement("p");
-      s.className = "stock";
-      s.textContent = "В наличии: " + item.stock;
-      d.appendChild(s);
-    }
-
-    const btn = document.createElement("button");
-    d.appendChild(btn);
-    updateButtonText(item, btn);
-
-    btn.onclick = () => {
-      if (!dataLoaded) return;
-      if (item.stock !== undefined && item.stock <= 0) return;
-      if (coins < item.cost) return;
-
-      coins -= item.cost;
-
-      if (item.id === 1) { clickPower += 1; item.cost += item.incrementCost; }
-      if (item.id === 2) { clickPower += item.power; item.cost += 250; item.stock = Math.max(0, item.stock - 1); }
-
-      updateUI();
-      saveData(); // сохраняем сразу после покупки
-      updateButtonText(item, btn);
-
-      if (item.stock !== undefined) {
-        const st = d.querySelector(".stock");
-        st.textContent = item.stock > 0 ? "В наличии: " + item.stock : "";
-      }
+function renderShop(){
+  itemsBlock.innerHTML="";
+  shopItems.forEach(item=>{
+    const d=document.createElement("div"); d.className="item";
+    d.innerHTML=`<div class="item-top"><img src="${item.img}"><div class="item-text"><b>${item.name}</b><p>${item.description}</p><p>${item.property}</p></div></div>`;
+    if(item.stock!==undefined){ const s=document.createElement("p"); s.className="stock"; s.textContent="В наличии: "+item.stock; d.appendChild(s); }
+    const btn=document.createElement("button"); d.appendChild(btn); updateButtonText(item, btn);
+    btn.onclick=()=>{
+      if(!dataLoaded) return;
+      if(item.stock!==undefined && item.stock<=0) return;
+      if(coins<item.cost) return;
+      coins-=item.cost;
+      if(item.id===1){clickPower+=1;item.cost+=item.incrementCost;}
+      if(item.id===2){clickPower+=item.power;item.cost+=250;item.stock=Math.max(0,item.stock-1);}
+      updateUI(); saveData(); updateButtonText(item, btn);
+      if(item.stock!==undefined){ const st=d.querySelector(".stock"); st.textContent=item.stock>0?"В наличии: "+item.stock:""; }
     };
-
     itemsBlock.appendChild(d);
   });
 }
 
-function updateUI() {
-  counterValue.textContent = coins;
-  document.querySelectorAll(".item").forEach((el,i)=>{
-    updateButtonText(shopItems[i], el.querySelector("button"));
-  });
+function updateUI(){
+  counterValue.textContent=coins;
+  document.querySelectorAll(".item").forEach((el,i)=>{ updateButtonText(shopItems[i], el.querySelector("button")); });
 }
 
 /* ===== FLOATING COINS ===== */
 function spawnFloatingCoin(x,y,value){
-  const el = document.createElement("div");
-  el.className = "floating-coin";
-  el.style.left = (x-10) + "px";
-  el.style.top = (y-10) + "px";
-  el.innerHTML = `<img src="img/anti-coin.png">${value}`;
+  const el=document.createElement("div"); el.className="floating-coin"; el.style.left=(x-10)+"px"; el.style.top=(y-10)+"px";
+  el.innerHTML=`<img src="img/anti-coin.png">${value}`;
   document.body.appendChild(el);
-
-  requestAnimationFrame(()=>{
-    el.style.transform = "translateY(-60px)";
-    el.style.opacity = "0";
-  });
-
-  setTimeout(()=> el.remove(), 800);
+  requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; });
+  setTimeout(()=>el.remove(),800);
 }
 
 /* ===== CLICKER ===== */
-const clickImg = document.getElementById("clickImg");
-const clickButton = document.getElementById("clickButton");
-
-function clickAction(x, y){
-  if (!dataLoaded) return;
-  coins += clickPower;
-  spawnFloatingCoin(x, y, clickPower);
-  updateUI();
-  // убираем сохранение после каждого клика
-}
-
-clickButton.addEventListener("touchstart", e => {
-  e.preventDefault();
-  for (const t of e.changedTouches) {
-    clickAction(t.clientX, t.clientY);
-  }
-  clickImg.src = "img/click2.png";
-  clickImg.style.transform = "scale(0.92)";
-  setTimeout(()=>{
-    clickImg.src = "img/click1.png";
-    clickImg.style.transform="scale(1)";
-  },150);
-},{ passive:false });
-
-clickButton.onclick = e => {
-  clickAction(e.clientX, e.clientY);
-  clickImg.src = "img/click2.png";
-  clickImg.style.transform="scale(0.92)";
-  setTimeout(()=>{
-    clickImg.src="img/click1.png";
-    clickImg.style.transform="scale(1)";
-  },150);
-};
+const clickImg=document.getElementById("clickImg");
+const clickButton=document.getElementById("clickButton");
+function clickAction(x,y){ if(!dataLoaded) return; coins+=clickPower; spawnFloatingCoin(x,y,clickPower); updateUI(); }
+clickButton.addEventListener("touchstart", e=>{ e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY); } clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); },{passive:false});
+clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); };
 
 /* ===== PANEL SWITCH ===== */
-const panels = document.getElementById("panels");
-const shopBtn = document.getElementById("shopBtn");
-const backBtn = document.getElementById("backBtn");
+const panels=document.getElementById("panels");
+const shopBtn=document.getElementById("shopBtn");
+const backBtn=document.getElementById("backBtn");
+shopBtn.onclick=()=>{ panels.style.transform="translateX(-392px)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
+backBtn.onclick=()=>{ panels.style.transform="translateX(0)"; shopBtn.style.display="block"; backBtn.style.display="none"; };
 
-shopBtn.onclick = () => {
-  panels.style.transform = "translateX(-392px)";
-  shopBtn.style.display = "none";
-  backBtn.style.display = "block";
-};
-backBtn.onclick = () => {
-  panels.style.transform = "translateX(0)";
-  shopBtn.style.display = "block";
-  backBtn.style.display = "none";
-};
-
-/* ===== AUTO-SAVE КОИНЫ ===== */
-// сохраняем только если монеты изменились
-setInterval(() => {
-  if (coins !== lastSavedCoins) {
-    saveData();
-  }
-}, 5000);
-
-loadData(); // внутри loadData уже renderShop вызывается
+/* ===== AUTO-SAVE ===== */
+setInterval(()=>{ if(coins!==lastSavedCoins){ saveData(); } },5000);
 </script>
 
 </body>
