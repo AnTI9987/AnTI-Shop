@@ -6,10 +6,11 @@
 
 <title>AnTI Shop</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- Шрифт Figures -->
+<link href="https://fonts.googleapis.com/css2?family=Figures&display=swap" rel="stylesheet">
 
 <style>
-body { margin: 0; padding: 0; background: #000; display: flex; justify-content: center; overflow: hidden; font-family: 'Inter', sans-serif; }
+body { margin: 0; padding: 0; background: #000; display: flex; justify-content: center; overflow: hidden; font-family: 'Figures', sans-serif; }
 #app { width: 392px; height: 100vh; background: #0000; overflow: hidden; position: relative; }
 
 /* ===== SPLASH SCREEN ===== */
@@ -28,8 +29,8 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 #splashScreen h1 {
   color: #fff;
   font-size: 36px;
-  margin-bottom: 24px; /* чуть меньше, чем было */
-  font-family: 'Inter', sans-serif;
+  margin-bottom: 24px;
+  font-family: 'Figures', sans-serif;
 }
 #progressBarContainer {
   width: 300px;
@@ -48,7 +49,7 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 }
 #progressPercent {
   color: #fff;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figures', sans-serif;
 }
 
 /* ===== MAIN UI ===== */
@@ -64,12 +65,12 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 #shopBtn { top: 12px; right: 12px; }
 #backBtn { top: 12px; right: 12px; display: none; }
 #settingsBtn { top: 12px; left: 12px; }
-#loginBtn { top: 70px; left: 12px; } /* под кнопкой настроек */
+#loginBtn { top: 70px; left: 12px; }
 
 #shopBtn img, #backBtn img, #settingsBtn img, #loginBtn img { width: 100%; height: 100%; }
 
-#panels { position: absolute; top: 0; left: 0; width: calc(392px * 2); height: 100%; display: flex; transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
-#clickerPanel, #shopPanel { width: 392px; height: 100%; flex-shrink: 0; }
+#panels { position: absolute; top: 0; left: 0; width: calc(392px * 3); height: 100%; display: flex; transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1); }
+#settingsPanel, #clickerPanel, #shopPanel { width: 392px; height: 100%; flex-shrink: 0; }
 
 #clickerPanel { background: linear-gradient(to bottom, #CEEDFF, #A1E6FF); padding-top: 20px; position: relative; overflow: hidden; }
 #counter { font-size: 46px; margin: 14px 0; display: flex; justify-content: center; align-items: center; gap: 6px; }
@@ -84,6 +85,10 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 
 #shopPanel { background: linear-gradient(to bottom, #7A4B1D, #5B3F1B); padding-top: 70px; overflow-y: auto; }
 #shopPanelInner { background: linear-gradient(to bottom, #FFBA67, #FF7749); margin: 0 auto; padding: 20px; border-radius: 12px; width: 350px; min-height: calc(100vh - 100px); }
+
+#settingsPanel { background: linear-gradient(to bottom, #7A4B1D, #5B3F1B); padding-top: 70px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; }
+#settingsPanel button { margin-top: 20px; width: 300px; padding: 10px; background: #332614; color: #fff; border: none; border-radius: 8px; font-size: 16px; transition: transform .12s ease; }
+#settingsPanel button:active { transform: scale(0.96); }
 
 .item { width: 300px; height: 170px; background-image: url("img/item-frame.png"); background-size: 100% 100%; padding: 7px 12px; display: flex; flex-direction: column; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35)); margin: 0 auto 18px; }
 .item-top { display: flex; margin-bottom: 6px; }
@@ -117,6 +122,9 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
   <button id="backBtn"><img src="img/back-icon.png"></button>
 
   <div id="panels">
+    <div id="settingsPanel">
+      <button id="loginOutBtn">Войти/Зарегистрироваться</button>
+    </div>
     <div id="clickerPanel">
       <div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
       <div id="clickButtonWrapper">
@@ -124,7 +132,6 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
         <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
       </div>
     </div>
-
     <div id="shopPanel">
       <div id="shopPanelInner"><div id="items"></div></div>
     </div>
@@ -134,7 +141,7 @@ body { margin: 0; padding: 0; background: #000; display: flex; justify-content: 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 /* ===== FIREBASE CONFIG ===== */
 const firebaseConfig = {
@@ -173,6 +180,7 @@ let coins = 0, clickPower = 1, dataLoaded = false, lastSavedCoins = 0;
 
 const counterValue = document.getElementById("counterValue");
 const itemsBlock = document.getElementById("items");
+const loginOutBtn = document.getElementById("loginOutBtn");
 
 const shopItems = [
   { id:1, name:'Оторванная пуговица', cost:50, description:'Похожа на глаз игрушки.', property:'+1 за клик', incrementCost:50, img:'img/item-1.png' },
@@ -206,16 +214,15 @@ function saveData(){ if(!dataLoaded || isGuest)return; const shopState={}; shopI
 /* ===== UI ===== */
 function updateUI(){ 
   counterValue.textContent=coins; 
-  // обновляем цвет цен
   document.querySelectorAll('.item button .price').forEach(p=>{
     const cost = parseInt(p.textContent);
     p.style.color = coins < cost ? "#ff3333":"#fff";
   });
 }
-function spawnFloatingCoin(x,y,value){ const el=document.createElement("div"); el.className="floating-coin"; el.style.left=(x-10)+"px"; el.style.top=(y-10)+"px"; el.innerHTML=`<img src="img/anti-coin.png">${value}`; document.body.appendChild(el); requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; }); setTimeout(()=>el.remove(),800); }
 
 /* ===== CLICKER ===== */
 const clickImg=document.getElementById("clickImg"), clickButton=document.getElementById("clickButton");
+function spawnFloatingCoin(x,y,value){ const el=document.createElement("div"); el.className="floating-coin"; el.style.left=(x-10)+"px"; el.style.top=(y-10)+"px"; el.innerHTML=`<img src="img/anti-coin.png">${value}`; document.body.appendChild(el); requestAnimationFrame(()=>{ el.style.transform="translateY(-60px)"; el.style.opacity="0"; }); setTimeout(()=>el.remove(),800); }
 function clickAction(x,y){ coins+=clickPower; spawnFloatingCoin(x,y,clickPower); updateUI(); }
 clickButton.addEventListener("touchstart",e=>{ e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX,t.clientY); } clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); },{passive:false});
 clickButton.onclick=e=>{ clickAction(e.clientX,e.clientY); clickImg.src="img/click2.png"; clickImg.style.transform="scale(0.92)"; setTimeout(()=>{ clickImg.src="img/click1.png"; clickImg.style.transform="scale(1)"; },150); };
@@ -256,29 +263,39 @@ function updateButtonText(item,btn){
 setInterval(()=>{ if(coins!==lastSavedCoins) saveData(); },5000);
 
 /* ===== LOGIN ===== */
-const loginBtn=document.getElementById("loginBtn");
-loginBtn.onclick=async()=>{
-  try{
-    const result = await signInWithPopup(auth,provider);
-    const user=result.user;
-    const onlineId=user.uid;
-    const onlineRef=ref(db,"players/"+onlineId);
-    const onlineData=await get(onlineRef);
-    if(onlineData.exists()){ const d=onlineData.val(); coins=d.coins??coins; clickPower=d.clickPower??clickPower; } else { await set(onlineRef,{coins,clickPower,shopItems:{}}); }
-    userId=onlineId; isGuest=false; localStorage.setItem("userId",onlineId); loginBtn.style.display="none";
-    updateUI(); saveData(); updateProgress(40);
-  } catch(err){ console.error(err); }
+loginOutBtn.onclick=async()=>{
+  if(isGuest){
+    try{
+      const result = await signInWithPopup(auth,provider);
+      const user=result.user;
+      const onlineId=user.uid;
+      const onlineRef=ref(db,"players/"+onlineId);
+      const onlineData=await get(onlineRef);
+      if(onlineData.exists()){ const d=onlineData.val(); coins=d.coins??coins; clickPower=d.clickPower??clickPower; } else { await set(onlineRef,{coins,clickPower,shopItems:{}}); }
+      userId=onlineId; isGuest=false; localStorage.setItem("userId",onlineId); loginOutBtn.textContent="Выйти из Аккаунта";
+      updateUI(); saveData(); updateProgress(40);
+    } catch(err){ console.error(err); }
+  } else {
+    await signOut(auth); 
+    isGuest=true; 
+    userId=localUserId; 
+    loginOutBtn.textContent="Войти/Зарегистрироваться"; 
+    updateUI();
+  }
 };
 
 /* ===== AUTO LOGIN ===== */
-onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginBtn.style.display="none"; updateProgress(40); loadData(); } else loadData(); });
+onAuthStateChanged(auth,user=>{ if(user){ userId=user.uid; isGuest=false; loginOutBtn.textContent="Выйти из Аккаунта"; updateProgress(40); loadData(); } else loadData(); });
 
 /* ===== PANELS ===== */
 const panels=document.getElementById("panels");
 const shopBtn=document.getElementById("shopBtn");
 const backBtn=document.getElementById("backBtn");
-shopBtn.onclick=()=>{ panels.style.transform="translateX(-392px)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
-backBtn.onclick=()=>{ panels.style.transform="translateX(0)"; shopBtn.style.display="block"; backBtn.style.display="none"; };
+const settingsBtn=document.getElementById("settingsBtn");
+
+shopBtn.onclick=()=>{ panels.style.transform="translateX(-784px)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
+settingsBtn.onclick=()=>{ panels.style.transform="translateX(0)"; shopBtn.style.display="none"; backBtn.style.display="block"; };
+backBtn.onclick=()=>{ panels.style.transform="translateX(-392px)"; shopBtn.style.display="block"; backBtn.style.display="none"; };
 </script>
 </body>
-</html>
+</html
