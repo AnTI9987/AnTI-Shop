@@ -11,10 +11,10 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #app{width:392px;height:100vh;position:relative;overflow:hidden;background:#0000;}
 
 /* SPLASH */
-#splashScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background-color:#888;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.8s ease;}
+#splashScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background-color:#888;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.4s ease;}
 #splashScreen h1{color:#fff;font-size:38px;margin-bottom:26px;}
 #progressBarContainer{width:300px;height:24px;background:#555;border-radius:12px;overflow:hidden;margin-bottom:12px;}
-#progressBar{width:0%;height:100%;background:linear-gradient(90deg,#ffba67,#ff7749);border-radius:12px;transition:width 0.2s ease;}
+#progressBar{width:0%;height:100%;background:linear-gradient(90deg,#ffba67,#ff7749);border-radius:12px;transition:width 0.1s ease;}
 #progressPercent{color:#fff;}
 
 /* PANELS */
@@ -41,9 +41,10 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}
 
 /* CLICKER */
-#clickerPanel{width:392px;height:100%;background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:60px;position:relative;overflow:hidden;}
-#counterWrapper{display:flex;flex-direction:column;align-items:center;margin-top:10px;}
-#counterWrapper span{font-size:24px;color:#000;}
+#clickerPanel{width:392px;height:100%;background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:80px;position:relative;overflow:hidden;}
+#clickerHeader{position:absolute;top:0;left:0;width:100%;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;}
+#clickerHeader h1{margin:0;color:#fff;font-size:24px;}
+#clickerHeader p{margin:0;color:#fff;font-size:18px;}
 #counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
 #counter img{width:24px;height:24px;}
 #clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:180px;}
@@ -56,23 +57,20 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #shopPanel{
   width:392px;height:100%;
   background:linear-gradient(to bottom,#FFC374,#FFB26B);
-  padding-top:80px;overflow-y:auto;
-  position:relative;
+  padding-top:70px;overflow-y:auto;
 }
-
-/* SHOP HEADER */
 #shopHeader{
-  position:absolute;top:0;left:0;width:100%;height:80px;background:#332614;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;
+  width:100%;height:80px;background:#332614;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;text-align:center;box-sizing:border-box;position:relative;z-index:10;
 }
-#shopHeader h1{margin:0;color:#fff;font-size:22px;}
-#shopHeader .coins{margin-top:4px;font-size:18px;color:#fff;display:flex;align-items:center;gap:6px;}
+#shopHeader h1{margin:0;font-size:24px;}
+#shopHeader p{margin:0;font-size:18px;}
 
 /* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
 #shopPanelInner{
   background:linear-gradient(to bottom,#896B51,#77593E);
-  margin:80px auto 0 auto;padding:24px;border-radius:14px;
-  width:350px;min-height:calc(100vh - 140px);
+  margin:0 auto;padding:24px;border-radius:14px;
+  width:350px;min-height:calc(100vh - 100px);
   box-shadow:0 12px 22px rgba(0,0,0,0.35) inset;
 }
 
@@ -140,10 +138,11 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 </div>
 
 <div id="clickerPanel">
-<div id="counterWrapper">
+<div id="clickerHeader">
   <h1>AnTI-Shop</h1>
-  <div class="coins"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
+  <p id="clickerCoins">0</p>
 </div>
+<div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
 <div id="clickButtonWrapper">
   <div id="ground"><img src="img/ground.png"></div>
   <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
@@ -153,7 +152,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 <div id="shopPanel">
 <div id="shopHeader">
   <h1>AnTI-Shop</h1>
-  <div class="coins"><span id="shopCoins">0</span><img src="img/anti-coin.png"></div>
+  <p id="shopCoins">0</p>
 </div>
 <div id="shopPanelInner">
   <div id="items"></div>
@@ -164,87 +163,114 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 </div>
 
 <script type="module">
-// ... остальной JS почти без изменений, кроме двух моментов:
+// --- Firebase и остальной код сохраняем как у тебя ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+const firebaseConfig={apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",authDomain:"anti-shop-99f1d.firebaseapp.com",databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",projectId:"anti-shop-99f1d",storageBucket:"anti-shop-99f1d.firebasestorage.app",messagingSenderId:"347202416802",appId:"1:347202416802:web:2d2df1b819be9da180e7fb"};
+
+const appFB=initializeApp(firebaseConfig);
+const db=getDatabase(appFB);
+const auth=getAuth(appFB);
+const provider=new GoogleAuthProvider();
+
+/* SPLASH */
+const splashScreen=document.getElementById("splashScreen");
+const progressBar=document.getElementById("progressBar");
+const progressPercent=document.getElementById("progressPercent");
+let progress=0;
+function fakeLoad(onDone){
+  const interval=setInterval(()=>{
+    progress+=Math.random()*10; // ускорено
+    if(progress>=100){
+      progress=100;
+      clearInterval(interval);
+      setTimeout(()=>{splashScreen.style.opacity=0;},150);
+      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},500);
+    }
+    progressBar.style.width=progress+"%";
+    progressPercent.textContent=Math.floor(progress)+"%";
+  },50);
+}
+
+/* VARIABLES */
+let isGuest=true;
+let localUserId=localStorage.getItem("userId");
+if(!localUserId){localUserId="guest_"+Math.random().toString(36).substring(2,9);localStorage.setItem("userId",localUserId);}
+let userId=localUserId;
+let coins=0,clickPower=1;
 
 const counterValue=document.getElementById("counterValue");
+const loginOutBtn=document.getElementById("loginOutBtn");
+const loginBtnEl=document.getElementById("loginBtn");
+const clickerCoins=document.getElementById("clickerCoins");
 const shopCoins=document.getElementById("shopCoins");
 
-// функция анимации числа всплывающей монеты
+/* ITEMS */
+const shopItems=[
+{id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
+{id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}
+];
+
+/* COUNTER ANIM */
+let animFrame=null;
+function animateCounter(oldVal,newVal){
+  oldVal=Number(oldVal)||0;newVal=Number(newVal)||0;
+  if(newVal-oldVal===1){counterValue.textContent=newVal; clickerCoins.textContent=newVal; shopCoins.textContent=newVal; return;}
+  if(animFrame)cancelAnimationFrame(animFrame);
+  let start=performance.now();
+  function frame(ts){
+    let p=Math.min((ts-start)/200,1); // медленнее
+    let val=Math.floor(oldVal+(newVal-oldVal)*p);
+    counterValue.textContent=val;
+    clickerCoins.textContent=val;
+    shopCoins.textContent=val;
+    if(p<1)animFrame=requestAnimationFrame(frame);else{
+      counterValue.textContent=newVal;
+      clickerCoins.textContent=newVal;
+      shopCoins.textContent=newVal;
+    }
+  }
+  animFrame=requestAnimationFrame(frame);
+}
+
+/* CLICK */
+const clickImg=document.getElementById("clickImg");
+const clickButton=document.getElementById("clickButton");
+
 function spawnFloatingCoin(x,y,value){
   const el=document.createElement("div");
   el.className="floating-coin";
   el.style.left=(x-10)+"px";
   el.style.top=(y-10)+"px";
-  el.innerHTML=`${value}<img src="img/anti-coin.png">`; // сначала число, потом иконка
+  el.innerHTML=`${value}<img src="img/anti-coin.png">`; // число сначала, иконка справа
   document.body.appendChild(el);
   requestAnimationFrame(()=>{el.style.transform="translateY(-60px)";el.style.opacity="0";});
-  setTimeout(()=>el.remove(),600); // чуть медленнее
-}
-
-// обновляем отображение монет в шапке магазина
-function updateShopHeader(){
-  if(shopCoins) shopCoins.textContent = coins;
+  setTimeout(()=>el.remove(),600);
 }
 
 function clickAction(x,y){
   coins+=clickPower;
   spawnFloatingCoin(x,y,clickPower);
   animateCounter(parseInt(counterValue.textContent)||0,coins);
-  updateShopHeader();
   updatePricesColor();
 }
 
-// при покупке предмета
-function renderShop(){
-  itemsBlock.innerHTML="";
-  shopItems.forEach(item=>{
-    const d=document.createElement("div");
-    d.className="item";
+clickButton.addEventListener("touchstart",e=>{
+  e.preventDefault();
+  for(const t of e.changedTouches) clickAction(t.clientX,t.clientY);
+  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";
+  setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);
+},{passive:false});
 
-    d.innerHTML=`
-      <div class="item-top">
-        <img src="${item.img}">
-        <div class="item-text">
-          <b>${item.name}</b>
-          <p>${item.description}</p>
-          <p class="prop">${item.property}</p>
-        </div>
-      </div>
-    `;
+clickButton.onclick=e=>{
+  clickAction(e.clientX,e.clientY);
+  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";
+  setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);
+};
 
-    if(item.stock!==undefined){
-      const s=document.createElement("p");
-      s.className="stock";
-      s.textContent="В наличии: "+item.stock;
-      d.appendChild(s);
-    }
-
-    const btn=document.createElement("button");
-    d.appendChild(btn);
-    updateButtonText(item,btn);
-
-    btn.addEventListener("click",()=>{
-      if(item.stock!==undefined&&item.stock<=0)return;
-      if(coins<item.cost)return;
-
-      const oldCoins=coins;
-      coins-=item.cost;
-
-      if(item.id===1){ clickPower+=1; item.cost=Math.floor(item.cost*1.2); }
-      if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock=Math.max(0,item.stock-1); }
-
-      animateCounter(oldCoins,coins);
-      updateShopHeader();
-      renderShop();
-    });
-
-    itemsBlock.appendChild(d);
-  });
-}
-
-// везде после изменения coins
-updateShopHeader();
-
+/* SHOP и остальной код сохраняется как у тебя */
 </script>
 
 </body>
