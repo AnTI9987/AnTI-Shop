@@ -41,19 +41,12 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}
 
 /* CLICKER */
-#clickerPanel{
-  width:392px;height:100%;
-  background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);
-  padding-top:20px;
-  position:relative;overflow:hidden;
-  display:flex;flex-direction:column;align-items:center;
-}
-#clickerHeader{margin-top:10px;text-align:center;color:#000;}
-#clickerHeader h1{margin:0;font-size:22px;}
-#clickerHeader p{margin:2px 0;font-size:18px;font-weight:500;}
+#clickerPanel{width:392px;height:100%;background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:60px;position:relative;overflow:hidden;}
+#counterWrapper{display:flex;flex-direction:column;align-items:center;margin-top:10px;}
+#counterWrapper span{font-size:24px;color:#000;}
 #counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
 #counter img{width:24px;height:24px;}
-#clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:150px;}
+#clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:180px;}
 #ground{position:absolute;left:50%;top:140px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}
 #ground img{width:100%;}
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
@@ -63,17 +56,23 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #shopPanel{
   width:392px;height:100%;
   background:linear-gradient(to bottom,#FFC374,#FFB26B);
-  padding-top:0;overflow-y:auto;position:relative;
+  padding-top:80px;overflow-y:auto;
+  position:relative;
 }
-#shopHeader{
-  width:100%;height:80px;background:#332614;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;
-}
-#shopHeader h1{margin:0;font-size:22px;}
-#shopHeader p{margin:2px 0;font-size:18px;font-weight:500;}
 
+/* SHOP HEADER */
+#shopHeader{
+  position:absolute;top:0;left:0;width:100%;height:80px;background:#332614;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;
+}
+#shopHeader h1{margin:0;color:#fff;font-size:22px;}
+#shopHeader .coins{margin-top:4px;font-size:18px;color:#fff;display:flex;align-items:center;gap:6px;}
+
+/* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
 #shopPanelInner{
-  margin-top:0px;padding:24px;border-radius:14px;
-  width:350px;min-height:calc(100vh - 80px);
+  background:linear-gradient(to bottom,#896B51,#77593E);
+  margin:80px auto 0 auto;padding:24px;border-radius:14px;
+  width:350px;min-height:calc(100vh - 140px);
   box-shadow:0 12px 22px rgba(0,0,0,0.35) inset;
 }
 
@@ -91,17 +90,25 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 .item-text b{font-size:18px;color:#FFDBBF;font-weight:700;}
 .item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:400;}
+
 .item-text .prop{color:#B48E70;font-weight:500;}
 
 .item .stock{
-  color:#FFDBBF;text-align:center;width:100%;margin-top:6px;margin-bottom:-4px;font-weight:500;
+  color:#FFDBBF;
+  text-align:center;
+  width:100%;
+  margin-top:6px;
+  margin-bottom:-4px;
+  font-weight:500;
 }
+
 .item button{
   margin-top:12px;width:100%;
   padding:12px;background:#332614;color:#fff;
   border:none;border-radius:8px;font-size:16px;
   transition:transform .12s ease;
 }
+
 .price{display:flex;align-items:center;justify-content:center;gap:6px;}
 .price img{width:18px;height:18px;}
 
@@ -133,11 +140,10 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 </div>
 
 <div id="clickerPanel">
-<div id="clickerHeader">
+<div id="counterWrapper">
   <h1>AnTI-Shop</h1>
-  <p id="clickerCoins">0</p>
+  <div class="coins"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
 </div>
-<div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
 <div id="clickButtonWrapper">
   <div id="ground"><img src="img/ground.png"></div>
   <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
@@ -147,7 +153,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 <div id="shopPanel">
 <div id="shopHeader">
   <h1>AnTI-Shop</h1>
-  <p id="shopCoins">0</p>
+  <div class="coins"><span id="shopCoins">0</span><img src="img/anti-coin.png"></div>
 </div>
 <div id="shopPanelInner">
   <div id="items"></div>
@@ -158,9 +164,12 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 </div>
 
 <script type="module">
-// ...firebase, login, save и остальной JS без изменений...
+// ... остальной JS почти без изменений, кроме двух моментов:
 
-// Переопределяем spawnFloatingCoin для нового формата: число + монета
+const counterValue=document.getElementById("counterValue");
+const shopCoins=document.getElementById("shopCoins");
+
+// функция анимации числа всплывающей монеты
 function spawnFloatingCoin(x,y,value){
   const el=document.createElement("div");
   el.className="floating-coin";
@@ -172,20 +181,70 @@ function spawnFloatingCoin(x,y,value){
   setTimeout(()=>el.remove(),600); // чуть медленнее
 }
 
-// обновляем монеты в шапке
-function updateHeaders(){
-  document.getElementById("shopCoins").textContent=coins;
-  document.getElementById("clickerCoins").textContent=coins;
+// обновляем отображение монет в шапке магазина
+function updateShopHeader(){
+  if(shopCoins) shopCoins.textContent = coins;
 }
 
-// вызовем при клике
 function clickAction(x,y){
   coins+=clickPower;
   spawnFloatingCoin(x,y,clickPower);
   animateCounter(parseInt(counterValue.textContent)||0,coins);
+  updateShopHeader();
   updatePricesColor();
-  updateHeaders();
 }
+
+// при покупке предмета
+function renderShop(){
+  itemsBlock.innerHTML="";
+  shopItems.forEach(item=>{
+    const d=document.createElement("div");
+    d.className="item";
+
+    d.innerHTML=`
+      <div class="item-top">
+        <img src="${item.img}">
+        <div class="item-text">
+          <b>${item.name}</b>
+          <p>${item.description}</p>
+          <p class="prop">${item.property}</p>
+        </div>
+      </div>
+    `;
+
+    if(item.stock!==undefined){
+      const s=document.createElement("p");
+      s.className="stock";
+      s.textContent="В наличии: "+item.stock;
+      d.appendChild(s);
+    }
+
+    const btn=document.createElement("button");
+    d.appendChild(btn);
+    updateButtonText(item,btn);
+
+    btn.addEventListener("click",()=>{
+      if(item.stock!==undefined&&item.stock<=0)return;
+      if(coins<item.cost)return;
+
+      const oldCoins=coins;
+      coins-=item.cost;
+
+      if(item.id===1){ clickPower+=1; item.cost=Math.floor(item.cost*1.2); }
+      if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock=Math.max(0,item.stock-1); }
+
+      animateCounter(oldCoins,coins);
+      updateShopHeader();
+      renderShop();
+    });
+
+    itemsBlock.appendChild(d);
+  });
+}
+
+// везде после изменения coins
+updateShopHeader();
+
 </script>
 
 </body>
