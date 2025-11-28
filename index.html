@@ -10,15 +10,17 @@
 body{margin:0;padding:0;background:#000;display:flex;justify-content:center;overflow:hidden;font-family:'Montserrat',sans-serif;}
 #app{width:392px;height:100vh;position:relative;overflow:hidden;background:#0000;}
 
+/* SPLASH */
 #splashScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background-color:#888;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.8s ease;}
 #splashScreen h1{color:#fff;font-size:38px;margin-bottom:26px;}
 #progressBarContainer{width:300px;height:24px;background:#555;border-radius:12px;overflow:hidden;margin-bottom:12px;}
 #progressBar{width:0%;height:100%;background:linear-gradient(90deg,#ffba67,#ff7749);border-radius:12px;transition:width 0.2s ease;}
 #progressPercent{color:#fff;}
 
+/* PANELS */
 #shopBtn,#backBtn,#settingsBtn,#loginBtn,#backToClickerBtn{
   position:absolute;width:48px;height:48px;background:none;border:none;padding:0;z-index:50;
-  transition:left .55s cubic-bezier(.35,.15,.1,1),right .55s cubic-bezier(.35,.15,.1,1);
+  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1),right 0.55s cubic-bezier(0.35,0.15,0.1,1);
 }
 #shopBtn{top:12px;right:12px;}
 #backBtn{top:12px;right:12px;display:none;}
@@ -27,113 +29,94 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #loginBtn{top:70px;left:12px;display:block;}
 #shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{width:100%;height:100%;}
 
-#panels{position:absolute;top:0;left:0;width:calc(392px*3);height:100%;display:flex;transition:transform .55s cubic-bezier(.35,.15,.1,1);}
-#settingsPanel,#clickerPanel,#shopPanel{width:392px;height:100%;flex-shrink:0;}
+#panels{position:absolute;top:0;left:0;width:calc(392px*3);height:100%;display:flex;transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1);}
 
-/* НОВЫЙ ГРАДИЕНТ ДЛЯ НАСТРОЕК */
+/* SETTINGS */
 #settingsPanel{
-  background:linear-gradient(to bottom,#64492B,#5E4429);
-  padding-top:70px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  overflow-y:auto;
+  width:392px;height:100%;
+  background:linear-gradient(to bottom,#896B51,#77593E);
+  padding-top:70px;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;overflow-y:auto;
 }
+#settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}
 
-#settingsPanel button{
-  margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;
-  border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;
-}
+/* CLICKER */
+#clickerPanel{width:392px;height:100%;background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:20px;position:relative;overflow:hidden;}
+#counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
+#counter img{width:24px;height:24px;}
+#clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}
+#ground{position:absolute;left:50%;top:140px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}
+#ground img{width:100%;}
+#clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
+#clickImg{width:220px;transition:transform 0.08s ease;display:block;}
 
-#clickerPanel{background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:20px;position:relative;overflow:hidden;}
-
-/* ВЫПУКЛАЯ ПАНЕЛЬ МАГАЗИНА */
+/* SHOP */
 #shopPanel{
-  background:linear-gradient(to bottom,#64492B,#5E4429);
-  padding-top:70px;
-  overflow-y:auto;
+  width:392px;height:100%;
+  background:linear-gradient(to bottom,#7A4B1D,#5B3F1B);
+  padding-top:70px;overflow-y:auto;
+}
+
+/* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
+#shopPanelInner{
+  background:linear-gradient(to bottom,#896B51,#77593E);
+  margin:0 auto;padding:24px;border-radius:14px;
+  width:350px;min-height:calc(100vh - 100px);
   box-shadow:0 12px 22px rgba(0,0,0,0.35) inset;
 }
 
-#shopPanelInner{
-  background:linear-gradient(to bottom,#FFBA67,#FF7749);
-  margin:0 auto;
-  padding:24px;
-  border-radius:14px;
-  width:350px;
-  min-height:calc(100vh - 100px);
-}
-
+/* ТОВАР */
 .item{
-  width:310px;
-  background-image:url("img/item-frame.png");
-  background-size:100% 100%;
-  padding:5px 14px; /* уменьшено на 10px по высоте */
-  display:flex;
-  flex-direction:column;
-  filter:drop-shadow(0 6px 12px rgba(0,0,0,.35));
+  width:310px;background-image:url("img/item-frame.png");
+  background-size:100% 100%;padding:10px 14px;
+  display:flex;flex-direction:column;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));
   margin:0 auto 22px;
 }
 
 .item-top{display:flex;align-items:center;}
 .item-top img{width:72px;height:72px;margin-right:14px;object-fit:contain;}
 
-.item-text b{
-  font-size:18px;
-  color:#B48E70;
-  font-weight:600;
-}
+.item-text b{font-size:18px;color:#FFDBBF;font-weight:700;}
+.item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:400;}
 
-.item-text p{
-  margin:3px 0;
-  font-size:14px;
-  color:#B48E70;
-  font-weight:450;
-}
+.item-text .prop{color:#B48E70;font-weight:500;}
 
-/* свойства — другой цвет */
-.item-text .prop{
-  color:#836B58;
-  font-weight:450;
-}
-
-/* В НАЛИЧИИ — центрирование */
-.stock{
-  margin-top:6px;
-  width:100%;
+.item .stock{
+  color:#FFDBBF;
   text-align:center;
-  font-size:14px;
-  color:#B48E70;
-  font-weight:450;
+  width:100%;
+  margin-top:6px;
+  margin-bottom:-4px;
+  font-weight:500;
 }
 
 .item button{
-  margin-top:10px;width:100%;padding:12px;background:#332614;color:#fff;
-  border:none;border-radius:8px;font-size:16px;transition:transform .12s ease;
+  margin-top:12px;width:100%;
+  padding:12px;background:#332614;color:#fff;
+  border:none;border-radius:8px;font-size:16px;
+  transition:transform .12s ease;
 }
 
 .price{display:flex;align-items:center;justify-content:center;gap:6px;}
 .price img{width:18px;height:18px;}
 
-.floating-coin{
-  font-size:15px;position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;
-  color:lime;transition:transform .4s ease-out, opacity .4s ease-out;z-index:60;
-}
+/* FLOATING COIN */
+.floating-coin{font-size:15px;position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;color:lime;transition:transform .4s ease-out, opacity .4s ease-out;z-index:60;}
 .floating-coin img{width:18px;height:18px;}
-
 </style>
 </head>
 
 <body>
+
+<!-- SPLASH -->
 <div id="splashScreen">
-  <h1>AnTI-Shop</h1>
-  <div id="progressBarContainer"><div id="progressBar"></div></div>
-  <div id="progressPercent">0%</div>
+<h1>AnTI-Shop</h1>
+<div id="progressBarContainer"><div id="progressBar"></div></div>
+<div id="progressPercent">0%</div>
 </div>
 
 <div id="app">
-
-<!-- кнопки -->
 <button id="settingsBtn"><img src="img/settings.png"></button>
 <button id="loginBtn"><img src="img/login.png"></button>
 <button id="shopBtn"><img src="img/shop-icon.png"></button>
@@ -141,26 +124,22 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 <button id="backToClickerBtn"><img src="img/back-icon.png"></button>
 
 <div id="panels">
-
-<!-- НАСТРОЙКИ -->
 <div id="settingsPanel">
-  <button id="loginOutBtn">Войти в аккаунт</button>
+<button id="loginOutBtn">Войти в аккаунт</button>
 </div>
 
-<!-- КЛИКЕР -->
 <div id="clickerPanel">
-  <div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
-  <div id="clickButtonWrapper">
-    <div id="ground"><img src="img/ground.png"></div>
-    <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
-  </div>
+<div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
+<div id="clickButtonWrapper">
+  <div id="ground"><img src="img/ground.png"></div>
+  <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
+</div>
 </div>
 
-<!-- МАГАЗИН -->
 <div id="shopPanel">
-  <div id="shopPanelInner">
-    <div id="items"></div>
-  </div>
+<div id="shopPanelInner">
+  <div id="items"></div>
+</div>
 </div>
 
 </div>
@@ -172,15 +151,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-const firebaseConfig={
-  apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
-  authDomain:"anti-shop-99f1d.firebaseapp.com",
-  databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId:"anti-shop-99f1d",
-  storageBucket:"anti-shop-99f1d.firebasestorage.app",
-  messagingSenderId:"347202416802",
-  appId:"1:347202416802:web:2d2df1b819be9da180e7fb"
-};
+const firebaseConfig={apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",authDomain:"anti-shop-99f1d.firebaseapp.com",databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",projectId:"anti-shop-99f1d",storageBucket:"anti-shop-99f1d.firebasestorage.app",messagingSenderId:"347202416802",appId:"1:347202416802:web:2d2df1b819be9da180e7fb"};
 
 const appFB=initializeApp(firebaseConfig);
 const db=getDatabase(appFB);
@@ -192,15 +163,14 @@ const splashScreen=document.getElementById("splashScreen");
 const progressBar=document.getElementById("progressBar");
 const progressPercent=document.getElementById("progressPercent");
 let progress=0;
-
 function fakeLoad(onDone){
   const interval=setInterval(()=>{
     progress+=Math.random()*6;
     if(progress>=100){
       progress=100;
       clearInterval(interval);
-      setTimeout(()=>splashScreen.style.opacity=0,300);
-      setTimeout(()=>{splashScreen.style.display="none";onDone&&onDone();},900);
+      setTimeout(()=>{splashScreen.style.opacity=0;},300);
+      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},900);
     }
     progressBar.style.width=progress+"%";
     progressPercent.textContent=Math.floor(progress)+"%";
@@ -210,10 +180,7 @@ function fakeLoad(onDone){
 /* VARIABLES */
 let isGuest=true;
 let localUserId=localStorage.getItem("userId");
-if(!localUserId){
-  localUserId="guest_"+Math.random().toString(36).substring(2,9);
-  localStorage.setItem("userId",localUserId);
-}
+if(!localUserId){localUserId="guest_"+Math.random().toString(36).substring(2,9);localStorage.setItem("userId",localUserId);}
 let userId=localUserId;
 let coins=0,clickPower=1;
 
@@ -223,29 +190,26 @@ const loginBtnEl=document.getElementById("loginBtn");
 
 /* ITEMS */
 const shopItems=[
-  {id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
-  {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}
+{id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
+{id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}
 ];
 
-/* COUNTER */
+/* COUNTER ANIM */
 let animFrame=null;
 function animateCounter(oldVal,newVal){
-  oldVal=Number(oldVal)||0;
-  newVal=Number(newVal)||0;
+  oldVal=Number(oldVal)||0;newVal=Number(newVal)||0;
   if(newVal-oldVal===1){counterValue.textContent=newVal;return;}
   if(animFrame)cancelAnimationFrame(animFrame);
-
   let start=performance.now();
-  function frame(t){
-    let p=Math.min((t-start)/100,1);
+  function frame(ts){
+    let p=Math.min((ts-start)/100,1);
     counterValue.textContent=Math.floor(oldVal+(newVal-oldVal)*p);
-    if(p<1)animFrame=requestAnimationFrame(frame);
-    else counterValue.textContent=newVal;
+    if(p<1)animFrame=requestAnimationFrame(frame);else counterValue.textContent=newVal;
   }
   animFrame=requestAnimationFrame(frame);
 }
 
-/* CLICKER */
+/* CLICK */
 const clickImg=document.getElementById("clickImg");
 const clickButton=document.getElementById("clickButton");
 
@@ -270,15 +234,13 @@ function clickAction(x,y){
 clickButton.addEventListener("touchstart",e=>{
   e.preventDefault();
   for(const t of e.changedTouches) clickAction(t.clientX,t.clientY);
-  clickImg.src="img/click2.png";
-  clickImg.style.transform="scale(.95)";
+  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";
   setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);
 },{passive:false});
 
 clickButton.onclick=e=>{
   clickAction(e.clientX,e.clientY);
-  clickImg.src="img/click2.png";
-  clickImg.style.transform="scale(.95)";
+  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";
   setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);
 };
 
@@ -287,7 +249,7 @@ const itemsBlock=document.getElementById("items");
 
 function updateButtonText(item,btn){
   btn.innerHTML="";
-  if(item.stock!==undefined && item.stock<=0){
+  if(item.stock!==undefined&&item.stock<=0){
     btn.textContent="распродано";
     btn.disabled=true;
     return;
@@ -317,25 +279,27 @@ function renderShop(){
     `;
 
     if(item.stock!==undefined){
-      const s=document.createElement("div");
+      const s=document.createElement("p");
       s.className="stock";
       s.textContent="В наличии: "+item.stock;
       d.appendChild(s);
     }
 
     const btn=document.createElement("button");
+    d.appendChild(btn);
     updateButtonText(item,btn);
+
     btn.addEventListener("click",()=>{
-      if(item.stock!==undefined && item.stock<=0)return;
+      if(item.stock!==undefined&&item.stock<=0)return;
       if(coins<item.cost)return;
 
       const oldCoins=coins;
       coins-=item.cost;
 
-      /* ---------- ИЗМЕНЁННАЯ ЛОГИКА ---------- */
+      /* === PRICE CHANGE FIX === */
       if(item.id===1){
         clickPower+=1;
-        item.cost=Math.floor(item.cost*1.2);
+        item.cost = Math.floor(item.cost * 1.2);
       }
       if(item.id===2){
         clickPower+=item.power;
@@ -347,15 +311,14 @@ function renderShop(){
       renderShop();
     });
 
-    d.appendChild(btn);
     itemsBlock.appendChild(d);
   });
 }
 
 function updatePricesColor(){
   document.querySelectorAll('.item .price').forEach(p=>{
-    const value=p.childNodes[0].textContent;
-    const cost=parseInt(value)||0;
+    const txt=p.childNodes[0]?p.childNodes[0].textContent:p.textContent;
+    const cost=parseInt(txt)||0;
     p.style.color=(coins<cost)?"#ff3333":"#fff";
   });
 }
@@ -363,12 +326,13 @@ function updatePricesColor(){
 /* SAVE */
 async function saveProgress(){
   if(isGuest)return;
-  await set(ref(db,'users/'+userId),{coins,clickPower,shopItems});
+  const data={coins,clickPower,shopItems};
+  await set(ref(db,'users/'+userId),data);
 }
 setInterval(saveProgress,5000);
 
 /* LOGIN */
-loginBtnEl.onclick=async()=>{try{await signInWithPopup(auth,provider);}catch(e){console.error(e)}};
+loginBtnEl.onclick=async()=>{try{await signInWithPopup(auth,provider);}catch(e){console.error(e);}};
 
 loginOutBtn.onclick=async()=>{
   if(isGuest){await signInWithPopup(auth,provider);return;}
@@ -377,14 +341,12 @@ loginOutBtn.onclick=async()=>{
   isGuest=true;
   userId=localUserId;
   coins=0;clickPower=1;
-  shopItems[0].cost=50;
-  shopItems[1].cost=250;
-  shopItems[1].stock=5;
+  shopItems.forEach(i=>{if(i.id===2)i.stock=5;if(i.id===1)i.cost=50;});
   animateCounter(0,0);
   renderShop();
 };
 
-/* AUTH */
+/* AUTH CHECK */
 onAuthStateChanged(auth,async user=>{
   if(user){
     isGuest=false;
@@ -397,7 +359,6 @@ onAuthStateChanged(auth,async user=>{
       const data=snap.val();
       coins=data.coins||0;
       clickPower=data.clickPower||1;
-
       if(data.shopItems){
         data.shopItems.forEach((si,i)=>{
           shopItems[i].cost=si.cost;
@@ -465,12 +426,7 @@ settingsBtnEl.onclick=goToSettings;
 backBtnEl.onclick=goBackFromSettings;
 backToClickerBtn.onclick=goBackFromShop;
 
-fakeLoad(()=>{
-  panels.style.transform="translateX(-392px)";
-  renderShop();
-  animateCounter(0,coins);
-  updatePricesColor();
-});
+fakeLoad(()=>{panels.style.transform="translateX(-392px)";renderShop();animateCounter(0,coins);updatePricesColor();});
 </script>
 
 </body>
