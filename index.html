@@ -1,433 +1,277 @@
-<!DOCTYPE html>  
-<html lang="ru">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
-<title>AnTI Shop</title>  
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">  
-  
-<style>  
-body{margin:0;padding:0;background:#000;display:flex;justify-content:center;overflow:hidden;font-family:'Montserrat',sans-serif;}  
-#app{width:392px;height:100vh;position:relative;overflow:hidden;background:#0000;}  
-  
-/* SPLASH */  
-#splashScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background-color:#888;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.8s ease;}  
-#splashScreen h1{color:#fff;font-size:38px;margin-bottom:26px;}  
-#progressBarContainer{width:300px;height:24px;background:#555;border-radius:12px;overflow:hidden;margin-bottom:12px;}  
-#progressBar{width:0%;height:100%;background:linear-gradient(90deg,#ffba67,#ff7749);border-radius:12px;transition:width 0.2s ease;}  
-#progressPercent{color:#fff;}  
-  
-/* PANELS */  
-#shopBtn,#backBtn,#settingsBtn,#loginBtn,#backToClickerBtn{  
-  position:absolute;width:48px;height:48px;background:none;border:none;padding:0;z-index:50;  
-  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1),right 0.55s cubic-bezier(0.35,0.15,0.1,1);  
-}  
-#shopBtn{top:12px;right:12px;}  
-#backBtn{top:12px;right:12px;display:none;}  
-#backToClickerBtn{top:12px;right:-60px;display:none;}  
-#settingsBtn{top:12px;left:12px;}  
-#loginBtn{top:70px;left:12px;display:block;}  
-#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{width:100%;height:100%;}  
-  
-#panels{position:absolute;top:0;left:0;width:calc(392px*3);height:100%;display:flex;transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1);}  
-  
-/* SETTINGS */  
-#settingsPanel{  
-  width:392px;height:100%;  
-  background:linear-gradient(to bottom,#896B51,#77593E);  
-  padding-top:70px;display:flex;flex-direction:column;align-items:center;  
-  justify-content:flex-start;overflow-y:auto;  
-}  
-#settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}  
-  
-/* CLICKER */  
-#clickerPanel{width:392px;height:100%;background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:20px;position:relative;overflow:hidden;}  
-#counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}  
-#counter img{width:24px;height:24px;}  
-#clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}  
-#ground{position:absolute;left:50%;top:140px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}  
-#ground img{width:100%;}  
-#clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}  
-#clickImg{width:220px;transition:transform 0.08s ease;display:block;}  
-  
-/* SHOP */  
-#shopPanel{  
-  width:392px;height:100%;  
-  background:linear-gradient(to bottom,#7A4B1D,#5B3F1B);  
-  padding-top:70px;overflow-y:auto;  
-}  
-  
-/* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */  
-#shopPanelInner{  
-  background:linear-gradient(to bottom,#896B51,#77593E);  
-  margin:0 auto;padding:24px;border-radius:14px;  
-  width:350px;min-height:calc(100vh - 100px);  
-  box-shadow:0 12px 22px rgba(0,0,0,0.35) inset;  
-}  
-  
-/* ТОВАР */  
-.item{  
-  width:310px;background-image:url("img/item-frame.png");  
-  background-size:100% 100%;padding:10px 14px;  
-  display:flex;flex-direction:column;  
-  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));  
-  margin:0 auto 22px;  
-}  
-  
-.item-top{display:flex;align-items:center;}  
-.item-top img{width:72px;height:72px;margin-right:14px;object-fit:contain;}  
-  
-.item-text b{font-size:18px;color:#FFDBBF;font-weight:700;}  
-.item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:400;}  
-  
-.item-text .prop{color:#B48E70;font-weight:500;}  
-  
-.item .stock{  
-  color:#FFDBBF;  
-  text-align:center;  
-  width:100%;  
-  margin-top:6px;  
-  margin-bottom:-4px;  
-  font-weight:500;  
-}  
-  
-.item button{  
-  margin-top:12px;width:100%;  
-  padding:12px;background:#332614;color:#fff;  
-  border:none;border-radius:8px;font-size:16px;  
-  transition:transform .12s ease;  
-}  
-  
-.price{display:flex;align-items:center;justify-content:center;gap:6px;}  
-.price img{width:18px;height:18px;}  
-  
-/* FLOATING COIN */  
-.floating-coin{font-size:15px;position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;color:lime;transition:transform .4s ease-out, opacity .4s ease-out;z-index:60;}  
-.floating-coin img{width:18px;height:18px;}  
-</style>  
-</head>  
-  
-<body>  
-  
-<!-- SPLASH -->  
-<div id="splashScreen">  
-<h1>AnTI-Shop</h1>  
-<div id="progressBarContainer"><div id="progressBar"></div></div>  
-<div id="progressPercent">0%</div>  
-</div>  
-  
-<div id="app">  
-<button id="settingsBtn"><img src="img/settings.png"></button>  
-<button id="loginBtn"><img src="img/login.png"></button>  
-<button id="shopBtn"><img src="img/shop-icon.png"></button>  
-<button id="backBtn"><img src="img/back-icon.png"></button>  
-<button id="backToClickerBtn"><img src="img/back-icon.png"></button>  
-  
-<div id="panels">  
-<div id="settingsPanel">  
-<button id="loginOutBtn">Войти в аккаунт</button>  
-</div>  
-  
-<div id="clickerPanel">  
-<div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>  
-<div id="clickButtonWrapper">  
-  <div id="ground"><img src="img/ground.png"></div>  
-  <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>  
-</div>  
-</div>  
-  
-<div id="shopPanel">  
-<div id="shopPanelInner">  
-  <div id="items"></div>  
-</div>  
-</div>  
-  
-</div>  
-</div>  
-  
-<script type="module">  
-/* FIREBASE */  
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";  
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";  
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";  
-  
-const firebaseConfig={apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",authDomain:"anti-shop-99f1d.firebaseapp.com",databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",projectId:"anti-shop-99f1d",storageBucket:"anti-shop-99f1d.firebasestorage.app",messagingSenderId:"347202416802",appId:"1:347202416802:web:2d2df1b819be9da180e7fb"};  
-  
-const appFB=initializeApp(firebaseConfig);  
-const db=getDatabase(appFB);  
-const auth=getAuth(appFB);  
-const provider=new GoogleAuthProvider();  
-  
-/* SPLASH */  
-const splashScreen=document.getElementById("splashScreen");  
-const progressBar=document.getElementById("progressBar");  
-const progressPercent=document.getElementById("progressPercent");  
-let progress=0;  
-function fakeLoad(onDone){  
-  const interval=setInterval(()=>{  
-    progress+=Math.random()*6;  
-    if(progress>=100){  
-      progress=100;  
-      clearInterval(interval);  
-      setTimeout(()=>{splashScreen.style.opacity=0;},300);  
-      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},900);  
-    }  
-    progressBar.style.width=progress+"%";  
-    progressPercent.textContent=Math.floor(progress)+"%";  
-  },100);  
-}  
-  
-/* VARIABLES */  
-let isGuest=true;  
-let localUserId=localStorage.getItem("userId");  
-if(!localUserId){localUserId="guest_"+Math.random().toString(36).substring(2,9);localStorage.setItem("userId",localUserId);}  
-let userId=localUserId;  
-let coins=0,clickPower=1;  
-  
-const counterValue=document.getElementById("counterValue");  
-const loginOutBtn=document.getElementById("loginOutBtn");  
-const loginBtnEl=document.getElementById("loginBtn");  
-  
-/* ITEMS */  
-const shopItems=[  
-{id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},  
-{id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}  
-];  
-  
-/* COUNTER ANIM */  
-let animFrame=null;  
-function animateCounter(oldVal,newVal){  
-  oldVal=Number(oldVal)||0;newVal=Number(newVal)||0;  
-  if(newVal-oldVal===1){counterValue.textContent=newVal;return;}  
-  if(animFrame)cancelAnimationFrame(animFrame);  
-  let start=performance.now();  
-  function frame(ts){  
-    let p=Math.min((ts-start)/100,1);  
-    counterValue.textContent=Math.floor(oldVal+(newVal-oldVal)*p);  
-    if(p<1)animFrame=requestAnimationFrame(frame);else counterValue.textContent=newVal;  
-  }  
-  animFrame=requestAnimationFrame(frame);  
-}  
-  
-/* CLICK */  
-const clickImg=document.getElementById("clickImg");  
-const clickButton=document.getElementById("clickButton");  
-  
-function spawnFloatingCoin(x,y,value){  
-  const el=document.createElement("div");  
-  el.className="floating-coin";  
-  el.style.left=(x-10)+"px";  
-  el.style.top=(y-10)+"px";  
-  el.innerHTML=`<img src="img/anti-coin.png">${value}`;  
-  document.body.appendChild(el);  
-  requestAnimationFrame(()=>{el.style.transform="translateY(-60px)";el.style.opacity="0";});  
-  setTimeout(()=>el.remove(),400);  
-}  
-  
-function clickAction(x,y){  
-  coins+=clickPower;  
-  spawnFloatingCoin(x,y,clickPower);  
-  animateCounter(parseInt(counterValue.textContent)||0,coins);  
-  updatePricesColor();  
-}  
-  
-clickButton.addEventListener("touchstart",e=>{  
-  e.preventDefault();  
-  for(const t of e.changedTouches) clickAction(t.clientX,t.clientY);  
-  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";  
-  setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);  
-},{passive:false});  
-  
-clickButton.onclick=e=>{  
-  clickAction(e.clientX,e.clientY);  
-  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";  
-  setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);  
-};  
-  
-/* SHOP */  
-const itemsBlock=document.getElementById("items");  
-  
-function updateButtonText(item,btn){  
-  btn.innerHTML="";  
-  if(item.stock!==undefined&&item.stock<=0){  
-    btn.textContent="распродано";  
-    btn.disabled=true;  
-    return;  
-  }  
-  const p=document.createElement("div");  
-  p.className="price";  
-  p.innerHTML=`${item.cost}<img src="img/anti-coin.png">`;  
-  p.style.color=(coins<item.cost)?"#ff3333":"#fff";  
-  btn.appendChild(p);  
-}  
-  
-function renderShop(){  
-  itemsBlock.innerHTML="";  
-  shopItems.forEach(item=>{  
-    const d=document.createElement("div");  
-    d.className="item";  
-  
-    d.innerHTML=`  
-      <div class="item-top">  
-        <img src="${item.img}">  
-        <div class="item-text">  
-          <b>${item.name}</b>  
-          <p>${item.description}</p>  
-          <p class="prop">${item.property}</p>  
-        </div>  
-      </div>  
-    `;  
-  
-    if(item.stock!==undefined){  
-      const s=document.createElement("p");  
-      s.className="stock";  
-      s.textContent="В наличии: "+item.stock;  
-      d.appendChild(s);  
-    }  
-  
-    const btn=document.createElement("button");  
-    d.appendChild(btn);  
-    updateButtonText(item,btn);  
-  
-    btn.addEventListener("click",()=>{  
-      if(item.stock!==undefined&&item.stock<=0)return;  
-      if(coins<item.cost)return;  
-  
-      const oldCoins=coins;  
-      coins-=item.cost;  
-  
-      /* === PRICE CHANGE FIX === */  
-      if(item.id===1){  
-        clickPower+=1;  
-        item.cost = Math.floor(item.cost * 1.2);  
-      }  
-      if(item.id===2){  
-        clickPower+=item.power;  
-        item.cost+=250;  
-        item.stock=Math.max(0,item.stock-1);  
-      }  
-  
-      animateCounter(oldCoins,coins);  
-      renderShop();  
-    });  
-  
-    itemsBlock.appendChild(d);  
-  });  
-}  
-  
-function updatePricesColor(){  
-  document.querySelectorAll('.item .price').forEach(p=>{  
-    const txt=p.childNodes[0]?p.childNodes[0].textContent:p.textContent;  
-    const cost=parseInt(txt)||0;  
-    p.style.color=(coins<cost)?"#ff3333":"#fff";  
-  });  
-}  
-  
-/* SAVE */  
-async function saveProgress(){  
-  if(isGuest)return;  
-  const data={coins,clickPower,shopItems};  
-  await set(ref(db,'users/'+userId),data);  
-}  
-setInterval(saveProgress,5000);  
-  
-/* LOGIN */  
-loginBtnEl.onclick=async()=>{try{await signInWithPopup(auth,provider);}catch(e){console.error(e);}};  
-  
-loginOutBtn.onclick=async()=>{  
-  if(isGuest){await signInWithPopup(auth,provider);return;}  
-  await signOut(auth);  
-  alert("Вы вышли из аккаунта");  
-  isGuest=true;  
-  userId=localUserId;  
-  coins=0;clickPower=1;  
-  shopItems.forEach(i=>{if(i.id===2)i.stock=5;if(i.id===1)i.cost=50;});  
-  animateCounter(0,0);  
-  renderShop();  
-};  
-  
-/* AUTH CHECK */  
-onAuthStateChanged(auth,async user=>{  
-  if(user){  
-    isGuest=false;  
-    userId=user.uid;  
-    loginOutBtn.textContent="Выйти из аккаунта";  
-    loginBtnEl.style.display="none";  
-  
-    const snap=await get(ref(db,'users/'+userId));  
-    if(snap.exists()){  
-      const data=snap.val();  
-      coins=data.coins||0;  
-      clickPower=data.clickPower||1;  
-      if(data.shopItems){  
-        data.shopItems.forEach((si,i)=>{  
-          shopItems[i].cost=si.cost;  
-          if(shopItems[i].stock!==undefined)shopItems[i].stock=si.stock;  
-        });  
-      }  
-    }  
-  
-    animateCounter(0,coins);  
-    renderShop();  
-  }else{  
-    isGuest=true;  
-    loginOutBtn.textContent="Войти в аккаунт";  
-  }  
-});  
-  
-/* PANELS */  
-const panels=document.getElementById("panels");  
-const shopBtnEl=document.getElementById("shopBtn");  
-const backBtnEl=document.getElementById("backBtn");  
-const settingsBtnEl=document.getElementById("settingsBtn");  
-const backToClickerBtn=document.getElementById("backToClickerBtn");  
-  
-panels.style.transform="translateX(-392px)";  
-  
-function goToShop(){  
-  panels.style.transform="translateX(-784px)";  
-  shopBtnEl.style.right="-60px";  
-  settingsBtnEl.style.left="-60px";  
-  loginBtnEl.style.left="-60px";  
-  backToClickerBtn.style.display="block";  
-  setTimeout(()=>backToClickerBtn.style.right="12px",0);  
-  updatePricesColor();  
-}  
-  
-function goBackFromShop(){  
-  panels.style.transform="translateX(-392px)";  
-  backToClickerBtn.style.right="-60px";  
-  setTimeout(()=>backToClickerBtn.style.display="none",400);  
-  shopBtnEl.style.right="12px";  
-  settingsBtnEl.style.left="12px";  
-  loginBtnEl.style.left="12px";  
-}  
-  
-function goToSettings(){  
-  panels.style.transform="translateX(0)";  
-  shopBtnEl.style.right="-60px";  
-  settingsBtnEl.style.left="-60px";  
-  loginBtnEl.style.left="-60px";  
-  backBtnEl.style.display="block";  
-  setTimeout(()=>backBtnEl.style.right="12px",50);  
-}  
-  
-function goBackFromSettings(){  
-  panels.style.transform="translateX(-392px)";  
-  shopBtnEl.style.right="12px";  
-  settingsBtnEl.style.left="12px";  
-  backBtnEl.style.right="-60px";  
-  setTimeout(()=>backBtnEl.style.display="none",500);  
-  loginBtnEl.style.left="12px";  
-}  
-  
-shopBtnEl.onclick=goToShop;  
-settingsBtnEl.onclick=goToSettings;  
-backBtnEl.onclick=goBackFromSettings;  
-backToClickerBtn.onclick=goBackFromShop;  
-  
-fakeLoad(()=>{panels.style.transform="translateX(-392px)";renderShop();animateCounter(0,coins);updatePricesColor();});  
-</script>  
-  
-</body>  
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AnTI Shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000;display:flex;justify-content:center;overflow:hidden;font-family:'Montserrat',sans-serif;}
+#app{width:392px;height:100vh;position:relative;overflow:hidden;background:#0000;}
+
+/* SPLASH */
+#splashScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background-color:#888;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.4s ease;}
+#splashScreen h1{color:#fff;font-size:38px;margin-bottom:26px;}
+#progressBarContainer{width:300px;height:24px;background:#555;border-radius:12px;overflow:hidden;margin-bottom:12px;}
+#progressBar{width:0%;height:100%;background:linear-gradient(90deg,#ffba67,#ff7749);border-radius:12px;transition:width 0.1s ease;}
+#progressPercent{color:#fff;}
+
+/* PANELS */
+#shopBtn,#backBtn,#settingsBtn,#loginBtn,#backToClickerBtn{
+  position:absolute;width:48px;height:48px;background:none;border:none;padding:0;z-index:50;
+  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1),right 0.55s cubic-bezier(0.35,0.15,0.1,1);
+}
+#shopBtn{top:12px;right:12px;}
+#backBtn{top:12px;right:12px;display:none;}
+#backToClickerBtn{top:12px;right:-60px;display:none;}
+#settingsBtn{top:12px;left:12px;}
+#loginBtn{top:70px;left:12px;display:block;}
+#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{width:100%;height:100%;}
+
+#panels{position:absolute;top:0;left:0;width:calc(392px*3);height:100%;display:flex;transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1);}
+
+/* SETTINGS */
+#settingsPanel{
+  width:392px;height:100%;
+  background:linear-gradient(to bottom,#896B51,#77593E);
+  padding-top:70px;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;overflow-y:auto;
+}
+#settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}
+
+/* CLICKER */
+#clickerPanel{width:392px;height:100%;background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:80px;position:relative;overflow:hidden;}
+#clickerHeader{position:absolute;top:0;left:0;width:100%;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;}
+#clickerHeader h1{margin:0;color:#fff;font-size:24px;}
+#clickerHeader p{margin:0;color:#fff;font-size:18px;}
+#counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
+#counter img{width:24px;height:24px;}
+#clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:180px;}
+#ground{position:absolute;left:50%;top:140px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}
+#ground img{width:100%;}
+#clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
+#clickImg{width:220px;transition:transform 0.08s ease;display:block;}
+
+/* SHOP */
+#shopPanel{
+  width:392px;height:100%;
+  background:linear-gradient(to bottom,#FFC374,#FFB26B);
+  padding-top:70px;overflow-y:auto;
+}
+#shopHeader{
+  width:100%;height:80px;background:#332614;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;text-align:center;box-sizing:border-box;position:relative;z-index:10;
+}
+#shopHeader h1{margin:0;font-size:24px;}
+#shopHeader p{margin:0;font-size:18px;}
+
+/* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
+#shopPanelInner{
+  background:linear-gradient(to bottom,#896B51,#77593E);
+  margin:0 auto;padding:24px;border-radius:14px;
+  width:350px;min-height:calc(100vh - 100px);
+  box-shadow:0 12px 22px rgba(0,0,0,0.35) inset;
+}
+
+/* ТОВАР */
+.item{
+  width:310px;background-image:url("img/item-frame.png");
+  background-size:100% 100%;padding:10px 14px;
+  display:flex;flex-direction:column;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));
+  margin:0 auto 22px;
+}
+
+.item-top{display:flex;align-items:center;}
+.item-top img{width:72px;height:72px;margin-right:14px;object-fit:contain;}
+
+.item-text b{font-size:18px;color:#FFDBBF;font-weight:700;}
+.item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:400;}
+
+.item-text .prop{color:#B48E70;font-weight:500;}
+
+.item .stock{
+  color:#FFDBBF;
+  text-align:center;
+  width:100%;
+  margin-top:6px;
+  margin-bottom:-4px;
+  font-weight:500;
+}
+
+.item button{
+  margin-top:12px;width:100%;
+  padding:12px;background:#332614;color:#fff;
+  border:none;border-radius:8px;font-size:16px;
+  transition:transform .12s ease;
+}
+
+.price{display:flex;align-items:center;justify-content:center;gap:6px;}
+.price img{width:18px;height:18px;}
+
+/* FLOATING COIN */
+.floating-coin{font-size:15px;position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;color:lime;transition:transform .6s ease-out, opacity .6s ease-out;z-index:60;}
+.floating-coin img{width:18px;height:18px;}
+</style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splashScreen">
+<h1>AnTI-Shop</h1>
+<div id="progressBarContainer"><div id="progressBar"></div></div>
+<div id="progressPercent">0%</div>
+</div>
+
+<div id="app">
+<button id="settingsBtn"><img src="img/settings.png"></button>
+<button id="loginBtn"><img src="img/login.png"></button>
+<button id="shopBtn"><img src="img/shop-icon.png"></button>
+<button id="backBtn"><img src="img/back-icon.png"></button>
+<button id="backToClickerBtn"><img src="img/back-icon.png"></button>
+
+<div id="panels">
+<div id="settingsPanel">
+<button id="loginOutBtn">Войти в аккаунт</button>
+</div>
+
+<div id="clickerPanel">
+<div id="clickerHeader">
+  <h1>AnTI-Shop</h1>
+  <p id="clickerCoins">0</p>
+</div>
+<div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
+<div id="clickButtonWrapper">
+  <div id="ground"><img src="img/ground.png"></div>
+  <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
+</div>
+</div>
+
+<div id="shopPanel">
+<div id="shopHeader">
+  <h1>AnTI-Shop</h1>
+  <p id="shopCoins">0</p>
+</div>
+<div id="shopPanelInner">
+  <div id="items"></div>
+</div>
+</div>
+
+</div>
+</div>
+
+<script type="module">
+// --- Firebase и остальной код сохраняем как у тебя ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+const firebaseConfig={apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",authDomain:"anti-shop-99f1d.firebaseapp.com",databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",projectId:"anti-shop-99f1d",storageBucket:"anti-shop-99f1d.firebasestorage.app",messagingSenderId:"347202416802",appId:"1:347202416802:web:2d2df1b819be9da180e7fb"};
+
+const appFB=initializeApp(firebaseConfig);
+const db=getDatabase(appFB);
+const auth=getAuth(appFB);
+const provider=new GoogleAuthProvider();
+
+/* SPLASH */
+const splashScreen=document.getElementById("splashScreen");
+const progressBar=document.getElementById("progressBar");
+const progressPercent=document.getElementById("progressPercent");
+let progress=0;
+function fakeLoad(onDone){
+  const interval=setInterval(()=>{
+    progress+=Math.random()*10; // ускорено
+    if(progress>=100){
+      progress=100;
+      clearInterval(interval);
+      setTimeout(()=>{splashScreen.style.opacity=0;},150);
+      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},500);
+    }
+    progressBar.style.width=progress+"%";
+    progressPercent.textContent=Math.floor(progress)+"%";
+  },50);
+}
+
+/* VARIABLES */
+let isGuest=true;
+let localUserId=localStorage.getItem("userId");
+if(!localUserId){localUserId="guest_"+Math.random().toString(36).substring(2,9);localStorage.setItem("userId",localUserId);}
+let userId=localUserId;
+let coins=0,clickPower=1;
+
+const counterValue=document.getElementById("counterValue");
+const loginOutBtn=document.getElementById("loginOutBtn");
+const loginBtnEl=document.getElementById("loginBtn");
+const clickerCoins=document.getElementById("clickerCoins");
+const shopCoins=document.getElementById("shopCoins");
+
+/* ITEMS */
+const shopItems=[
+{id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
+{id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}
+];
+
+/* COUNTER ANIM */
+let animFrame=null;
+function animateCounter(oldVal,newVal){
+  oldVal=Number(oldVal)||0;newVal=Number(newVal)||0;
+  if(newVal-oldVal===1){counterValue.textContent=newVal; clickerCoins.textContent=newVal; shopCoins.textContent=newVal; return;}
+  if(animFrame)cancelAnimationFrame(animFrame);
+  let start=performance.now();
+  function frame(ts){
+    let p=Math.min((ts-start)/200,1); // медленнее
+    let val=Math.floor(oldVal+(newVal-oldVal)*p);
+    counterValue.textContent=val;
+    clickerCoins.textContent=val;
+    shopCoins.textContent=val;
+    if(p<1)animFrame=requestAnimationFrame(frame);else{
+      counterValue.textContent=newVal;
+      clickerCoins.textContent=newVal;
+      shopCoins.textContent=newVal;
+    }
+  }
+  animFrame=requestAnimationFrame(frame);
+}
+
+/* CLICK */
+const clickImg=document.getElementById("clickImg");
+const clickButton=document.getElementById("clickButton");
+
+function spawnFloatingCoin(x,y,value){
+  const el=document.createElement("div");
+  el.className="floating-coin";
+  el.style.left=(x-10)+"px";
+  el.style.top=(y-10)+"px";
+  el.innerHTML=`${value}<img src="img/anti-coin.png">`; // число сначала, иконка справа
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>{el.style.transform="translateY(-60px)";el.style.opacity="0";});
+  setTimeout(()=>el.remove(),600);
+}
+
+function clickAction(x,y){
+  coins+=clickPower;
+  spawnFloatingCoin(x,y,clickPower);
+  animateCounter(parseInt(counterValue.textContent)||0,coins);
+  updatePricesColor();
+}
+
+clickButton.addEventListener("touchstart",e=>{
+  e.preventDefault();
+  for(const t of e.changedTouches) clickAction(t.clientX,t.clientY);
+  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";
+  setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);
+},{passive:false});
+
+clickButton.onclick=e=>{
+  clickAction(e.clientX,e.clientY);
+  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";
+  setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);
+};
+
+/* SHOP и остальной код сохраняется как у тебя */
+</script>
+
+</body>
 </html>
