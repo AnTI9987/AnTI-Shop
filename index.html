@@ -52,17 +52,22 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 /* SHOP */
 #shopPanel{
-  width:392px;height:100%;
-  background:linear-gradient(to bottom,#7A4B1D,#5B3F1B);
-  padding-top:70px;overflow-y:auto;
+  width:392px;
+  height:100%;
+  background:linear-gradient(to bottom,#FFC374,#FFB26B);
+  padding-top:70px;
+  overflow-y:auto;
 }
 
 /* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
 #shopPanelInner{
-  background:linear-gradient(to bottom,#896B51,#77593E);
-  margin:0 auto;padding:24px;border-radius:14px;
-  width:350px;min-height:calc(100vh - 100px);
-  box-shadow:0 12px 22px rgba(0,0,0,0.35) inset;
+  background:#332614;
+  margin:0 auto;
+  padding:32px 24px 24px;
+  border-radius:0;
+  width:350px;
+  min-height:calc(100vh - 70px);
+  box-shadow:none;
 }
 
 /* ТОВАР */
@@ -104,6 +109,42 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 /* FLOATING COIN */
 .floating-coin{font-size:15px;position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;color:lime;transition:transform .4s ease-out, opacity .4s ease-out;z-index:60;}
 .floating-coin img{width:18px;height:18px;}
+
+#shopTop{
+  width:100%;
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.shopTitle{
+  font-size:28px;
+  font-weight:700;
+  color:#FFDBBF;
+  margin:0;
+}
+
+.shopBalance{
+  margin-top:4px;
+  font-size:20px;
+  font-weight:600;
+  color:#FFDBBF;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+}
+
+.shopBalance img{
+  width:22px;
+  height:22px;
+}
+  
+#clickerTop{
+  width:100%;
+  text-align:center;
+  margin-top:10px;
+}
+  
 </style>
 </head>
 
@@ -129,7 +170,10 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 </div>
 
 <div id="clickerPanel">
-<div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>
+<div id="clickerTop">
+  <h2 class="shopTitle">AnTI-Shop</h2>
+  <div class="shopBalance"><span id="shopBalanceValueClicker">0</span> <img src="img/anti-coin.png"></div>
+</div>
 <div id="clickButtonWrapper">
   <div id="ground"><img src="img/ground.png"></div>
   <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
@@ -138,6 +182,10 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 <div id="shopPanel">
 <div id="shopPanelInner">
+  <div id="shopTop">
+  <h2 class="shopTitle">AnTI-Shop</h2>
+  <div class="shopBalance"><span id="shopBalanceValue">0</span> <img src="img/anti-coin.png"></div>
+  </div>
   <div id="items"></div>
 </div>
 </div>
@@ -164,17 +212,24 @@ const progressBar=document.getElementById("progressBar");
 const progressPercent=document.getElementById("progressPercent");
 let progress=0;
 function fakeLoad(onDone){
+  progress = 1; // НЕ 0%
+  progressBar.style.width = "1%";
+  progressPercent.textContent = "1%";
+
   const interval=setInterval(()=>{
-    progress+=Math.random()*6;
+    progress += 10 + Math.random()*15;  // быстрее
+
     if(progress>=100){
       progress=100;
       clearInterval(interval);
-      setTimeout(()=>{splashScreen.style.opacity=0;},300);
-      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},900);
+
+      setTimeout(()=>{splashScreen.style.opacity=0;},200);
+      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},700);
     }
-    progressBar.style.width=progress+"%";
+
+    progressBar.style.width=Math.min(progress,100)+"%";
     progressPercent.textContent=Math.floor(progress)+"%";
-  },100);
+  },80);
 }
 
 /* VARIABLES */
@@ -203,8 +258,13 @@ function animateCounter(oldVal,newVal){
   let start=performance.now();
   function frame(ts){
     let p=Math.min((ts-start)/100,1);
-    counterValue.textContent=Math.floor(oldVal+(newVal-oldVal)*p);
-    if(p<1)animFrame=requestAnimationFrame(frame);else counterValue.textContent=newVal;
+    document.getElementById("shopBalanceValue").textContent =
+Math.floor(oldVal+(newVal-oldVal)*p);
+
+document.getElementById("shopBalanceValueClicker").textContent =
+Math.floor(oldVal+(newVal-oldVal)*p);
+    if(p<1)animFrame=requestAnimationFrame(frame);else document.getElementById("shopBalanceValue").textContent=newVal;
+document.getElementById("shopBalanceValueClicker").textContent=newVal;
   }
   animFrame=requestAnimationFrame(frame);
 }
@@ -216,12 +276,22 @@ const clickButton=document.getElementById("clickButton");
 function spawnFloatingCoin(x,y,value){
   const el=document.createElement("div");
   el.className="floating-coin";
+
   el.style.left=(x-10)+"px";
   el.style.top=(y-10)+"px";
-  el.innerHTML=`<img src="img/anti-coin.png">${value}`;
+
+  // Теперь: СНАЧАЛА число, справа иконка
+  el.innerHTML=`${value}<img src="img/anti-coin.png">`;
+
   document.body.appendChild(el);
-  requestAnimationFrame(()=>{el.style.transform="translateY(-60px)";el.style.opacity="0";});
-  setTimeout(()=>el.remove(),400);
+
+  // более плавная анимация
+  requestAnimationFrame(()=>{
+    el.style.transform="translateY(-80px)";
+    el.style.opacity="0";
+  });
+
+  setTimeout(()=>el.remove(),650);
 }
 
 function clickAction(x,y){
