@@ -53,7 +53,12 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #ground{position:absolute;left:50%;top:140px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}
 #ground img{width:100%;}
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
-#clickImg{width:220px;transition:transform 0.08s ease;display:block;}
+#clickImg {
+  width: 220px;
+  display: block;       /* обязательно */
+  pointer-events: none; /* чтобы клики шли на кнопку */
+  transition: transform 0.07s ease; /* анимация масштаба */
+}
 
 /* SHOP */
 #shopPanel{
@@ -154,6 +159,13 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   left:50%;
   transform:translateX(-50%);
 }
+
+#topPlate {
+  z-index: 100; /* выше всех панелей */
+  position: relative; /* для анимации */
+  display: block; /* на всякий случай */
+}
+  
 #topPlate img#plateImg{
   width:280px; /* вместо 330px */
   height:120px;
@@ -383,34 +395,27 @@ function clickAction(x,y){
   updatePricesColor();
 }
 
- clickButton.addEventListener("touchstart", e => {
-    e.preventDefault();
-    for (const t of e.changedTouches) clickAction(t.clientX, t.clientY);
+function animateClicker(){
+  clickImg.style.transform = "scale(0.87)";
+  clickImg.src = "img/click2.png";
+  setTimeout(()=>{
+    clickImg.style.transform = "scale(1)";
+    clickImg.src = "img/click1.png";
+  }, 150);
+}
 
-    // анимация: уменьшаем и меняем картинку
-    clickImg.style.transition = "transform 0.07s ease";
-    clickImg.style.transform = "scale(0.87)";
-    clickImg.src = "img/click2.png"; // временно другая картинка
+clickButton.addEventListener("click", e => {
+  clickAction(e.clientX, e.clientY);
+  animateClicker();
+});
 
-    setTimeout(()=>{
-        clickImg.style.transform = "scale(1)";
-        clickImg.src = "img/click1.png"; // возвращаем исходную картинку
-    }, 300);
+clickButton.addEventListener("touchstart", e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    clickAction(t.clientX, t.clientY);
+  }
+  animateClicker();
 }, {passive:false});
-
-clickButton.onclick = e => {
-    clickAction(e.clientX, e.clientY);
-
-    // анимация: уменьшаем и меняем картинку
-    clickImg.style.transition = "transform 0.07s ease";
-    clickImg.style.transform = "scale(0.87)";
-    clickImg.src = "img/click2.png";
-
-    setTimeout(()=>{
-        clickImg.style.transform = "scale(1)";
-        clickImg.src = "img/click1.png";
-    }, 300);
-};
 
 /* SHOP */
 const itemsBlock=document.getElementById("items");
@@ -603,7 +608,8 @@ function goToShop(){
   settingsBtnEl.style.left="-60px";
   loginBtnEl.style.left="-60px";
   backToClickerBtn.style.display="block";
-safeSetStyle(backToClickerBtn, "right", "12px", 0);
+backToClickerBtn.style.right = "-60px"; // стартовая позиция за экраном
+setTimeout(() => safeSetStyle(backToClickerBtn, "right", "12px", 0), 50);
   updatePricesColor();
 }
 
@@ -642,7 +648,7 @@ settingsBtnEl.onclick=goToSettings;
 backBtnEl.onclick=goBackFromSettings;
 backToClickerBtn.onclick=goBackFromShop;
 
-fakeLoad(()=>{panels.style.transform="translateX(-392px)";renderShop();animateCounter(0,coins);updatePricesColor();});
+fakeLoad(()=>{panels.style.transform="translateX(-392px)";renderShop();document.getElementById("topPlate").style.display = "block";animateCounter(0,coins);updatePricesColor();});
 </script>
 
 </body>
