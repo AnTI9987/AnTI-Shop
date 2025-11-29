@@ -301,6 +301,30 @@ let localUserId=localStorage.getItem("userId");
 if(!localUserId){localUserId="guest_"+Math.random().toString(36).substring(2,9);localStorage.setItem("userId",localUserId);}
 let userId=localUserId;
 let coins=0,clickPower=1;
+let plateAnimFrame=null;
+
+function animatePlateCoins(newValue){
+    const el = document.getElementById("plateBalanceValue");
+    let startVal = Number(el.textContent) || 0;
+    const diff = newValue - startVal;
+    const duration = 500; // миллисекунды
+    const startTime = performance.now();
+
+    if(plateAnimFrame) cancelAnimationFrame(plateAnimFrame);
+
+    function frame(now){
+        let t = Math.min((now - startTime)/duration, 1);
+        let eased = 1 - Math.pow(1 - t, 3); // плавное ускорение
+        el.textContent = Math.floor(startVal + diff * eased);
+        if(t < 1){
+            plateAnimFrame = requestAnimationFrame(frame);
+        } else {
+            el.textContent = newValue;
+        }
+    }
+
+    plateAnimFrame = requestAnimationFrame(frame);
+}
 
 const counterValue=document.getElementById("counterValue");
 const loginOutBtn=document.getElementById("loginOutBtn");
@@ -320,40 +344,6 @@ let coinAnimStart = 0;
 let coinAnimStartTime = 0;
 let coinAnimRunning = false;
 
-function animatePlateCoins(newValue){
-    const el = document.getElementById("plateBalanceValue");
-
-    const now = performance.now();
-
-    if(!coinAnimRunning){
-        coinAnimStart = Number(el.textContent)||0;
-        coinAnimStartTime = now;
-        coinAnimRunning = true;
-    }
-
-    coinAnimTarget = newValue;
-
-    function frame(){
-        if(!coinAnimRunning) return;
-
-        const t = (performance.now() - coinAnimStartTime) / 1000;
-        const p = Math.min(t / 1, 1);
-
-        const eased = 1 - Math.pow(1 - p, 3); // быстро → медленно
-
-        const val = Math.floor(coinAnimStart + (coinAnimTarget - coinAnimStart)*eased);
-
-        el.textContent = val;
-
-        if(p < 1){
-            requestAnimationFrame(frame);
-        } else {
-            coinAnimRunning = false;
-        }
-    }
-
-    requestAnimationFrame(frame);
-}
   oldVal=Number(oldVal)||0;newVal=Number(newVal)||0;
   if(newVal-oldVal===1){counterValue.textContent=newVal;return;}
   if(animFrame)cancelAnimationFrame(animFrame);
