@@ -66,7 +66,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 /* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
 #shopPanelInner{
-  background:#332614;
+  background: none;
   margin:0 auto;
   padding:32px 24px 24px;
   border-radius:0;
@@ -115,12 +115,6 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 .floating-coin{font-size:15px;position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;color:lime;transition:transform .4s ease-out, opacity .4s ease-out;z-index:60;}
 .floating-coin img{width:18px;height:18px;}
 
-#shopTop{
-  width:100%;
-  text-align:center;
-  margin-bottom:20px;
-}
-
 .shopTitle{
   font-size:28px;
   font-weight:700;
@@ -143,12 +137,13 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   width:22px;
   height:22px;
 }
-  
-#clickerTop{
-  width:100%;
-  text-align:center;
-  margin-top:10px;
-}
+
+.itemWrap {
+  width: 100%;           /* растянуть на всю ширину */
+  display: flex;         /* чтобы item центрировался внутри */
+  justify-content: center;
+  padding: 16px 0;       /* высота полосы */
+  }
   
 </style>
 </head>
@@ -187,10 +182,6 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 <div id="shopPanel">
 <div id="shopPanelInner">
-  <div id="shopTop">
-  <h2 class="shopTitle">AnTI-Shop</h2>
-  <div class="shopBalance"><span id="shopBalanceValue">0</span> <img src="img/anti-coin.png"></div>
-  </div>
   <div id="items"></div>
 </div>
 </div>
@@ -343,21 +334,18 @@ function renderShop(){
     
     /* === НОВАЯ ОБЁРТКА, КОТОРУЮ ТЫ ХОТЕЛ === */
     const wrap = document.createElement("div");
-    wrap.className = "itemWrap";
-    wrap.style.padding = "10px 0";
-    wrap.style.marginBottom = "22px";
-    wrap.style.borderRadius = "14px";
+wrap.className = "itemWrap";
 
-    /* === ЧЕРЕДОВАНИЕ ФОНА ДЛЯ wrap (а НЕ item!) === */
-    if ((itemsBlock.children.length % 2) === 1) {
-        wrap.style.background = "#8E663D";   // тёмный фон
-    } else {
-        wrap.style.background = "#A7794C";   // светлый фон
-    }
+/* Фон для каждого второго товара */
+if ((itemsBlock.children.length % 2) === 1) {
+    wrap.style.background = "#8E663D";        // тёмная полоса
+} else {
+    wrap.style.background = "transparent";    // без полосы
+}
 
-    /* === САМА РАМКА ТОВАРА (НЕ МЕНЯЕТ ЦВЕТ!) === */
-    const d=document.createElement("div");
-    d.className="item";
+/* Элемент товара */
+const d = document.createElement("div");
+d.className = "item";
 
     d.style.margin = "0 auto";           // чтобы оставить центрирование
     d.style.backgroundImage = 'url("img/item-frame.png")'; // рамка ВСЕГДА ОДНА И ТА ЖЕ
