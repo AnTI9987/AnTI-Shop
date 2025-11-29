@@ -1,537 +1,186 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AnTI Shop</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet">
-
-<style>
-body{
-  margin:0;padding:0;background:#000;
-  display:flex;justify-content:center;overflow:hidden;
-  font-family:'Montserrat',sans-serif;
-}
-#app{width:392px;height:100vh;position:relative;overflow:hidden;background:#0000;}
-
-/* SPLASH */
-#splashScreen{
-  position:fixed;top:0;left:0;width:100vw;height:100vh;
-  background-color:#888;
-  display:flex;flex-direction:column;
-  justify-content:center;align-items:center;
-  z-index:9999;
-  transition:opacity 0.7s ease;
-}
-#splashScreen h1{color:#fff;font-size:38px;margin-bottom:26px;}
-#progressBarContainer{
-  width:300px;height:24px;background:#555;border-radius:12px;
-  overflow:hidden;margin-bottom:12px;
-}
-#progressBar{
-  width:0%;height:100%;
-  background:linear-gradient(90deg,#ffba67,#ff7749);
-  border-radius:12px;transition:width 0.12s ease;
-}
-#progressPercent{color:#fff;font-size:17px;margin-top:6px;}
-
-/* BUTTONS */
-#shopBtn,#backBtn,#settingsBtn,#loginBtn,#backToClickerBtn{
-  position:absolute;width:48px;height:48px;background:none;border:none;padding:0;z-index:50;
-  transition:left .55s cubic-bezier(.35,.15,.1,1),
-             right .55s cubic-bezier(.35,.15,.1,1);
-}
-#shopBtn{top:12px;right:12px;}
-#backBtn{top:12px;right:12px;display:none;}
-#backToClickerBtn{top:12px;right:-60px;display:none;}
-#settingsBtn{top:12px;left:12px;}
-#loginBtn{top:70px;left:12px;display:block;}
-#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{
-  width:100%;height:100%;
-}
-
-/* PANELS */
-#panels{
-  position:absolute;top:0;left:0;
-  width:calc(392px*3);height:100%;
-  display:flex;
-  transition:transform .55s cubic-bezier(.35,.15,.1,1);
-}
-
-/* SETTINGS */
-#settingsPanel{
-  width:392px;height:100%;
-  background:linear-gradient(to bottom,#896B51,#77593E);
-  padding-top:70px;
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:flex-start;overflow-y:auto;
-}
-#settingsPanel button{
-  margin-top:20px;width:300px;padding:14px;
-  background:#332614;color:#fff;border:none;border-radius:8px;
-  font-size:18px;transition:transform .12s ease;
-}
-
-/* CLICKER PANEL */
-#clickerPanel{
-  width:392px;height:100%;
-  background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);
-  padding-top:86px;          /* ← место под верхние надписи */
-  position:relative;overflow:hidden;
-}
-
-/* КЛИКЕР — ВЕРХНИЕ НАДПИСИ */
-.top-title{
-  width:100%;text-align:center;color:#000;
-  font-size:26px;font-weight:700;margin-bottom:4px;
-}
-.top-balance{
-  width:100%;text-align:center;color:#000;
-  font-size:18px;font-weight:600;margin-bottom:12px;
-}
-
-/* CLICKER */
-#clickButtonWrapper{
-  position:relative;width:100%;display:flex;justify-content:center;
-  margin-top:200px;
-}
-#ground{
-  position:absolute;left:50%;top:140px;transform:translateX(-50%);
-  width:100%;pointer-events:none;z-index:0;
-}
-#ground img{width:100%;}
-#clickButton{background:none;border:none;z-index:1;position:relative;
-  display:flex;align-items:center;justify-content:center;padding:0;}
-#clickImg{width:220px;transition:transform .08s ease;display:block;}
-
-/* SHOP PANEL */
-#shopPanel{
-  width:392px;height:100%;
-  background:linear-gradient(to bottom,#FFC374,#FFB26B);   /* ← ТВОЙ ГРАДИЕНТ */
-  padding-top:100px;overflow-y:auto;
-}
-
-/* ВЕРХНЯЯ ПАНЕЛЬ МАГАЗИНА */
-.shop-header{
-  width:100%;height:82px;
-  background:#332614;             /* ← ровная и выше */
-  position:absolute;top:0;left:0;
-  display:flex;flex-direction:column;
-  justify-content:center;align-items:center;
-  color:#FFDBBF;
-  box-shadow:0 4px 10px rgba(0,0,0,0.35);
-}
-.shop-header-title{
-  font-size:28px;font-weight:700;margin-bottom:2px;
-}
-.shop-header-balance{
-  font-size:18px;font-weight:600;
-}
-
-/* SHOP INNER */
-#shopPanelInner{
-  background:linear-gradient(to bottom,#896B51,#77593E);
-  margin:0 auto;padding:24px;border-radius:14px;
-  width:350px;
-  min-height:calc(100vh - 140px);
-  box-shadow:0 12px 22px rgba(0,0,0,0.35) inset;
-  margin-top:26px;
-}
-
-/* ITEM */
-.item{
-  width:310px;background-image:url("img/item-frame.png");
-  background-size:100% 100%;
-  padding:5px 14px 5px;     /* высота уменьшена -10px */
-  display:flex;flex-direction:column;
-  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));
-  margin:0 auto 22px;
-}
-.item-top{display:flex;align-items:center;}
-.item-top img{width:72px;height:72px;margin-right:14px;object-fit:contain;}
-.item-text b{font-size:18px;color:#FFDBBF;font-weight:700;}
-item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:400;}
-.item-text .prop{color:#B48E70;font-weight:500;}
-.item .stock{
-  color:#FFDBBF;text-align:center;width:100%;
-  margin-top:6px;margin-bottom:-4px;font-weight:500;
-}
-.item button{
-  margin-top:12px;width:100%;padding:12px;background:#332614;
-  color:#fff;border:none;border-radius:8px;font-size:16px;
-  transition:transform .12s ease;
-}
-.price{display:flex;align-items:center;justify-content:center;gap:6px;}
-.price img{width:18px;height:18px;}
-
-/* FLOATING COIN */
-.floating-coin{
-  font-size:17px;
-  position:absolute;pointer-events:none;
-  display:flex;align-items:center;gap:4px;
-  color:lime;font-weight:700;
-  transition:transform .55s ease-out, opacity .55s ease-out;
-  z-index:60;
-}
-.floating-coin img{width:20px;height:20px;}
-</style>
-</head>
-
-<body>
-
-<!-- SPLASH -->
-<div id="splashScreen">
-  <h1>AnTI-Shop</h1>
-  <div id="progressBarContainer"><div id="progressBar"></div></div>
-  <div id="progressPercent">0%</div>
-</div>
-
-<div id="app">
-<button id="settingsBtn"><img src="img/settings.png"></button>
-<button id="loginBtn"><img src="img/login.png"></button>
-<button id="shopBtn"><img src="img/shop-icon.png"></button>
-<button id="backBtn"><img src="img/back-icon.png"></button>
-<button id="backToClickerBtn"><img src="img/back-icon.png"></button>
-
-<div id="panels">
-
-<!-- SETTINGS -->
-<div id="settingsPanel">
-  <button id="loginOutBtn">Войти в аккаунт</button>
-</div>
-
-<!-- CLICKER -->
-<div id="clickerPanel">
-
-  <div class="top-title">AnTI-Shop</div>
-  <div class="top-balance"><span id="topBalance">0</span> <img src="img/anti-coin.png" style="width:20px;height:20px;vertical-align:-3px;"></div>
-
-  <div id="clickButtonWrapper">
-    <div id="ground"><img src="img/ground.png"></div>
-    <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>
-  </div>
-</div>
-
-<!-- SHOP -->
-<div id="shopPanel">
-
-  <div class="shop-header">
-    <div class="shop-header-title">AnTI-Shop</div>
-    <div class="shop-header-balance"><span id="shopBalance">0</span> <img src="img/anti-coin.png" style="width:18px;height:18px;vertical-align:-2px;"></div>
-  </div>
-
-  <div id="shopPanelInner">
-    <div id="items"></div>
-  </div>
-</div>
-
-</div></div>
-
-<script type="module">
-/* FIREBASE */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, set, get }
-  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import {
-  getAuth, GoogleAuthProvider, signInWithPopup,
-  signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-
-const firebaseConfig={
-  apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
-  authDomain:"anti-shop-99f1d.firebaseapp.com",
-  databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId:"anti-shop-99f1d",
-  storageBucket:"anti-shop-99f1d.firebasestorage.app",
-  messagingSenderId:"347202416802",
-  appId:"1:347202416802:web:2d2df1b819be9da180e7fb"
-};
-
-const appFB=initializeApp(firebaseConfig);
-const db=getDatabase(appFB);
-const auth=getAuth(appFB);
-const provider=new GoogleAuthProvider();
-
-/* SPLASH */
-const splashScreen=document.getElementById("splashScreen");
-const progressBar=document.getElementById("progressBar");
-const progressPercent=document.getElementById("progressPercent");
-let progress=0;
-
-function fakeLoad(onDone){
-  const interval=setInterval(()=>{
-    progress+=8+Math.random()*12;   /* ускорена загрузка */
-    if(progress>=100){
-      progress=100;
-      clearInterval(interval);
-      setTimeout(()=>{splashScreen.style.opacity=0;},250);
-      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},850);
-    }
-    progressBar.style.width=progress+"%";
-    progressPercent.textContent=Math.floor(progress)+"%";
-  },90);
-}
-
-/* VARIABLES */
-let isGuest=true;
-let localUserId=localStorage.getItem("userId");
-if(!localUserId){
-  localUserId="guest_"+Math.random().toString(36).substring(2,9);
-  localStorage.setItem("userId",localUserId);
-}
-let userId=localUserId;
-
-let coins=0,clickPower=1;
-
-const topBalanceEl=document.getElementById("topBalance");
-const shopBalanceEl=document.getElementById("shopBalance");
-
-const loginOutBtn=document.getElementById("loginOutBtn");
-const loginBtnEl=document.getElementById("loginBtn");
-
-  /* PANELS */
-const panels=document.getElementById("panels");
-const shopBtn=document.getElementById("shopBtn");
-const backBtn=document.getElementById("backBtn");
-const backToClickerBtn=document.getElementById("backToClickerBtn");
-const settingsBtn=document.getElementById("settingsBtn");
-
-let currentPanel=1; // 0=settings, 1=clicker, 2=shop
-
-function updatePanel(){
-  panels.style.transform=`translateX(-${392*currentPanel}px)`;
-  backBtn.style.display=currentPanel===2?"block":"none";
-  shopBtn.style.right=currentPanel===1?"12px":"-60px";
-  backToClickerBtn.style.right=currentPanel!==1?"12px":"-60px";
-}
-
-shopBtn.onclick=function(){currentPanel=2;updatePanel();}
-backBtn.onclick=function(){currentPanel=1;updatePanel();}
-settingsBtn.onclick=function(){currentPanel=0;updatePanel();}
-backToClickerBtn.onclick=function(){currentPanel=1;updatePanel();}
-
-/* AUTH HANDLERS */
-loginBtnEl.onclick=()=>{
-  signInWithPopup(auth,provider).catch(()=>{});
-};
-
-loginOutBtn.onclick=()=>{
-  if(isGuest){
-    signInWithPopup(auth,provider).catch(()=>{});
-  }else{
-    signOut(auth);
-  }
-};
-
-/* LOAD DATA */
-async function loadUserData(){
-  const userRef=ref(db,"users/"+userId);
-  const snap=await get(userRef);
-
-  if(!snap.exists()){
-    await set(userRef,{
-      coins:0,
-      clickPower:1,
-      items:{}
-    });
-    coins=0;
-    clickPower=1;
-  }else{
-    const val=snap.val();
-    coins=val.coins||0;
-    clickPower=val.clickPower||1;
-  }
-
-  updateBalances();
-  updatePriceColors();
-}
-
-/* SAVE DATA */
-function save(){
-  if(isGuest)return;
-  set(ref(db,"users/"+userId),{
-    coins,
-    clickPower,
-    items:getUserItems()
-  });
-}
-
-/* BALANCE UI */
-function updateBalances(){
-  topBalanceEl.textContent=coins;
-  shopBalanceEl.textContent=coins;
-}
-
-/* CLICKER */
-const clickButton=document.getElementById("clickButton");
-const clickImg=document.getElementById("clickImg");
-
-clickButton.onclick=function(){
-  coins+=clickPower;
-  updateBalances();
-  updatePriceColors();
-  spawnFloatingCoin(clickPower);
-
-  clickImg.style.transform="scale(0.88)";
-  setTimeout(()=>clickImg.style.transform="scale(1)",90);
-
-  save();
-};
-
-/* FLOATING + COIN */
-function spawnFloatingCoin(amount){
-  const el=document.createElement("div");
-  el.className="floating-coin";
-
-  el.innerHTML=`+${amount} <img src="img/anti-coin.png">`;
-
-  const rect=clickButton.getBoundingClientRect();
-  el.style.left=(rect.left+rect.width/2-18)+"px";
-  el.style.top=(rect.top+40)+"px";
-
-  document.body.appendChild(el);
-
-  requestAnimationFrame(()=>{
-    el.style.transform="translateY(-45px)";
-    el.style.opacity="0";
-  });
-
-  setTimeout(()=>el.remove(),550);
-}
-
-/* SHOP ITEMS */
-const itemsList=[
-  {
-    id:"click1",
-    icon:"img/shop/click1.png",
-    name:"Перчатка",
-    desc:"+1 к клику",
-    cost:20,
-    onBuy(){clickPower+=1;}
-  },
-  {
-    id:"click2",
-    icon:"img/shop/click2.png",
-    name:"Металлическая перчатка",
-    desc:"+5 к клику",
-    cost:80,
-    onBuy(){clickPower+=5;}
-  },
-  {
-    id:"passive1",
-    icon:"img/shop/passive1.png",
-    name:"Маленькая фабрика",
-    desc:"+1/сек",
-    cost:100,
-    onBuy(){ /* позже */ }
-  }
-];
-
-function getUserItems(){
-  const result={};
-  for(const it of itemsList){
-    result[it.id]=it.stock||0;
-  }
-  return result;
-}
-
-function loadItemsToHTML(){
-  const container=document.getElementById("items");
-  container.innerHTML="";
-
-  for(const it of itemsList){
-    it.stock=0;
-
-    const div=document.createElement("div");
-    div.className="item";
-    div.innerHTML=`
-      <div class="item-top">
-        <img src="${it.icon}">
-        <div class="item-text">
-          <b>${it.name}</b>
-          <p class="prop">${it.desc}</p>
-        </div>
-      </div>
-      <div class="stock">В наличии: <span id="stock-${it.id}">0</span></div>
-      <button id="btn-${it.id}">
-        <span class="price" id="price-${it.id}">
-          <img src="img/anti-coin.png">${it.cost}
-        </span>
-      </button>
-    `;
-
-    container.appendChild(div);
-  }
-
-  attachItemButtons();
-  updatePriceColors();
-}
-
-/* PRICE COLOR UPDATE */
-function updatePriceColors(){
-  for(const it of itemsList){
-    const el=document.getElementById("price-"+it.id);
-    if(!el)continue;
-
-    if(coins>=it.cost){
-      el.style.color="white";
-    }else{
-      el.style.color="#ff4444";   // красный
-    }
-  }
-}
-
-/* BUY LOGIC */
-function attachItemButtons(){
-  for(const it of itemsList){
-    const btn=document.getElementById("btn-"+it.id);
-
-    btn.onclick=()=>{
-      if(coins<it.cost)return;
-
-      coins-=it.cost;
-      it.stock=(it.stock||0)+1;
-
-      document.getElementById("stock-"+it.id).textContent=it.stock;
-
-      it.onBuy();
-
-      updateBalances();
-      updatePriceColors();
-      save();
-    };
-  }
-}
-
-/* AUTH CONNECTION */
-onAuthStateChanged(auth,async(user)=>{
-  if(user){
-    isGuest=false;
-    userId=user.uid;
-
-    loginOutBtn.textContent="Выйти из аккаунта";
-    loginBtnEl.style.display="none";
-
-    await loadUserData();
-  }else{
-    isGuest=true;
-    userId=localUserId;
-
-    loginOutBtn.textContent="Войти в аккаунт";
-    loginBtnEl.style.display="block";
-
-    await loadUserData();
-  }
-});
-
-/* START */
-fakeLoad(async()=>{
-  loadItemsToHTML();
-  await loadUserData();
-});
-</script>
-
-</body>
-</html>
+<!DOCTYPE html>                                                                    
+<html lang="ru">                                                                    
+<head>                                                                    
+<meta charset="UTF-8">                                                                    
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">                                                                    
+<title>AnTI Shop</title>                                                                    
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">                                                                    
+                                                                    
+<style>                                                                    
+body{margin:0;padding:0;background:#000;display:flex;justify-content:center;overflow:hidden;font-family:'Montserrat',sans-serif;}                                                                    
+#app{width:392px;height:100vh;position:relative;overflow:hidden;background:#0000;}                                                                    
+                                                                    
+/* SPLASH */                                                                    
+#splashScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background-color:#888;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.8s ease;}                                                                    
+#splashScreen h1{color:#fff;font-size:38px;margin-bottom:26px;}                                                                    
+#progressBarContainer{width:300px;height:24px;background:#555;border-radius:12px;overflow:hidden;margin-bottom:12px;}                                                                    
+#progressBar{width:0%;height:100%;background:linear-gradient(90deg,#ffba67,#ff7749);border-radius:12px;transition:width 0.2s ease;}                                                                    
+#progressPercent{color:#fff;}                                                                    
+                                                                    
+/* PANELS */                                                                    
+#shopBtn,#backBtn,#settingsBtn,#loginBtn,#backToClickerBtn{                                                                    
+  position:absolute;width:48px;height:48px;background:none;border:none;padding:0;z-index:50;                                                                    
+  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1),right 0.55s cubic-bezier(0.35,0.15,0.1,1);                                                                    
+}                                                                    
+#shopBtn{top:12px;right:12px;}                                                                    
+#backBtn{top:12px;right:12px;display:none;}                                                                    
+#backToClickerBtn{top:12px;right:-60px;display:none;}                                                                    
+#settingsBtn{top:12px;left:12px;}                                                                    
+#loginBtn{top:70px;left:12px;display:block;}                                                                    
+#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{width:100%;height:100%;}                                                                    
+                                                                    
+#panels{position:absolute;top:0;left:0;width:calc(392px*3);height:100%;display:flex;transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1);}                                                                    
+                                                                    
+/* SETTINGS */                                                                    
+#settingsPanel{                                                                    
+  width:392px;height:100%;                                                                    
+  background:linear-gradient(to bottom,#896B51,#77593E);                                                                    
+  padding-top:70px;display:flex;flex-direction:column;align-items:center;                                                                    
+  justify-content:flex-start;overflow-y:auto;                                                                    
+}                                                                    
+#settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}                                                                    
+                                                                    
+/* CLICKER */                                                                    
+#clickerPanel{width:392px;height:100%;background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:20px;position:relative;overflow:hidden;}                                                                    
+#counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}                                                                    
+#counter img{width:24px;height:24px;}                                                                    
+#clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}                                                                    
+#ground{position:absolute;left:50%;top:140px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}                                                                    
+#ground img{width:100%;}                                                                    
+#clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}                                                                    
+#clickImg{width:220px;transition:transform 0.08s ease;display:block;}                                                                    
+                                                                    
+/* SHOP */                                                                    
+#shopPanel{                                                                    
+  width:392px;height:100%;                                                                    
+  background:linear-gradient(to bottom,#7A4B1D,#5B3F1B);                                                                    
+  padding-top:70px;overflow-y:auto;                                                                    
+}                                                                    
+                                                                    
+/* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */                                                                    
+#shopPanelInner{                                                                    
+  background:linear-gradient(to bottom,#896B51,#77593E);                                                                    
+  margin:0 auto;padding:24px;border-radius:14px;                                                                    
+  width:350px;min-height:calc(100vh - 100px);                                                                    
+  box-shadow:0 12px 22px rgba(0,0,0,0.35) inset;                                                                    
+}                                                                    
+                                                                    
+/* ТОВАР */                                                                    
+.item{                                                                    
+  width:310px;background-image:url("img/item-frame.png");                                                                    
+  background-size:100% 100%;padding:10px 14px;                                                                    
+  display:flex;flex-direction:column;                                                                    
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));                                                                    
+  margin:0 auto 22px;                                                                    
+}                                                                    
+                                                                    
+.item-top{display:flex;align-items:center;}                                                                    
+.item-top img{width:72px;height:72px;margin-right:14px;object-fit:contain;}                                                                    
+                                                                    
+.item-text b{font-size:18px;color:#FFDBBF;font-weight:700;}                                                                    
+.item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:400;}                                                                    
+                                                                    
+.item-text .prop{color:#B48E70;font-weight:500;}                                                                    
+                                                                    
+.item .stock{                                                                    
+  color:#FFDBBF;                                                                    
+  text-align:center;                                                                    
+  width:100%;                                                                    
+  margin-top:6px;                                                                    
+  margin-bottom:-4px;                                                                    
+  font-weight:500;                                                                    
+}                                                                    
+                                                                    
+.item button{                                                                    
+  margin-top:12px;width:100%;                                                                    
+  padding:12px;background:#332614;color:#fff;                                                                    
+  border:none;border-radius:8px;font-size:16px;                                                                    
+  transition:transform .12s ease;                                                                    
+}                                                                    
+                                                                    
+.price{display:flex;align-items:center;justify-content:center;gap:6px;}                                                                    
+.price img{width:18px;height:18px;}                                                                    
+                                                                    
+/* FLOATING COIN */                                                                    
+.floating-coin{font-size:15px;position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;color:lime;transition:transform .4s ease-out, opacity .4s ease-out;z-index:60;}                                                                    
+.floating-coin img{width:18px;height:18px;}                                                                    
+</style>                                                                    
+</head>                                                                    
+                                                                    
+<body>                                                                    
+                                                                    
+<!-- SPLASH -->                                                                    
+<div id="splashScreen">                                                                    
+<h1>AnTI-Shop</h1>                                                                    
+<div id="progressBarContainer"><div id="progressBar"></div></div>                                                                    
+<div id="progressPercent">0%</div>                                                                    
+</div>                                                                    
+                                                                    
+<div id="app">                                                                    
+<button id="settingsBtn"><img src="img/settings.png"></button>                                                                    
+<button id="loginBtn"><img src="img/login.png"></button>                                                                    
+<button id="shopBtn"><img src="img/shop-icon.png"></button>                                                                    
+<button id="backBtn"><img src="img/back-icon.png"></button>                                                                    
+<button id="backToClickerBtn"><img src="img/back-icon.png"></button>                                                                    
+                                                                    
+<div id="panels">                                                                    
+<div id="settingsPanel">                                                                    
+<button id="loginOutBtn">Войти в аккаунт</button>                                                                    
+</div>                                                                    
+                                                                    
+<div id="clickerPanel">                                                                    
+<div id="counter"><span id="counterValue">0</span><img src="img/anti-coin.png"></div>                                                                    
+<div id="clickButtonWrapper">                                                                    
+  <div id="ground"><img src="img/ground.png"></div>                                                                    
+  <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>                                                                    
+</div>                                                                    
+</div>                                                                    
+                                                                    
+<div id="shopPanel">                                                                    
+<div id="shopPanelInner">                                                                    
+  <div id="items"></div>                                                                    
+</div>                                                                    
+</div>                                                                    
+                                                                    
+</div>                                                                    
+</div>                                                                    
+                                                                    
+<script type="module">                                                                    
+/* FIREBASE */                                                                    
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";                                                                    
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";                                                                    
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";                                                                    
+                                                                    
+const firebaseConfig={apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",authDomain:"anti-shop-99f1d.firebaseapp.com",databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",projectId:"anti-shop-99f1d",storageBucket:"anti-shop-99f1d.firebasestorage.app",messagingSenderId:"347202416802",appId:"1:347202416802:web:2d2df1b819be9da180e7fb"};                                                                    
+                                                                    
+const appFB=initializeApp(firebaseConfig);                                                                    
+const db=getDatabase(appFB);                                                                    
+const auth=getAuth(appFB);                                                                    
+const provider=new GoogleAuthProvider();                                                                    
+                                                                    
+/* SPLASH */                                                                    
+const splashScreen=document.getElementById("splashScreen");                                                                    
+const progressBar=document.getElementById("progressBar");                                                                    
+const progressPercent=document.getElementById("progressPercent");                                                                    
+let progress=0;                                                                    
+function fakeLoad(onDone){                                                                    
+  const interval=setInterval(()=>{                                                                    
+    progress+=Math.random()*6;                                                                    
+    if(progress>=100){                                                                    
+      progress=100;                                                                    
+      clearInterval(interval);                                                                    
+      setTimeout(()=>{splashScreen.style.opacity=0;},300);                                                                    
+      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},900);                                                                    
+    }                                                                    
+    progressBar.style.width=progress+"%";                                                                    
+    progressPercent.textContent=Math.floor(progress)+"%";                                                                    
+  },100);                                                                    
+}                                                                    
+                                                                    
+/* VARIABLES */                                                                    
+let isGuest=true;                                                                    
+let localUserId=localStorage.getItem("userId");                                                                    
+if(!localUserId){localUserId="guest_"+Math.random().toString(36).substring(2,9);localStorage.setItem("userId",localUserId);}                                                                    
+let userId=localUserId;                                                                    
+let coins=0,clickPower=1;                                                                    
+         
