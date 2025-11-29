@@ -33,10 +33,15 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 /* SETTINGS */
 #settingsPanel{
-  width:392px;height:100%;
-  background:linear-gradient(to bottom,#896B51,#77593E);
-  padding-top:70px;display:flex;flex-direction:column;align-items:center;
-  justify-content:flex-start;overflow-y:auto;
+  width:392px;
+  height:100%;
+  background:linear-gradient(to bottom,#A7794C,#8E663D);
+  padding-top:70px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  overflow-y:auto;
 }
 #settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}
 
@@ -54,7 +59,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #shopPanel{
   width:392px;
   height:100%;
-  background:linear-gradient(to bottom,#FFC374,#FFB26B);
+  background:#A7794C;
   padding-top:70px;
   overflow-y:auto;
 }
@@ -336,6 +341,16 @@ function renderShop(){
   shopItems.forEach(item=>{
     const d=document.createElement("div");
     d.className="item";
+
+    // Чередование фонов — каждый второй item темнее
+if (itemsBlock.children.length % 2 === 1) {
+    d.style.backgroundImage = "none";
+    d.style.backgroundColor = "#8E663D";
+    d.style.borderRadius = "12px";
+} else {
+    // Светлый вариант — рамка как сейчас
+    d.style.backgroundImage = 'url("img/item-frame.png")';
+}
 
     d.innerHTML=`
       <div class="item-top">
