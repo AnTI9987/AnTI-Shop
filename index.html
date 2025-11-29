@@ -75,57 +75,36 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   box-shadow:none;
 }
 
-/* --- вставить вместо старого блока .item / .item-top / .item-text / .stock --- */
-
-/* обёртка рамки — на ней будет меняться фон для каждого второго товара */
-.itemWrap{
-  width:334px;             /* рамка 310 + отступы вокруг */
-  margin:0 auto 16px;
-  padding:8px;             /* пространство между фоном и самой рамкой */
-  border-radius:12px;
-  box-sizing:border-box;
-}
-
-/* сама рамка товара — НЕ МЕНЯЕМ, это та самая “рамка” с изображением */
+/* ТОВАР */
 .item{
-  width:310px;
-  background-image:url("img/item-frame.png");
-  background-size:100% 100%;
-  padding:10px 14px;
-  display:flex;
-  flex-direction:column;
+  width:310px;background-image:url("img/item-frame.png");
+  background-size:100% 100%;padding:10px 14px;
+  display:flex;flex-direction:column;
   filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));
-  box-sizing:border-box;
-  border-radius:8px;
+  margin:0 auto 22px;
 }
 
-/* внутренности рамки */
 .item-top{display:flex;align-items:center;}
 .item-top img{width:72px;height:72px;margin-right:14px;object-fit:contain;}
+
 .item-text b{font-size:18px;color:#FFDBBF;font-weight:700;}
-.item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:500;}
+.item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:400;}
+
 .item-text .prop{color:#B48E70;font-weight:500;}
 
-/* центрируем "В наличии" над кнопкой */
 .item .stock{
   color:#FFDBBF;
   text-align:center;
   width:100%;
-  margin-top:10px;
-  margin-bottom:4px;
-  font-weight:600;
+  margin-top:6px;
+  margin-bottom:-4px;
+  font-weight:500;
 }
 
-/* кнопка покупки остаётся прежней */
 .item button{
-  margin-top:8px;
-  width:100%;
-  padding:12px;
-  background:#332614;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  font-size:16px;
+  margin-top:12px;width:100%;
+  padding:12px;background:#332614;color:#fff;
+  border:none;border-radius:8px;font-size:16px;
   transition:transform .12s ease;
 }
 
@@ -359,24 +338,31 @@ function updateButtonText(item,btn){
 
 function renderShop(){
   itemsBlock.innerHTML="";
+
   shopItems.forEach(item=>{
-    const wrap = document.createElement("div");
-wrap.className = "itemWrap";
-
-const d = document.createElement("div");
-d.className = "item";
-wrap.appendChild(d);
     
-    // Чередование фонов — каждый второй item темнее
-if (itemsBlock.children.length % 2 === 1) {
-    d.style.backgroundImage = "none";
-    d.style.backgroundColor = "#8E663D";
-    d.style.borderRadius = "12px";
-} else {
-    // Светлый вариант — рамка как сейчас
-    d.style.backgroundImage = 'url("img/item-frame.png")';
-}
+    /* === НОВАЯ ОБЁРТКА, КОТОРУЮ ТЫ ХОТЕЛ === */
+    const wrap = document.createElement("div");
+    wrap.className = "itemWrap";
+    wrap.style.padding = "10px 0";
+    wrap.style.marginBottom = "22px";
+    wrap.style.borderRadius = "14px";
 
+    /* === ЧЕРЕДОВАНИЕ ФОНА ДЛЯ wrap (а НЕ item!) === */
+    if ((itemsBlock.children.length % 2) === 1) {
+        wrap.style.background = "#8E663D";   // тёмный фон
+    } else {
+        wrap.style.background = "#A7794C";   // светлый фон
+    }
+
+    /* === САМА РАМКА ТОВАРА (НЕ МЕНЯЕТ ЦВЕТ!) === */
+    const d=document.createElement("div");
+    d.className="item";
+
+    d.style.margin = "0 auto";           // чтобы оставить центрирование
+    d.style.backgroundImage = 'url("img/item-frame.png")'; // рамка ВСЕГДА ОДНА И ТА ЖЕ
+
+    /* === СОДЕРЖИМОЕ === */
     d.innerHTML=`
       <div class="item-top">
         <img src="${item.img}">
@@ -388,6 +374,7 @@ if (itemsBlock.children.length % 2 === 1) {
       </div>
     `;
 
+    /* === НАЛИЧИЕ === */
     if(item.stock!==undefined){
       const s=document.createElement("p");
       s.className="stock";
@@ -395,18 +382,18 @@ if (itemsBlock.children.length % 2 === 1) {
       d.appendChild(s);
     }
 
+    /* === КНОПКА === */
     const btn=document.createElement("button");
     d.appendChild(btn);
     updateButtonText(item,btn);
 
     btn.addEventListener("click",()=>{
-      if(item.stock!==undefined&&item.stock<=0)return;
-      if(coins<item.cost)return;
+      if(item.stock!==undefined && item.stock<=0) return;
+      if(coins < item.cost) return;
 
       const oldCoins=coins;
       coins-=item.cost;
 
-      /* === PRICE CHANGE FIX === */
       if(item.id===1){
         clickPower+=1;
         item.cost = Math.floor(item.cost * 1.2);
@@ -414,21 +401,16 @@ if (itemsBlock.children.length % 2 === 1) {
       if(item.id===2){
         clickPower+=item.power;
         item.cost+=250;
-        item.stock=Math.max(0,item.stock-1);
+        item.stock = Math.max(0, item.stock - 1);
       }
 
       animateCounter(oldCoins,coins);
       renderShop();
     });
 
+    /* === ДОБАВЛЯЕМ: wrap → внутрь item, а затем wrap в itemsBlock === */
+    wrap.appendChild(d);
     itemsBlock.appendChild(wrap);
-    
-    // Чередование фона у каждой второй рамки
-if ((itemsBlock.children.length % 2) === 1) {
-    wrap.style.background = "#8E663D";  // тёмный фон
-} else {
-    wrap.style.background = "#A7794C";  // светлый фон
-}
   });
 }
 
