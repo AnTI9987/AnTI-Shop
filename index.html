@@ -394,27 +394,33 @@ function clickAction(x,y){
   updatePricesColor();
 }
 
-clickButton.addEventListener("touchstart", e => {
+ clickButton.addEventListener("touchstart", e => {
     e.preventDefault();
     for (const t of e.changedTouches) clickAction(t.clientX, t.clientY);
 
+    // анимация: уменьшаем и меняем картинку
     clickImg.style.transition = "transform 0.07s ease";
     clickImg.style.transform = "scale(0.87)";
+    clickImg.src = "img/click2.png"; // временно другая картинка
 
     setTimeout(()=>{
         clickImg.style.transform = "scale(1)";
-    }, 90);
+        clickImg.src = "img/click1.png"; // возвращаем исходную картинку
+    }, 300);
 }, {passive:false});
 
 clickButton.onclick = e => {
     clickAction(e.clientX, e.clientY);
 
+    // анимация: уменьшаем и меняем картинку
     clickImg.style.transition = "transform 0.07s ease";
     clickImg.style.transform = "scale(0.87)";
+    clickImg.src = "img/click2.png";
 
     setTimeout(()=>{
         clickImg.style.transform = "scale(1)";
-    },90);
+        clickImg.src = "img/click1.png";
+    }, 300);
 };
 
 /* SHOP */
