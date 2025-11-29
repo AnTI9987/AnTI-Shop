@@ -577,6 +577,17 @@ onAuthStateChanged(auth,async user=>{
 
 /* PANELS */
 const panels=document.getElementById("panels");
+let btnTimers={};
+
+function safeSetStyle(el, prop, value, delay=0){
+    const id = el.id + prop; // уникальный ключ для таймера
+    if(btnTimers[id]) clearTimeout(btnTimers[id]);
+    if(delay===0){
+        el.style[prop] = value;
+    } else {
+        btnTimers[id] = setTimeout(() => { el.style[prop] = value; }, delay);
+    }
+}
 const shopBtnEl=document.getElementById("shopBtn");
 const backBtnEl=document.getElementById("backBtn");
 const settingsBtnEl=document.getElementById("settingsBtn");
@@ -603,15 +614,15 @@ function goToShop(){
   settingsBtnEl.style.left="-60px";
   loginBtnEl.style.left="-60px";
   backToClickerBtn.style.display="block";
-  setTimeout(()=>backToClickerBtn.style.right="12px",0);
+safeSetStyle(backToClickerBtn, "right", "12px", 0);
   updatePricesColor();
 }
 
 function goBackFromShop(){
   swingPlate("right");
   panels.style.transform="translateX(-392px)";
-  backToClickerBtn.style.right="-60px";
-  setTimeout(()=>backToClickerBtn.style.display="none",400);
+  safeSetStyle(backToClickerBtn, "right", "-60px");
+safeSetStyle(backToClickerBtn, "display", "none", 400);
   shopBtnEl.style.right="12px";
   settingsBtnEl.style.left="12px";
   loginBtnEl.style.left="12px";
@@ -624,16 +635,15 @@ function goToSettings(){
   settingsBtnEl.style.left="-60px";
   loginBtnEl.style.left="-60px";
   backBtnEl.style.display="block";
-  setTimeout(()=>backBtnEl.style.right="12px",50);
-}
+safeSetStyle(backBtnEl, "right", "12px", 50);
 
 function goBackFromSettings(){
   swingPlate("left");
   panels.style.transform="translateX(-392px)";
   shopBtnEl.style.right="12px";
   settingsBtnEl.style.left="12px";
-  backBtnEl.style.right="-60px";
-  setTimeout(()=>backBtnEl.style.display="none",500);
+  safeSetStyle(backBtnEl, "right", "-60px");
+safeSetStyle(backBtnEl, "display", "none", 500);
   loginBtnEl.style.left="12px";
 }
 
