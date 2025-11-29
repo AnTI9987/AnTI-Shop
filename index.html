@@ -138,12 +138,78 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   height:22px;
 }
 
-.itemWrap {
-  width: 100%;           /* растянуть на всю ширину */
-  display: flex;         /* чтобы item центрировался внутри */
-  justify-content: center;
-  padding: 16px 0;       /* высота полосы */
-  }
+.itemWrap{
+  width:100%;
+  padding:18px 0;
+  background-size:100% 100%;
+  background-repeat:no-repeat;
+  display:flex;
+  justify-content:center;
+}
+
+#topPlate{
+  position:fixed;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:330px;
+  height:120px;
+  z-index:200;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
+#topPlate img#plateImg{
+  position:absolute;
+  width:330px;
+  height:120px;
+  top:0;
+  left:0;
+}
+
+#plateTitle{
+  margin-top:18px;
+  font-size:28px;
+  font-weight:700;
+  color:#FFDBBF;
+  z-index:250;
+}
+
+#plateBalance{
+  margin-top:6px;
+  font-size:22px;
+  font-weight:600;
+  color:#FFDBBF;
+  z-index:250;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+#plateBalance img{
+  width:22px;
+  height:22px;
+}
+
+/* Анимации покачивания */
+@keyframes swingLeft {
+  0% { transform:translateX(-50%) rotate(0deg); }
+  25% { transform:translateX(-50%) rotate(-4deg); }
+  50% { transform:translateX(-50%) rotate(2deg); }
+  70% { transform:translateX(-50%) rotate(-1deg); }
+  100%{ transform:translateX(-50%) rotate(0deg); }
+}
+
+@keyframes swingRight {
+  0% { transform:translateX(-50%) rotate(0deg); }
+  25% { transform:translateX(-50%) rotate(4deg); }
+  50% { transform:translateX(-50%) rotate(-2deg); }
+  70% { transform:translateX(-50%) rotate(1deg); }
+  100%{ transform:translateX(-50%) rotate(0deg); }
+}
   
 </style>
 </head>
@@ -158,6 +224,11 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 </div>
 
 <div id="app">
+<div id="topPlate">
+    <img id="plateImg" src="img/stat-table.png">
+    <div id="plateTitle">AnTI-Shop</div>
+    <div id="plateBalance"><span id="plateBalanceValue">0</span> <img src="img/anti-coin.png"></div>
+</div>
 <button id="settingsBtn"><img src="img/settings.png"></button>
 <button id="loginBtn"><img src="img/login.png"></button>
 <button id="shopBtn"><img src="img/shop-icon.png"></button>
@@ -248,6 +319,45 @@ const shopItems=[
 /* COUNTER ANIM */
 let animFrame=null;
 function animateCounter(oldVal,newVal){
+  let coinAnimTarget = 0;
+let coinAnimStart = 0;
+let coinAnimStartTime = 0;
+let coinAnimRunning = false;
+
+function animatePlateCoins(newValue){
+    const el = document.getElementById("plateBalanceValue");
+
+    const now = performance.now();
+
+    if(!coinAnimRunning){
+        coinAnimStart = Number(el.textContent)||0;
+        coinAnimStartTime = now;
+        coinAnimRunning = true;
+    }
+
+    coinAnimTarget = newValue;
+
+    function frame(){
+        if(!coinAnimRunning) return;
+
+        const t = (performance.now() - coinAnimStartTime) / 1000;
+        const p = Math.min(t / 1, 1);
+
+        const eased = 1 - Math.pow(1 - p, 3); // быстро → медленно
+
+        const val = Math.floor(coinAnimStart + (coinAnimTarget - coinAnimStart)*eased);
+
+        el.textContent = val;
+
+        if(p < 1){
+            requestAnimationFrame(frame);
+        } else {
+            coinAnimRunning = false;
+        }
+    }
+
+    requestAnimationFrame(frame);
+}
   oldVal=Number(oldVal)||0;newVal=Number(newVal)||0;
   if(newVal-oldVal===1){counterValue.textContent=newVal;return;}
   if(animFrame)cancelAnimationFrame(animFrame);
@@ -294,20 +404,31 @@ function clickAction(x,y){
   coins+=clickPower;
   spawnFloatingCoin(x,y,clickPower);
   animateCounter(parseInt(counterValue.textContent)||0,coins);
+  animatePlateCoins(coins);
   updatePricesColor();
 }
 
-clickButton.addEventListener("touchstart",e=>{
-  e.preventDefault();
-  for(const t of e.changedTouches) clickAction(t.clientX,t.clientY);
-  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";
-  setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);
-},{passive:false});
+clickButton.addEventListener("touchstart", e => {
+    e.preventDefault();
+    for (const t of e.changedTouches) clickAction(t.clientX, t.clientY);
 
-clickButton.onclick=e=>{
-  clickAction(e.clientX,e.clientY);
-  clickImg.src="img/click2.png";clickImg.style.transform="scale(0.95)";
-  setTimeout(()=>{clickImg.src="img/click1.png";clickImg.style.transform="scale(1)";},80);
+    clickImg.style.transition = "transform 0.07s ease";
+    clickImg.style.transform = "scale(0.87)";
+
+    setTimeout(()=>{
+        clickImg.style.transform = "scale(1)";
+    }, 90);
+}, {passive:false});
+
+clickButton.onclick = e => {
+    clickAction(e.clientX, e.clientY);
+
+    clickImg.style.transition = "transform 0.07s ease";
+    clickImg.style.transform = "scale(0.87)";
+
+    setTimeout(()=>{
+        clickImg.style.transform = "scale(1)";
+    },90);
 };
 
 /* SHOP */
@@ -338,9 +459,9 @@ wrap.className = "itemWrap";
 
 /* Фон для каждого второго товара */
 if ((itemsBlock.children.length % 2) === 1) {
-    wrap.style.background = "#8E663D";        // тёмная полоса
+    wrap.style.background = "#8E663D";     // тёмная полоса
 } else {
-    wrap.style.background = "transparent";    // без полосы
+    wrap.style.background = "#A7794C";     // обычный цвет фона магазина
 }
 
 /* Элемент товара */
@@ -393,6 +514,7 @@ d.className = "item";
       }
 
       animateCounter(oldCoins,coins);
+      animatePlateCoins(coins);
       renderShop();
     });
 
@@ -455,6 +577,7 @@ onAuthStateChanged(auth,async user=>{
     }
 
     animateCounter(0,coins);
+    animatePlateCoins(coins);
     renderShop();
   }else{
     isGuest=true;
@@ -471,7 +594,20 @@ const backToClickerBtn=document.getElementById("backToClickerBtn");
 
 panels.style.transform="translateX(-392px)";
 
+function swingPlate(direction){
+  const plate = document.getElementById("topPlate");
+  plate.style.animation = "none";
+  void plate.offsetWidth;
+
+  if(direction === "left"){
+    plate.style.animation = "swingLeft 0.8s ease-out";
+  } else {
+    plate.style.animation = "swingRight 0.8s ease-out";
+  }
+}
+  
 function goToShop(){
+  swingPlate("left");
   panels.style.transform="translateX(-784px)";
   shopBtnEl.style.right="-60px";
   settingsBtnEl.style.left="-60px";
@@ -482,6 +618,7 @@ function goToShop(){
 }
 
 function goBackFromShop(){
+  swingPlate("right");
   panels.style.transform="translateX(-392px)";
   backToClickerBtn.style.right="-60px";
   setTimeout(()=>backToClickerBtn.style.display="none",400);
@@ -491,6 +628,7 @@ function goBackFromShop(){
 }
 
 function goToSettings(){
+  swingPlate("right");
   panels.style.transform="translateX(0)";
   shopBtnEl.style.right="-60px";
   settingsBtnEl.style.left="-60px";
@@ -500,6 +638,7 @@ function goToSettings(){
 }
 
 function goBackFromSettings(){
+  swingPlate("left");
   panels.style.transform="translateX(-392px)";
   shopBtnEl.style.right="12px";
   settingsBtnEl.style.left="12px";
