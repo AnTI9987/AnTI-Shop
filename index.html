@@ -489,26 +489,24 @@ d.className = "item";
     updateButtonText(item,btn);
 
     btn.addEventListener("click",()=>{
-      if(item.stock!==undefined && item.stock<=0) return;
-      if(coins < item.cost) return;
+  if(item.stock!==undefined && item.stock<=0) return;
+  if(coins < item.cost) return;
 
-      const oldCoins=coins;
-      coins-=item.cost;
+  // анимация кнопки
+  btn.style.transform="scale(0.95)";
+  setTimeout(()=>btn.style.transform="scale(1)",100);
 
-      if(item.id===1){
-        clickPower+=1;
-        item.cost = Math.floor(item.cost * 1.2);
-      }
-      if(item.id===2){
-        clickPower+=item.power;
-        item.cost+=250;
-        item.stock = Math.max(0, item.stock - 1);
-      }
+  const oldCoins=coins;
+  coins-=item.cost;
 
-      animateCounter(oldCoins,coins);
-      animatePlateCoins(coins);
-      renderShop();
-    });
+  if(item.id===1){ clickPower+=1; item.cost = Math.floor(item.cost*1.2);}
+  if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock = Math.max(0,item.stock-1);}
+
+  animateCounter(oldCoins,coins);
+  animatePlateCoins(coins);
+  updatePricesColor(); // обновление цвета цен
+  renderShop();
+});
 
     /* === ДОБАВЛЯЕМ: wrap → внутрь item, а затем wrap в itemsBlock === */
     wrap.appendChild(d);
