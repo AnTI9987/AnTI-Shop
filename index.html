@@ -210,12 +210,9 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 /* Анимации покачивания */
 @keyframes swingDecay {
   0%   { transform: translateX(-50%) rotate(0deg); }
-  16%  { transform: translateX(-50%) rotate(12deg); }   /* ускорение к пику */
-  33%  { transform: translateX(-50%) rotate(-10deg); }
-  50%  { transform: translateX(-50%) rotate(7deg); }
-  66%  { transform: translateX(-50%) rotate(-5deg); }
-  83%  { transform: translateX(-50%) rotate(3deg); }
-  100% { transform: translateX(-50%) rotate(0deg); }
+  33%  { transform: translateX(-50%) rotate(var(--deg1,12deg)); }
+  66%  { transform: translateX(-50%) rotate(var(--deg2,-8deg)); }
+  100% { transform: translateX(-50%) rotate(var(--deg3,4deg)); }
 }
   
 </style>
@@ -603,11 +600,23 @@ panels.style.transform="translateX(-392px)";
 
 function swingPlate(direction) {
     const plate = document.getElementById("topPlate");
-
     plate.style.animation = "none";
-    void plate.offsetWidth;
+    void plate.offsetWidth; // сброс анимации
 
-    plate.style.animation = "swingDecay 1.6s ease-in-out"; // дёрганность меньше, три колебания
+    let deg1 = 12; // первый мах
+    let deg2 = -8; // второй мах
+    let deg3 = 4;  // третий мах
+
+    if (direction === "right") {
+        deg1 = -deg1;
+        deg2 = -deg2;
+        deg3 = -deg3;
+    }
+
+    plate.style.animation = `swingDecay 1.2s ease-in-out forwards`;
+    plate.style.setProperty("--deg1", deg1 + "deg");
+    plate.style.setProperty("--deg2", deg2 + "deg");
+    plate.style.setProperty("--deg3", deg3 + "deg");
 }
   
 function goToShop(){
