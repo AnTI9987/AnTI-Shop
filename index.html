@@ -33,6 +33,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
       
 /* SETTINGS */      
 #settingsPanel{      
+  font-family: 'Montserrat', sans-serif;
   width:392px;      
   height:100%;      
   background:linear-gradient(to bottom,#A7794C,#8E663D);      
@@ -62,6 +63,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
       
 /* SHOP */      
 #shopPanel{      
+  font-family: 'Montserrat', sans-serif;
   width:392px;      
   height:100%;      
   background:#A7794C;      
@@ -375,7 +377,14 @@ document.getElementById("shopBalanceValueClicker").textContent=newVal;
       
 /* CLICK */      
 const clickImg=document.getElementById("clickImg");      
-const clickButton=document.getElementById("clickButton");      
+const clickButton=document.getElementById("clickButton");
+const clickSprites = ["img/click1.png","img/click2.png"];
+clickSprites.forEach(src=>{
+    const img = new Image();
+    img.src = src; // предзагрузка
+});
+const coinImg = new Image();
+coinImg.src = "img/anti-coin.png";
       
 function spawnFloatingCoin(x,y,value){      
   const el=document.createElement("div");      
@@ -391,12 +400,12 @@ function spawnFloatingCoin(x,y,value){
       
   // более плавная анимация      
   requestAnimationFrame(()=>{      
-    el.style.transform="translateY(-80px)";      
-    el.style.opacity="0";      
-  });      
-      
-  setTimeout(()=>el.remove(),650);      
-}      
+    el.style.transition = "transform 1s ease-out, opacity 1s ease-out";
+requestAnimationFrame(()=>{
+    el.style.transform="translateY(-120px)";
+    el.style.opacity="0.3";
+});
+setTimeout(()=>el.remove(),1000); // увеличить время до конца анимации    
       
 function clickAction(x,y){      
   coins+=clickPower;      
