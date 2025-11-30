@@ -453,9 +453,50 @@ function updateButtonText(item,btn){
   p.style.color=(coins<item.cost)?"#ff3333":"#fff";      
   btn.appendChild(p);      
 }      
-      
+
+function createTierDivider(tierText, remaining=null){
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.alignItems = "center";
+    div.style.gap = "8px";
+    div.style.color = "#332615";
+    div.style.fontWeight = "600";
+    div.style.margin = "12px 0"; // отступ сверху и снизу
+    
+    const icon1 = document.createElement("img");
+    icon1.src = "img/range-icon.png";
+    icon1.style.width = "24px";
+    icon1.style.height = "24px";
+    
+    const icon2 = document.createElement("img");
+    icon2.src = "img/range-icon.png";
+    icon2.style.width = "24px";
+    icon2.style.height = "24px";
+    
+    const line1 = document.createElement("div");
+    line1.style.flex = "1";
+    line1.style.height = "2px";
+    line1.style.background = "#332615";
+    
+    const line2 = document.createElement("div");
+    line2.style.flex = "1";
+    line2.style.height = "2px";
+    line2.style.background = "#332615";
+    
+    const text = document.createElement("div");
+    text.textContent = remaining !== null ? `осталось ${remaining} покупок до ${tierText}` : tierText;
+    text.style.padding = "0 8px";
+    
+    div.append(icon1, line1, text, line2, icon2);
+    return div;
+}
+        
 function renderShop(){      
-  itemsBlock.innerHTML="";      
+  itemsBlock.innerHTML = "";
+
+// над товарами: 1 тир
+const tier1 = createTierDivider("1 тир");
+itemsBlock.appendChild(tier1);
       
   shopItems.forEach(item=>{      
           
@@ -526,6 +567,11 @@ d.className = "item";
     wrap.appendChild(d);      
     itemsBlock.appendChild(wrap);      
   });      
+// глобальная переменная для количества покупок до 2-го тира
+let remaining2 = 50;
+
+const tier2 = createTierDivider("2 тир", remaining2);
+itemsBlock.appendChild(tier2);
 }      
       
 function updatePricesColor(){      
@@ -555,7 +601,12 @@ loginOutBtn.onclick=async()=>{
   userId=localUserId;      
   coins=0;clickPower=1;      
   shopItems.forEach(i=>{if(i.id===2)i.stock=5;if(i.id===1)i.cost=50;});      
-  animateCounter(0,0);      
+  animateCounter(0,0);    
+  if(remaining2 > 0){
+    remaining2--;
+    const textDiv = tier2.querySelector("div:nth-child(3)"); // центральный текст
+    textDiv.textContent = remaining2 > 0 ? `осталось ${remaining2} покупок до 2-го тира` : "2 тир";
+  }
   renderShop();      
 };      
       
