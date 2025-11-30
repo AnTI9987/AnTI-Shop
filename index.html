@@ -156,11 +156,31 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   width: 240px;
   height: 120px;
   position: relative;
-  top: 0;
+  top: 12;
   left: 50%;
   transform: translateX(-50%);
   transform-origin: 50% -50px; /* <-- ось 50px над центром */
   z-index: 100;
+}
+
+  /* цепи слева и справа */
+.chain {
+  position: absolute;
+  bottom: 50%; /* низ цепи на середине таблички */
+  width: 24px;
+  height: 146px;
+  overflow: visible; /* верх выходит за экран */
+  transform-origin: 50% 0; /* верхняя точка - ось вращения */
+  z-index: 50; /* позади таблички */
+}
+.chain.leftChain { left: 48px; }
+.chain.rightChain { right: 48px; }
+
+.chain img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
 }
 
 /* картинка занимает весь фон таблички */
@@ -216,6 +236,14 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   75%  { transform: translateX(-50.25%) rotate(var(--deg3,3deg)); }
   100% { transform: translateX(-50%) rotate(0deg); }
 }
+
+@keyframes swingChain {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(var(--deg1,4deg)); }
+  50%  { transform: rotate(var(--deg2,-2.5deg)); }
+  75%  { transform: rotate(var(--deg3,1.5deg)); }
+  100% { transform: rotate(0deg); }
+}
   
 </style>
 </head>
@@ -231,6 +259,9 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 <div id="app">
 <div id="topPlate">
+    <div class="chain leftChain"><img src="img/chain.png"></div>
+    <div class="chain rightChain"><img src="img/chain.png"></div>
+    
     <img id="plateImg" src="img/stat-table.png">
     <div id="plateTitle">AnTI-Shop</div>
     <div id="plateBalance"><span id="plateBalanceValue">0</span> <img src="img/anti-coin.png"></div>
@@ -602,8 +633,13 @@ panels.style.transform="translateX(-392px)";
 
 function swingPlate(direction) {
     const plate = document.getElementById("topPlate");
-    plate.style.animation = "none"; // сброс предыдущей анимации
-    void plate.offsetWidth; // принудительный reflow
+    const leftChain = plate.querySelector(".leftChain");
+    const rightChain = plate.querySelector(".rightChain");
+
+    plate.style.animation = "none"; 
+    leftChain.style.animation = "none";
+    rightChain.style.animation = "none";
+    void plate.offsetWidth;
 
     let deg1 = 8, deg2 = -5, deg3 = 3;
     if (direction === "right") {
@@ -616,11 +652,23 @@ function swingPlate(direction) {
     plate.style.setProperty("--deg2", deg2 + "deg");
     plate.style.setProperty("--deg3", deg3 + "deg");
 
-    plate.style.animation = "swingSuspended 0.7s ease-in-out";
+    // цепи качаются синхронно, но меньше
+    leftChain.style.setProperty("--deg1", deg1/2 + "deg");
+    leftChain.style.setProperty("--deg2", deg2/2 + "deg");
+    leftChain.style.setProperty("--deg3", deg3/2 + "deg");
+    rightChain.style.setProperty("--deg1", -deg1/2 + "deg");
+    rightChain.style.setProperty("--deg2", -deg2/2 + "deg");
+    rightChain.style.setProperty("--deg3", -deg3/2 + "deg");
+
+    plate.style.animation = "swingSuspended 0.9s ease-in-out";
+    leftChain.style.animation = "swingChain 0.9s ease-in-out";
+    rightChain.style.animation = "swingChain 0.9s ease-in-out";
 
     plate.addEventListener("animationend", function handler() {
         plate.style.transform = "translateX(-50%) rotate(0deg)";
-        plate.style.animation = "none";
+        leftChain.style.transform = "rotate(0deg)";
+        rightChain.style.transform = "rotate(0deg)";
+        plate.style.animation = leftChain.style.animation = rightChain.style.animation = "none";
         plate.removeEventListener("animationend", handler);
     });
 }
