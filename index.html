@@ -36,7 +36,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   width:392px;
   height:100%;
   background:linear-gradient(to bottom,#A7794C,#8E663D);
-  padding-top:70px;
+  padding-top:140px;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -76,7 +76,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   padding:32px 24px 24px;
   border-radius:0;
   width:350px;
-  min-height:calc(100vh - 70px);
+  min-height:calc(100vh - 140px);
   box-shadow:none;
 }
 
@@ -169,27 +169,15 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   height:120px;
 }
 
-#plateTitle{
-  margin-top:18px;
-  font-size:28px;
-  font-weight:700;
-  color:#FFDBBF;
-  z-index:250;
+#plateTitle, #plateBalance {
+  position: absolute;
+  top: 50%;           /* вертикальный центр самой таблички */
+  left: 50%;          /* горизонтальный центр */
+  transform: translate(-50%, -50%); /* смещаем ровно в центр */
   text-align: center;
   width: 100%;
-}
-
-#plateBalance{
-  margin-top:6px;
-  font-size:22px;
-  font-weight:600;
-  color:#FFDBBF;
-  z-index:250;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  justify-content: center;
-  width: 100%;
+  pointer-events: none; /* чтобы клики шли на кнопки под табличкой */
+  z-index: 250;
 }
 
 #plateBalance img{
@@ -200,12 +188,11 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 /* Анимации покачивания */
 @keyframes swingDecay {
   0%   { transform: translateX(-50%) rotate(0deg); }
-  10%  { transform: translateX(-50%) rotate(12deg); }
-  25%  { transform: translateX(-50%) rotate(-10deg); }
-  40%  { transform: translateX(-50%) rotate(7deg); }
-  55%  { transform: translateX(-50%) rotate(-5deg); }
-  70%  { transform: translateX(-50%) rotate(3deg); }
-  85%  { transform: translateX(-50%) rotate(-2deg); }
+  16%  { transform: translateX(-50%) rotate(12deg); }   /* ускорение к пику */
+  33%  { transform: translateX(-50%) rotate(-10deg); }
+  50%  { transform: translateX(-50%) rotate(7deg); }
+  66%  { transform: translateX(-50%) rotate(-5deg); }
+  83%  { transform: translateX(-50%) rotate(3deg); }
   100% { transform: translateX(-50%) rotate(0deg); }
 }
   
@@ -290,8 +277,8 @@ function fakeLoad(onDone){
       progress=100;
       clearInterval(interval);
 
-      setTimeout(()=>{splashScreen.style.opacity=0;},200);
-      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},700);
+      setTimeout(()=>{splashScreen.style.opacity=0;},500);
+      setTimeout(()=>{splashScreen.style.display="none";if(onDone)onDone();},1000);
     }
 
     progressBar.style.width=Math.min(progress,100)+"%";
@@ -598,7 +585,7 @@ function swingPlate(direction) {
     plate.style.animation = "none";
     void plate.offsetWidth;
 
-    plate.style.animation = "swingDecay 3.0s ease-out"; // затихающее качание
+    plate.style.animation = "swingDecay 1.6s ease-in-out"; // дёрганность меньше, три колебания
 }
   
 function goToShop(){
