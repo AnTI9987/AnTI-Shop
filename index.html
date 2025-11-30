@@ -601,23 +601,8 @@ panels.style.transform="translateX(-392px)";
 
 function swingPlate(direction) {
     const plate = document.getElementById("topPlate");
-    plate.style.animation = "none";
-    void plate.offsetWidth; // сброс анимации
-
-    let deg1 = 12; // первый мах
-    let deg2 = -8; // второй мах
-    let deg3 = 4;  // третий мах
-
-    if (direction === "right") {
-        deg1 = -deg1;
-        deg2 = -deg2;
-        deg3 = -deg3;
-    }
-
-    function swingPlate(direction) {
-    const plate = document.getElementById("topPlate");
     plate.style.animation = "none"; // сброс предыдущей анимации
-    void plate.offsetWidth; // принудительный reflow для сброса
+    void plate.offsetWidth; // принудительный reflow
 
     let deg1 = 12, deg2 = -8, deg3 = 4;
     if (direction === "right") {
@@ -637,7 +622,6 @@ function swingPlate(direction) {
         plate.style.animation = "none";
         plate.removeEventListener("animationend", handler);
     });
-    }
 }
   
 function goToShop(){
