@@ -153,18 +153,22 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 }
 
 #topPlate{
-  width:280px; /* вместо 330px */
+  width:240px; /* вместо 330px */
   height:120px;
   top:0;
   left:50%;
   transform:translateX(-50%);
+  text-align: center;
   z-index: 100; /* выше всех панелей */
   position: relative; /* для анимации */
   display: block; /* на всякий случай */
+  transform-origin: 50% -30px; /* подвешено над табличкой */
+  transition: transform 0.3s;
+    
 }
   
 #topPlate img#plateImg{
-  width:280px; /* вместо 330px */
+  width:240px; /* вместо 330px */
   height:120px;
 }
 
@@ -174,6 +178,8 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   font-weight:700;
   color:#FFDBBF;
   z-index:250;
+  text-align: center;
+  width: 100%;
 }
 
 #plateBalance{
@@ -185,6 +191,8 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   display:flex;
   align-items:center;
   gap:6px;
+  justify-content: center;
+  width: 100%;
 }
 
 #plateBalance img{
@@ -194,19 +202,17 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 /* Анимации покачивания */
 @keyframes swingLeft {
-  0% { transform:translateX(-50%) rotate(0deg); }
-  25% { transform:translateX(-50%) rotate(-4deg); }
-  50% { transform:translateX(-50%) rotate(2deg); }
-  70% { transform:translateX(-50%) rotate(-1deg); }
-  100%{ transform:translateX(-50%) rotate(0deg); }
+  0%   { transform: translateX(-50%) rotateX(0deg) rotate(-1deg); }
+  40%  { transform: translateX(-50%) rotateX(8deg) rotate(-6deg); }
+  70%  { transform: translateX(-50%) rotateX(4deg) rotate(-2deg); }
+  100% { transform: translateX(-50%) rotateX(0deg) rotate(0deg); }
 }
 
 @keyframes swingRight {
-  0% { transform:translateX(-50%) rotate(0deg); }
-  25% { transform:translateX(-50%) rotate(4deg); }
-  50% { transform:translateX(-50%) rotate(-2deg); }
-  70% { transform:translateX(-50%) rotate(1deg); }
-  100%{ transform:translateX(-50%) rotate(0deg); }
+  0%   { transform: translateX(-50%) rotateX(0deg) rotate(1deg); }
+  40%  { transform: translateX(-50%) rotateX(8deg) rotate(6deg); }
+  70%  { transform: translateX(-50%) rotateX(4deg) rotate(2deg); }
+  100% { transform: translateX(-50%) rotateX(0deg) rotate(0deg); }
 }
   
 </style>
@@ -598,9 +604,9 @@ function swingPlate(direction){
   void plate.offsetWidth;
 
   if(direction === "left"){
-    plate.style.animation = "swingLeft 0.8s ease-out";
+    plate.style.animation = "swingLeft 1.4s ease-out";
   } else {
-    plate.style.animation = "swingRight 0.8s ease-out";
+    plate.style.animation = "swingRight 1.4s ease-out";
   }
 }
   
