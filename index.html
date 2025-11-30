@@ -349,6 +349,9 @@ const shopItems=[
 {id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},      
 {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}      
 ];      
+
+let remaining2 = 50;  // глобальная переменная для количества покупок до 2-го тира
+let tier2 = null;      // глобальная переменная для блока второго тира
       
 /* COUNTER ANIM */      
 let animFrame=null;      
@@ -546,7 +549,13 @@ d.className = "item";
     btn.addEventListener("click",()=>{      
   if(item.stock!==undefined && item.stock<=0) return;      
   if(coins < item.cost) return;      
-      
+
+  if (remaining2 > 0) {
+    remaining2--;
+    const textDiv = tier2.querySelector("div:nth-child(3)");
+    textDiv.textContent = remaining2 > 0 ? `осталось ${remaining2} покупок до 2-го тира` : "2 тир";
+}
+          
   // анимация кнопки      
   btn.style.transform="scale(0.95)";      
   setTimeout(()=>btn.style.transform="scale(1)",100);      
@@ -567,11 +576,6 @@ d.className = "item";
     wrap.appendChild(d);      
     itemsBlock.appendChild(wrap);      
   });      
-// глобальная переменная для количества покупок до 2-го тира
-let remaining2 = 50;
-
-const tier2 = createTierDivider("2 тир", remaining2);
-itemsBlock.appendChild(tier2);
 }      
       
 function updatePricesColor(){      
@@ -601,12 +605,17 @@ loginOutBtn.onclick=async()=>{
   userId=localUserId;      
   coins=0;clickPower=1;      
   shopItems.forEach(i=>{if(i.id===2)i.stock=5;if(i.id===1)i.cost=50;});      
-  animateCounter(0,0);    
-  if(remaining2 > 0){
-    remaining2--;
+  animateCounter(0,0);  
+
+      if (!tier2) {
+    tier2 = createTierDivider("2 тир", remaining2);
+    itemsBlock.appendChild(tier2);
+} else {
+    // если уже есть, просто обновляем текст
     const textDiv = tier2.querySelector("div:nth-child(3)"); // центральный текст
     textDiv.textContent = remaining2 > 0 ? `осталось ${remaining2} покупок до 2-го тира` : "2 тир";
-  }
+      }
+      
   renderShop();      
 };      
       
