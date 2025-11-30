@@ -153,18 +153,15 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 }
 
 #topPlate{
-  width:240px; /* вместо 330px */
-  height:120px;
-  top:0;
-  left:50%;
-  transform:translateX(-50%);
-  text-align: center;
-  z-index: 100; /* выше всех панелей */
-  position: relative; /* для анимации */
-  display: block; /* на всякий случай */
-  transform-origin: 50% -30px; /* подвешено над табличкой */
+  width: 240px;
+  height: 120px;
+  position: relative;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-origin: 50% -80px;   /* Ось выше таблички */
   transition: transform 0.3s;
-    
+  z-index: 100;
 }
   
 #topPlate img#plateImg{
@@ -201,18 +198,15 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 }
 
 /* Анимации покачивания */
-@keyframes swingLeft {
-  0%   { transform: translateX(-50%) rotateX(0deg) rotate(-1deg); }
-  40%  { transform: translateX(-50%) rotateX(8deg) rotate(-6deg); }
-  70%  { transform: translateX(-50%) rotateX(4deg) rotate(-2deg); }
-  100% { transform: translateX(-50%) rotateX(0deg) rotate(0deg); }
-}
-
-@keyframes swingRight {
-  0%   { transform: translateX(-50%) rotateX(0deg) rotate(1deg); }
-  40%  { transform: translateX(-50%) rotateX(8deg) rotate(6deg); }
-  70%  { transform: translateX(-50%) rotateX(4deg) rotate(2deg); }
-  100% { transform: translateX(-50%) rotateX(0deg) rotate(0deg); }
+@keyframes swingDecay {
+  0%   { transform: translateX(-50%) rotate(0deg); }
+  10%  { transform: translateX(-50%) rotate(12deg); }
+  25%  { transform: translateX(-50%) rotate(-10deg); }
+  40%  { transform: translateX(-50%) rotate(7deg); }
+  55%  { transform: translateX(-50%) rotate(-5deg); }
+  70%  { transform: translateX(-50%) rotate(3deg); }
+  85%  { transform: translateX(-50%) rotate(-2deg); }
+  100% { transform: translateX(-50%) rotate(0deg); }
 }
   
 </style>
@@ -598,16 +592,13 @@ const backToClickerBtn=document.getElementById("backToClickerBtn");
 
 panels.style.transform="translateX(-392px)";
 
-function swingPlate(direction){
-  const plate = document.getElementById("topPlate");
-  plate.style.animation = "none";
-  void plate.offsetWidth;
+function swingPlate(direction) {
+    const plate = document.getElementById("topPlate");
 
-  if(direction === "left"){
-    plate.style.animation = "swingLeft 0.9s ease-out";
-  } else {
-    plate.style.animation = "swingRight 0.9s ease-out";
-  }
+    plate.style.animation = "none";
+    void plate.offsetWidth;
+
+    plate.style.animation = "swingDecay 1.6s ease-out"; // затихающее качание
 }
   
 function goToShop(){
