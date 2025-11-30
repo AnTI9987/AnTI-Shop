@@ -615,7 +615,7 @@ function swingPlate(direction) {
     plate.style.setProperty("--deg2", deg2 + "deg");
     plate.style.setProperty("--deg3", deg3 + "deg");
 
-    plate.style.animation = "swingDecay 0.8s ease-in-out";
+    plate.style.animation = "swingDecay 1.2s ease-in-out";
 
     plate.addEventListener("animationend", function handler() {
         plate.style.transform = "translateX(-50%) rotate(0deg)";
