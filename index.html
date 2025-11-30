@@ -211,9 +211,9 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 /* Анимации покачивания */
 @keyframes swingSuspended {
   0%   { transform: translateX(-50%) rotate(0deg); }
-  25%  { transform: translateX(-49%) rotate(var(--deg1,12deg)); }
-  50%  { transform: translateX(-51%) rotate(var(--deg2,-8deg)); }
-  75%  { transform: translateX(-50.5%) rotate(var(--deg3,4deg)); }
+  25%  { transform: translateX(-49.5%) rotate(var(--deg1,8deg)); }
+  50%  { transform: translateX(-50.5%) rotate(var(--deg2,-5deg)); }
+  75%  { transform: translateX(-50.25%) rotate(var(--deg3,3deg)); }
   100% { transform: translateX(-50%) rotate(0deg); }
 }
   
@@ -602,10 +602,10 @@ panels.style.transform="translateX(-392px)";
 
 function swingPlate(direction) {
     const plate = document.getElementById("topPlate");
-    plate.style.animation = "none";
-    void plate.offsetWidth; // reflow для сброса
+    plate.style.animation = "none"; // сброс предыдущей анимации
+    void plate.offsetWidth; // принудительный reflow
 
-    let deg1 = 12, deg2 = -8, deg3 = 4;
+    let deg1 = 8, deg2 = -5, deg3 = 3;
     if (direction === "right") {
         deg1 = -deg1;
         deg2 = -deg2;
@@ -616,7 +616,13 @@ function swingPlate(direction) {
     plate.style.setProperty("--deg2", deg2 + "deg");
     plate.style.setProperty("--deg3", deg3 + "deg");
 
-    plate.style.animation = "swingSuspended 0.8s ease-in-out forwards";
+    plate.style.animation = "swingSuspended 1.2s ease-in-out";
+
+    plate.addEventListener("animationend", function handler() {
+        plate.style.transform = "translateX(-50%) rotate(0deg)";
+        plate.style.animation = "none";
+        plate.removeEventListener("animationend", handler);
+    });
 }
   
 function goToShop(){
