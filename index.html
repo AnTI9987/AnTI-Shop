@@ -65,7 +65,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   width:392px;
   height:100%;
   background:#A7794C;
-  padding-top:70px;
+  padding-top:140px;
   overflow-y:auto;
 }
 
@@ -76,7 +76,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   padding:32px 24px 24px;
   border-radius:0;
   width:350px;
-  min-height:calc(100vh - 170px);
+  min-height:calc(100vh - 70px);
   box-shadow:none;
 }
 
@@ -152,32 +152,48 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   justify-content:center;
 }
 
-#topPlate{
+#topPlate {
   width: 240px;
   height: 120px;
   position: relative;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  transform-origin: 50% -80px;   /* Ось выше таблички */
+  transform-origin: 50% -80px;
   transition: transform 0.3s;
   z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* центрирует по вертикали */
+}
+
+/* заголовок чуть выше */
+#plateTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #FFDBBF;
+  margin: 0;
+  margin-bottom: 6px;  /* чуть ниже оставить место для монет */
+  z-index: 250;
+  text-align: center;
+}
+
+/* баланс монет чуть ниже */
+#plateBalance {
+  font-size: 22px;
+  font-weight: 600;
+  color: #FFDBBF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  z-index: 250;
 }
   
 #topPlate img#plateImg{
   width:240px; /* вместо 330px */
   height:120px;
-}
-
-#plateTitle, #plateBalance {
-  position: absolute;
-  top: 50%;           /* вертикальный центр самой таблички */
-  left: 50%;          /* горизонтальный центр */
-  transform: translate(-50%, -50%); /* смещаем ровно в центр */
-  text-align: center;
-  width: 100%;
-  pointer-events: none; /* чтобы клики шли на кнопки под табличкой */
-  z-index: 250;
 }
 
 #plateBalance img{
