@@ -386,12 +386,12 @@ function clickAction(x,y){
 }
 
 function animateClicker(){
-  clickImg.style.transform = "scale(0.87)";
+  clickImg.style.transform = "scale(0.93)";  // раньше 0.87
   clickImg.src = "img/click2.png";
   setTimeout(()=>{
     clickImg.style.transform = "scale(1)";
     clickImg.src = "img/click1.png";
-  }, 150);
+  }, 100); // раньше 150мс
 }
 
 clickButton.addEventListener("click", e => {
