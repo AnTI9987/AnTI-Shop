@@ -12,6 +12,8 @@ imagesToPreload.forEach(src=>{
   img.src = src;
 });
 
+settingsBtnEl.classList.add("settings-btn");
+
 /* FIREBASE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
