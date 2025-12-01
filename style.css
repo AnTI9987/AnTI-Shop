@@ -71,6 +71,11 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   box-shadow:none;
 }
 
+.settings-btn {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600 !important;
+}
+
 /* ТОВАР */
 .item{
   width:310px;background-image:url("img/item-frame.png");
