@@ -1,4 +1,12 @@
-// прогружаем картинки сразу
+/* FIREBASE IMPORTS (оставляем в самом верху, как требуется ES-модулями) */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+/* ---------------------------------------------- */
+/* ПРОГРУЗКА КАРТИНОК */
+/* ---------------------------------------------- */
+
 const imagesToPreload = [
   "img/click1.png",
   "img/click2.png",
@@ -12,25 +20,47 @@ imagesToPreload.forEach(src=>{
   img.src = src;
 });
 
-settingsBtnEl.classList.add("settings-btn");
+/* ---------------------------------------------- */
+/* ЭЛЕМЕНТЫ */
+/* ---------------------------------------------- */
 
+const shopBtnEl = document.getElementById("shopBtn");
+const backBtnEl = document.getElementById("backBtn");
+const settingsBtnEl = document.getElementById("settingsBtn"); // ← теперь ЗДЕСЬ
+settingsBtnEl.classList.add("settings-btn");                  // ← и только потом используем
+settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";
+settingsBtnEl.style.fontWeight = "600";
+
+const backToClickerBtn = document.getElementById("backToClickerBtn");
+
+/* ---------------------------------------------- */
 /* FIREBASE */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+/* ---------------------------------------------- */
 
-const firebaseConfig={apiKey:"AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",authDomain:"anti-shop-99f1d.firebaseapp.com",databaseURL:"https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",projectId:"anti-shop-99f1d",storageBucket:"anti-shop-99f1d.firebasestorage.app",messagingSenderId:"347202416802",appId:"1:347202416802:web:2d2df1b819be9da180e7fb"};
+const firebaseConfig = {
+  apiKey: "AIzaSyAcv5AfJPjUA-RGfcAsUiQwvucSxkJX4F0",
+  authDomain: "anti-shop-99f1d.firebaseapp.com",
+  databaseURL: "https://anti-shop-99f1d-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "anti-shop-99f1d",
+  storageBucket: "anti-shop-99f1d.firebasestorage.app",
+  messagingSenderId: "347202416802",
+  appId: "1:347202416802:web:2d2df1b819be9da180e7fb"
+};
 
-const appFB=initializeApp(firebaseConfig);
-const db=getDatabase(appFB);
-const auth=getAuth(appFB);
-const provider=new GoogleAuthProvider();
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+const auth = getAuth(appFB);
+const provider = new GoogleAuthProvider();
 
+/* ---------------------------------------------- */
 /* SPLASH */
-const splashScreen=document.getElementById("splashScreen");
-const progressBar=document.getElementById("progressBar");
-const progressPercent=document.getElementById("progressPercent");
-let progress=0;
+/* ---------------------------------------------- */
+
+const splashScreen = document.getElementById("splashScreen");
+const progressBar = document.getElementById("progressBar");
+const progressPercent = document.getElementById("progressPercent");
+let progress = 0;
+
 function fakeLoad(onDone){
   progress = 1;
   progressBar.style.width = "1%";
@@ -52,13 +82,30 @@ function fakeLoad(onDone){
   },80);
 }
 
-/* VARIABLES */
-let isGuest=true;
-let localUserId=localStorage.getItem("userId");
-if(!localUserId){localUserId="guest_"+Math.random().toString(36).substring(2,9);localStorage.setItem("userId",localUserId);}
-let userId=localUserId;
-let coins=0,clickPower=1;
-let plateAnimFrame=null;
+/* ---------------------------------------------- */
+/* ПЕРЕМЕННЫЕ */
+/* ---------------------------------------------- */
+
+let isGuest = true;
+let localUserId = localStorage.getItem("userId");
+if(!localUserId){
+  localUserId = "guest_" + Math.random().toString(36).substring(2,9);
+  localStorage.setItem("userId", localUserId);
+}
+
+let userId = localUserId;
+
+let coins = 0;
+let clickPower = 1;
+let plateAnimFrame = null;
+
+const counterValue = document.getElementById("counterValue");
+const loginOutBtn = document.getElementById("loginOutBtn");
+const loginBtnEl = document.getElementById("loginBtn");
+
+/* ---------------------------------------------- */
+/* АНИМАЦИЯ ПЛАШКИ */
+/* ---------------------------------------------- */
 
 function animatePlateCoins(newValue){
     const el = document.getElementById("plateBalanceValue");
@@ -83,18 +130,19 @@ function animatePlateCoins(newValue){
     plateAnimFrame = requestAnimationFrame(frame);
 }
 
-const counterValue=document.getElementById("counterValue");
-const loginOutBtn=document.getElementById("loginOutBtn");
-const loginBtnEl=document.getElementById("loginBtn");
+/* ---------------------------------------------- */
+/* ТОВАРЫ */
+/* ---------------------------------------------- */
 
-/* ITEMS */
 let shopItems=[
 {id:1,name:'Оторванная пуговица',cost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
 {id:2,name:'Страшная штука',cost:250,description:'Оно пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
 ];
 
+/* ---------------------------------------------- */
+/* АНИМАЦИЯ СЧЁТЧИКА */
+/* ---------------------------------------------- */
 
-/* COUNTER ANIM */
 let animFrame=null;
 function animateCounter(oldVal,newVal){
   oldVal=Number(oldVal)||0;newVal=Number(newVal)||0;
@@ -104,20 +152,28 @@ function animateCounter(oldVal,newVal){
   function frame(ts){
     let p=Math.min((ts-start)/100,1);
     document.getElementById("shopBalanceValue").textContent =
-Math.floor(oldVal+(newVal-oldVal)*p);
+      Math.floor(oldVal+(newVal-oldVal)*p);
 
-document.getElementById("shopBalanceValueClicker").textContent =
-Math.floor(oldVal+(newVal-oldVal)*p);
-    if(p<1)animFrame=requestAnimationFrame(frame);else document.getElementById("shopBalanceValue").textContent=newVal;
-document.getElementById("shopBalanceValueClicker").textContent=newVal;
+    document.getElementById("shopBalanceValueClicker").textContent =
+      Math.floor(oldVal+(newVal-oldVal)*p);
+
+    if(p<1){
+      animFrame=requestAnimationFrame(frame);
+    } else {
+      document.getElementById("shopBalanceValue").textContent=newVal;
+      document.getElementById("shopBalanceValueClicker").textContent=newVal;
+    }
   }
   animFrame=requestAnimationFrame(frame);
 }
 
-/* CLICK */
-const clickImg=document.getElementById("clickImg");
+/* ---------------------------------------------- */
+/* КЛИКЕР */
+/* ---------------------------------------------- */
+
+const clickImg = document.getElementById("clickImg");
 clickImg.style.display = "block";
-const clickButton=document.getElementById("clickButton");
+const clickButton = document.getElementById("clickButton");
 
 function spawnFloatingCoin(x, y, value){
   const el = document.createElement("div");
@@ -125,15 +181,13 @@ function spawnFloatingCoin(x, y, value){
   el.style.left = (x-10) + "px";
   el.style.top = (y-10) + "px";
   el.innerHTML = `${value}<img src="img/anti-coin.png">`;
-  el.style.willChange = "transform, opacity";
 
   document.body.appendChild(el);
 
-  // небольшая задержка, чтобы браузер успел прогрузить элемент и CSS
   setTimeout(()=>{
     el.style.transform = "translateY(-80px)";
     el.style.opacity = "0";
-  }, 10); // 10мс достаточно
+  }, 10);
 
   setTimeout(()=>el.remove(), 650);
 }
@@ -142,7 +196,6 @@ function clickAction(x,y){
   const oldCoins = coins;
   coins += clickPower;
 
-  // если сила клика = 1 → никаких анимаций, моментальное пополнение
   if (clickPower === 1) {
     counterValue.textContent = coins;
     document.getElementById("shopBalanceValue").textContent = coins;
@@ -154,7 +207,6 @@ function clickAction(x,y){
     return;
   }
 
-  // обычный режим
   spawnFloatingCoin(x, y, clickPower);
   animateCounter(oldCoins, coins);
   animatePlateCoins(coins);
@@ -162,7 +214,7 @@ function clickAction(x,y){
 }
 
 function animateClicker(){
-  clickImg.style.display = "block"; // на случай, если вкладка была в фоне
+  clickImg.style.display = "block";
   clickImg.src = "img/click2.png";
   clickImg.style.transform = "scale(0.93)";
   
@@ -185,12 +237,15 @@ clickButton.addEventListener("touchstart", e => {
   animateClicker();
 }, {passive:false});
 
-/* SHOP */
+/* ---------------------------------------------- */
+/* МАГАЗИН */
+/* ---------------------------------------------- */
+
 const itemsBlock=document.getElementById("items");
 
 function updateButtonText(item,btn){
   btn.style.fontFamily = "'Montserrat', sans-serif";
-btn.style.fontWeight = "600";
+  btn.style.fontWeight = "600";
   btn.innerHTML="";
   if(item.stock!==undefined&&item.stock<=0){
     btn.textContent="распродано";
@@ -211,12 +266,10 @@ function renderShop(){
 
     const wrap = document.createElement("div");
     wrap.className = "itemWrap";
-
     wrap.style.background = "none";
 
     const d = document.createElement("div");
     d.className = "item";
-
     d.style.margin = "0 auto";
     d.style.backgroundImage = 'url("img/item-frame.png")';
 
@@ -252,8 +305,16 @@ function renderShop(){
       const oldCoins=coins;
       coins-=item.cost;
 
-      if(item.id===1){ clickPower+=1; item.cost = Math.floor(item.cost*1.2);}
-      if(item.id===2){ clickPower+=item.power; item.cost+=250; item.stock = Math.max(0,item.stock-1);}
+      if(item.id===1){
+        clickPower+=1;
+        item.cost = Math.floor(item.cost*1.2);
+      }
+
+      if(item.id===2){
+        clickPower+=item.power;
+        item.cost+=250;
+        item.stock = Math.max(0,item.stock-1);
+      }
 
       animateCounter(oldCoins,coins);
       animatePlateCoins(coins);
@@ -261,31 +322,31 @@ function renderShop(){
       renderShop();
     });
 
-    if (itemsBlock.children.length === 0) { // над первым товаром
-  const separator = document.createElement("div");
-  separator.style.display = "flex";
-  separator.style.alignItems = "center";
-  separator.style.justifyContent = "center";
-  separator.style.margin = "0 0 12px 0";
-  separator.style.gap = "6px";
+    if (itemsBlock.children.length === 0) {
+      const separator = document.createElement("div");
+      separator.style.display = "flex";
+      separator.style.alignItems = "center";
+      separator.style.justifyContent = "center";
+      separator.style.margin = "0 0 12px 0";
+      separator.style.gap = "6px";
 
-  const lineLeft = document.createElement("div");
-  lineLeft.style.flex = "1";
-  lineLeft.style.height = "1px";
-  lineLeft.style.backgroundColor = "#fff"; // цвет линии
+      const lineLeft = document.createElement("div");
+      lineLeft.style.flex = "1";
+      lineLeft.style.height = "1px";
+      lineLeft.style.backgroundColor = "#fff";
 
-  const lineRight = lineLeft.cloneNode();
-  const label = document.createElement("span");
-  label.textContent = "I тир";
-  label.style.color = "#FFDBBF";
-  label.style.fontWeight = "700";
-  label.style.margin = "0 6px";
+      const lineRight = lineLeft.cloneNode();
+      const label = document.createElement("span");
+      label.textContent = "I тир";
+      label.style.color = "#FFDBBF";
+      label.style.fontWeight = "700";
+      label.style.margin = "0 6px";
 
-  separator.appendChild(lineLeft);
-  separator.appendChild(label);
-  separator.appendChild(lineRight);
+      separator.appendChild(lineLeft);
+      separator.appendChild(label);
+      separator.appendChild(lineRight);
 
-  itemsBlock.appendChild(separator);
+      itemsBlock.appendChild(separator);
     }
 
     wrap.appendChild(d);
@@ -301,7 +362,10 @@ function updatePricesColor(){
   });
 }
 
+/* ---------------------------------------------- */
 /* SAVE */
+/* ---------------------------------------------- */
+
 async function saveProgress(){
   if(isGuest)return;
   const data={coins,clickPower,shopItems};
@@ -309,31 +373,39 @@ async function saveProgress(){
 }
 setInterval(saveProgress,5000);
 
-/* LOGIN */
-loginBtnEl.onclick=async()=>{try{await signInWithPopup(auth,provider);}catch(e){console.error(e);}};
+/* ---------------------------------------------- */
+/* AUTH */
+/* ---------------------------------------------- */
+
+loginBtnEl.onclick=async()=>{
+  try{
+    await signInWithPopup(auth,provider);
+  }catch(e){console.error(e);}
+};
 
 loginOutBtn.onclick=async()=>{
-  if(isGuest){await signInWithPopup(auth,provider);return;}
+  if(isGuest){
+    await signInWithPopup(auth,provider);
+    return;
+  }
   await signOut(auth);
   alert("Вы вышли из аккаунта");
   isGuest=true;
   userId=localUserId;
   coins=0; clickPower=1;
 
-  // сброс цен и стоков
   shopItems = [
-  {id:1,name:'Оторванная пуговица',cost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'+Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
-  {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
-];
+    {id:1,name:'Оторванная пуговица',cost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'+Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
+    {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
+  ];
 
-  // обновляем интерфейс
   animateCounter(0,0);
   animatePlateCoins(0);
   renderShop();
-  updatePricesColor(); // обновляем цвет цен
+  updatePricesColor();
 };
 
-/* AUTH CHECK */
+/* CHECK */
 onAuthStateChanged(auth,async user=>{
   if(user){
     isGuest=false;
@@ -357,14 +429,17 @@ onAuthStateChanged(auth,async user=>{
     animateCounter(0,coins);
     animatePlateCoins(coins);
     renderShop();
-  }else{
+  } else {
     isGuest=true;
     loginOutBtn.textContent="Войти в аккаунт";
   }
 });
 
+/* ---------------------------------------------- */
 /* PANELS */
-const panels=document.getElementById("panels");
+/* ---------------------------------------------- */
+
+const panels = document.getElementById("panels");
 let btnTimers={};
 
 function safeSetStyle(el, prop, value, delay=0){
@@ -376,12 +451,6 @@ function safeSetStyle(el, prop, value, delay=0){
         btnTimers[id] = setTimeout(() => { el.style[prop] = value; }, delay);
     }
 }
-const shopBtnEl=document.getElementById("shopBtn");
-const backBtnEl=document.getElementById("backBtn");
-const settingsBtnEl=document.getElementById("settingsBtn");
-settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";
-settingsBtnEl.style.fontWeight = "600";
-const backToClickerBtn=document.getElementById("backToClickerBtn");
 
 panels.style.transform="translateX(-392px)";
 
@@ -459,10 +528,20 @@ backToClickerBtn.onclick=goBackFromShop;
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) {
-    clickImg.style.display = "block"; // восстанавливаем кликер
-    animatePlateCoins(coins); // обновляем верхний баланс
-    animateCounter(parseInt(counterValue.textContent)||0, coins); // обновляем счётчик
+    clickImg.style.display = "block";
+    animatePlateCoins(coins);
+    animateCounter(parseInt(counterValue.textContent)||0, coins);
   }
 });
 
-fakeLoad(()=>{panels.style.transform="translateX(-392px)";renderShop();document.getElementById("topPlate").style.display = "block";animateCounter(0,coins);updatePricesColor();});
+/* ---------------------------------------------- */
+/* СТАРТ */
+/* ---------------------------------------------- */
+
+fakeLoad(()=>{
+  panels.style.transform="translateX(-392px)";
+  renderShop();
+  document.getElementById("topPlate").style.display = "block";
+  animateCounter(0,coins);
+  updatePricesColor();
+});
