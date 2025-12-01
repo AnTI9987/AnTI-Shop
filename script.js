@@ -257,6 +257,33 @@ function renderShop(){
       renderShop();
     });
 
+    if (itemsBlock.children.length === 0) { // над первым товаром
+  const separator = document.createElement("div");
+  separator.style.display = "flex";
+  separator.style.alignItems = "center";
+  separator.style.justifyContent = "center";
+  separator.style.margin = "0 0 12px 0";
+  separator.style.gap = "6px";
+
+  const lineLeft = document.createElement("div");
+  lineLeft.style.flex = "1";
+  lineLeft.style.height = "1px";
+  lineLeft.style.backgroundColor = "#fff"; // цвет линии
+
+  const lineRight = lineLeft.cloneNode();
+  const label = document.createElement("span");
+  label.textContent = "I тир";
+  label.style.color = "#FFDBBF";
+  label.style.fontWeight = "700";
+  label.style.margin = "0 6px";
+
+  separator.appendChild(lineLeft);
+  separator.appendChild(label);
+  separator.appendChild(lineRight);
+
+  itemsBlock.appendChild(separator);
+    }
+
     wrap.appendChild(d);
     itemsBlock.appendChild(wrap);
   });
