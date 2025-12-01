@@ -1,4 +1,38 @@
 /* =========================================================
+    SPLASH SCREEN LOADING
+========================================================= */
+
+function fakeLoad(onFinish) {
+    const splash = document.getElementById("splashScreen");
+    const bar = document.getElementById("progressBar");
+    const percent = document.getElementById("progressPercent");
+
+    let progress = 0;
+
+    function step() {
+        progress += Math.random() * 7 + 3;
+        if (progress > 100) progress = 100;
+
+        bar.style.width = progress + "%";
+        percent.textContent = Math.floor(progress) + "%";
+
+        if (progress < 100) {
+            setTimeout(step, 120);
+        } else {
+            setTimeout(() => {
+                splash.style.opacity = 0;
+                setTimeout(() => {
+                    splash.style.display = "none";
+                    if (onFinish) onFinish();
+                }, 700);
+            }, 300);
+        }
+    }
+
+    step();
+}
+
+/* =========================================================
     FIREBASE
 ========================================================= */
 
