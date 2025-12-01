@@ -100,22 +100,23 @@ document.getElementById("shopBalanceValueClicker").textContent=newVal;
 
 /* CLICK */
 const clickImg=document.getElementById("clickImg");
+clickImg.style.display = "block";
 const clickButton=document.getElementById("clickButton");
 
-function spawnFloatingCoin(x,y,value){
-  const el=document.createElement("div");
-  el.className="floating-coin";
-
-  el.style.left=(x-10)+"px";
-  el.style.top=(y-10)+"px";
-
-  el.innerHTML=`${value}<img src="img/anti-coin.png">`;
+function spawnFloatingCoin(x, y, value){
+  const el = document.createElement("div");
+  el.className = "floating-coin";
+  el.style.left = (x-10) + "px";
+  el.style.top = (y-10) + "px";
+  el.innerHTML = `${value}<img src="img/anti-coin.png">`;
+  el.style.willChange = "transform, opacity";
 
   document.body.appendChild(el);
 
+  // обязательно вызвать рендер перед анимацией
   requestAnimationFrame(()=>{
-    el.style.transform="translateY(-80px)";
-    el.style.opacity="0";
+    el.style.transform = "translateY(-80px)";
+    el.style.opacity = "0";
   });
 
   setTimeout(()=>el.remove(),650);
