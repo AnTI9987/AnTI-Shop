@@ -208,8 +208,6 @@ function renderShop(){
 
     if ((itemsBlock.children.length % 2) === 1) {
         wrap.style.background = "#8E663D";
-    } else {
-        wrap.style.background = "#A7794C";
     }
 
     const d = document.createElement("div");
