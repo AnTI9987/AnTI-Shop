@@ -29,6 +29,8 @@ settingsBtnEl.classList.add("settings-btn");
 settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";
 settingsBtnEl.style.fontWeight = "600";
 const backToClickerBtn = document.getElementById("backToClickerBtn");
+const loginBtnEl = document.getElementById("loginBtn");
+const loginOutBtn = document.getElementById("loginOutBtn");
 
 /* ---------------------------------------------- */
 /* FIREBASE */
@@ -67,7 +69,6 @@ function fakeLoad(onDone){
     if(progress >= 100){
       progress = 100;
       clearInterval(interval);
-
       setTimeout(()=>{ splashScreen.style.opacity = 0; }, 500);
       setTimeout(()=>{ splashScreen.style.display = "none"; if(onDone) onDone(); }, 1000);
     }
@@ -92,8 +93,6 @@ let coins = 0;
 let clickPower = 1;
 let plateAnimFrame = null;
 const counterValue = document.getElementById("counterValue");
-const loginOutBtn = document.getElementById("loginOutBtn");
-const loginBtnEl = document.getElementById("loginBtn");
 
 /* ---------------------------------------------- */
 /* АНИМАЦИЯ ПЛАШКИ */
@@ -129,7 +128,7 @@ const baseShopItems = [
   {id:2,name:'Страшная штука',baseCost:250,description:'Оно пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
 ];
 
-let shopItems = baseShopItems.map(item => ({...item})); // копия с динамическими cost/stock
+let shopItems = baseShopItems.map(item => ({...item}));
 let boughtItems = { "1":0, "2":0 };
 
 /* ---------------------------------------------- */
@@ -165,16 +164,15 @@ const clickButton = document.getElementById("clickButton");
 function spawnFloatingCoin(x, y, value){
   const el = document.createElement("div");
   el.className = "floating-coin";
-  el.style.left = (x-10) + "px";
-  el.style.top = (y-10) + "px";
-  el.innerHTML = `<b style="font-size:16px">${value}</b><img src="img/anti-coin.png" style="width:16px;height:16px;">`;
+  el.style.left = (x-12) + "px";
+  el.style.top = (y-12) + "px";
+  el.innerHTML = `<b style="font-size:18px;color:#ffd700">+${value}</b><img src="img/anti-coin.png" style="width:18px;height:18px;">`;
   document.body.appendChild(el);
   setTimeout(()=>{ el.style.transform = "translateY(-80px)"; el.style.opacity = "0"; }, 10);
-  setTimeout(()=>el.remove(), 650);
+  setTimeout(()=>el.remove(), 700);
 }
 
 function clickAction(x,y){
-  const oldCoins = coins;
   coins += clickPower;
   counterValue.textContent = coins;
   document.getElementById("shopBalanceValue").textContent = coins;
@@ -185,9 +183,8 @@ function clickAction(x,y){
 }
 
 function animateClicker(){
-  clickImg.style.display = "block";
-  clickImg.src = "img/click2.png";
   clickImg.style.transform = "scale(0.93)";
+  clickImg.src = "img/click2.png";
   setTimeout(()=>{
     clickImg.style.transform = "scale(1)";
     clickImg.src = "img/click1.png";
@@ -275,7 +272,6 @@ function updatePricesColor(){
 
 /* ---------------------------------------------- */
 /* SAVE */
-/* ---------------------------------------------- */
 async function saveProgress(){
   if(isGuest) return;
   await set(ref(db,'users/'+userId), {coins, clickPower, items: boughtItems});
@@ -284,8 +280,11 @@ setInterval(saveProgress, 5000);
 
 /* ---------------------------------------------- */
 /* AUTH */
-/* ---------------------------------------------- */
+loginBtnEl.style.fontFamily = "'Montserrat', sans-serif";
+loginBtnEl.style.fontWeight = "600";
 loginBtnEl.onclick = async()=>{ try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);} };
+loginOutBtn.style.fontFamily = "'Montserrat', sans-serif";
+loginOutBtn.style.fontWeight = "600";
 loginOutBtn.onclick = async()=>{
   if(isGuest){ await signInWithPopup(auth, provider); return; }
   await signOut(auth);
@@ -301,7 +300,6 @@ onAuthStateChanged(auth, async user=>{
     userId = user.email.replaceAll(".","_");
     loginOutBtn.textContent="Выйти из аккаунта";
     loginBtnEl.style.display="none";
-
     const snap = await get(ref(db,'users/'+userId));
     if(snap.exists()){
       const data = snap.val();
@@ -309,7 +307,6 @@ onAuthStateChanged(auth, async user=>{
       clickPower = data.clickPower || 1;
       boughtItems = data.items || { "1":0, "2":0 };
     }
-
     renderShop(); animateCounter(0,coins); animatePlateCoins(coins);
   } else {
     isGuest=true; loginOutBtn.textContent="Войти в аккаунт";
@@ -318,7 +315,6 @@ onAuthStateChanged(auth, async user=>{
 
 /* ---------------------------------------------- */
 /* PANELS */
-/* ---------------------------------------------- */
 const panels = document.getElementById("panels");
 let btnTimers={};
 
@@ -356,7 +352,6 @@ document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ clickI
 
 /* ---------------------------------------------- */
 /* СТАРТ */
-/* ---------------------------------------------- */
 fakeLoad(()=>{
   panels.style.transform="translateX(-392px)";
   renderShop();
