@@ -1,3 +1,17 @@
+// прогружаем картинки сразу
+const imagesToPreload = [
+  "img/click1.png",
+  "img/click2.png",
+  "img/anti-coin.png",
+  "img/item-1.png",
+  "img/item-2.png"
+];
+
+imagesToPreload.forEach(src=>{
+  const img = new Image();
+  img.src = src;
+});
+
 /* FIREBASE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
@@ -113,13 +127,13 @@ function spawnFloatingCoin(x, y, value){
 
   document.body.appendChild(el);
 
-  // обязательно вызвать рендер перед анимацией
-  requestAnimationFrame(()=>{
+  // небольшая задержка, чтобы браузер успел прогрузить элемент и CSS
+  setTimeout(()=>{
     el.style.transform = "translateY(-80px)";
     el.style.opacity = "0";
-  });
+  }, 10); // 10мс достаточно
 
-  setTimeout(()=>el.remove(),650);
+  setTimeout(()=>el.remove(), 650);
 }
 
 function clickAction(x,y){
@@ -131,13 +145,28 @@ function clickAction(x,y){
 }
 
 function animateClicker(){
-  clickImg.style.transform = "scale(0.93)";
+  clickImg.style.display = "block"; // на случай, если вкладка была в фоне
   clickImg.src = "img/click2.png";
+  clickImg.style.transform = "scale(0.93)";
+  
   setTimeout(()=>{
     clickImg.style.transform = "scale(1)";
     clickImg.src = "img/click1.png";
   }, 100);
 }
+
+clickButton.addEventListener("click", e => {
+  clickAction(e.clientX, e.clientY);
+  animateClicker();
+});
+
+clickButton.addEventListener("touchstart", e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    clickAction(t.clientX, t.clientY);
+  }
+  animateClicker();
+}, {passive:false});
 
 clickButton.addEventListener("click", e => {
   clickAction(e.clientX, e.clientY);
@@ -396,5 +425,13 @@ shopBtnEl.onclick=goToShop;
 settingsBtnEl.onclick=goToSettings;
 backBtnEl.onclick=goBackFromSettings;
 backToClickerBtn.onclick=goBackFromShop;
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    clickImg.style.display = "block"; // восстанавливаем кликер
+    animatePlateCoins(coins); // обновляем верхний баланс
+    animateCounter(parseInt(counterValue.textContent)||0, coins); // обновляем счётчик
+  }
+});
 
 fakeLoad(()=>{panels.style.transform="translateX(-392px)";renderShop();document.getElementById("topPlate").style.display = "block";animateCounter(0,coins);updatePricesColor();});
