@@ -86,9 +86,9 @@ const loginOutBtn=document.getElementById("loginOutBtn");
 const loginBtnEl=document.getElementById("loginBtn");
 
 /* ITEMS */
-const shopItems=[
-{id:1,name:'Оторванная пуговица',cost:50,description:'Похожа на глаз игрушки.',property:'+1 за клик',incrementCost:50,img:'img/item-1.png'},
-{id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'+10 за клик',power:10,stock:5,img:'img/item-2.png'}
+let shopItems=[
+{id:1,name:'Оторванная пуговица',cost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
+{id:2,name:'Страшная штука',cost:250,description:'Оно пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
 ];
 
 
@@ -169,19 +169,6 @@ function animateClicker(){
     clickImg.src = "img/click1.png";
   }, 100);
 }
-
-clickButton.addEventListener("click", e => {
-  clickAction(e.clientX, e.clientY);
-  animateClicker();
-});
-
-clickButton.addEventListener("touchstart", e => {
-  e.preventDefault();
-  for (const t of e.changedTouches) {
-    clickAction(t.clientX, t.clientY);
-  }
-  animateClicker();
-}, {passive:false});
 
 clickButton.addEventListener("click", e => {
   clickAction(e.clientX, e.clientY);
@@ -333,8 +320,8 @@ loginOutBtn.onclick=async()=>{
 
   // сброс цен и стоков
   shopItems = [
-  {id:1,name:'Оторванная пуговица',cost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
-  {id:2,name:'Страшная штука',cost:250,description:'Оно пугает.',property:'прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
+  {id:1,name:'Оторванная пуговица',cost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'+Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
+  {id:2,name:'Страшная штука',cost:250,description:'Она пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
 ];
 
   // обновляем интерфейс
