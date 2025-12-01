@@ -13,7 +13,6 @@ const imagesToPreload = [
   "img/item-1.png",
   "img/item-2.png"
 ];
-
 imagesToPreload.forEach(src => {
   const img = new Image();
   img.src = src;
@@ -31,6 +30,9 @@ settingsBtnEl.style.fontWeight = "600";
 const backToClickerBtn = document.getElementById("backToClickerBtn");
 const loginBtnEl = document.getElementById("loginBtn");
 const loginOutBtn = document.getElementById("loginOutBtn");
+const clickButton = document.getElementById("clickButton");
+const clickImg = document.getElementById("clickImg");
+clickImg.style.display = "block";
 
 /* ---------------------------------------------- */
 /* FIREBASE */
@@ -44,7 +46,6 @@ const firebaseConfig = {
   messagingSenderId: "347202416802",
   appId: "1:347202416802:web:2d2df1b819be9da180e7fb"
 };
-
 const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
 const auth = getAuth(appFB);
@@ -62,20 +63,17 @@ function fakeLoad(onDone){
   progress = 1;
   progressBar.style.width = "1%";
   progressPercent.textContent = "1%";
-
   const interval = setInterval(() => {
-    progress += 10 + Math.random() * 15;
-
+    progress += 10 + Math.random()*15;
     if(progress >= 100){
       progress = 100;
       clearInterval(interval);
       setTimeout(()=>{ splashScreen.style.opacity = 0; }, 500);
       setTimeout(()=>{ splashScreen.style.display = "none"; if(onDone) onDone(); }, 1000);
     }
-
     progressBar.style.width = Math.min(progress,100) + "%";
     progressPercent.textContent = Math.floor(progress) + "%";
-  }, 80);
+  },80);
 }
 
 /* ---------------------------------------------- */
@@ -103,20 +101,14 @@ function animatePlateCoins(newValue){
     const diff = newValue - startVal;
     const duration = 500;
     const startTime = performance.now();
-
     if(plateAnimFrame) cancelAnimationFrame(plateAnimFrame);
-
     function frame(now){
-        let t = Math.min((now - startTime)/duration, 1);
-        let eased = 1 - Math.pow(1 - t, 3);
-        el.textContent = Math.floor(startVal + diff * eased);
-        if(t < 1){
-            plateAnimFrame = requestAnimationFrame(frame);
-        } else {
-            el.textContent = newValue;
-        }
+        let t = Math.min((now-startTime)/duration,1);
+        let eased = 1 - Math.pow(1-t,3);
+        el.textContent = Math.floor(startVal + diff*eased);
+        if(t<1) plateAnimFrame = requestAnimationFrame(frame);
+        else el.textContent = newValue;
     }
-
     plateAnimFrame = requestAnimationFrame(frame);
 }
 
@@ -127,7 +119,6 @@ const baseShopItems = [
   {id:1,name:'Оторванная пуговица',baseCost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
   {id:2,name:'Страшная штука',baseCost:250,description:'Оно пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
 ];
-
 let shopItems = baseShopItems.map(item => ({...item}));
 let boughtItems = { "1":0, "2":0 };
 
@@ -136,19 +127,21 @@ let boughtItems = { "1":0, "2":0 };
 /* ---------------------------------------------- */
 let animFrame = null;
 function animateCounter(oldVal,newVal){
-  oldVal = Number(oldVal) || 0;
-  newVal = Number(newVal) || 0;
-  if(newVal - oldVal === 1){ counterValue.textContent = newVal; return; }
+  oldVal = Number(oldVal)||0;
+  newVal = Number(newVal)||0;
+  if(newVal-oldVal===1){ counterValue.textContent = newVal; return; }
   if(animFrame) cancelAnimationFrame(animFrame);
   let start = performance.now();
   function frame(ts){
     let p = Math.min((ts-start)/100,1);
-    document.getElementById("shopBalanceValue").textContent = Math.floor(oldVal + (newVal - oldVal) * p);
-    document.getElementById("shopBalanceValueClicker").textContent = Math.floor(oldVal + (newVal - oldVal) * p);
-    if(p < 1) animFrame = requestAnimationFrame(frame);
+    document.getElementById("shopBalanceValue").textContent = Math.floor(oldVal + (newVal-oldVal)*p);
+    document.getElementById("shopBalanceValueClicker").textContent = Math.floor(oldVal + (newVal-oldVal)*p);
+    counterValue.textContent = Math.floor(oldVal + (newVal-oldVal)*p);
+    if(p<1) animFrame=requestAnimationFrame(frame);
     else {
       document.getElementById("shopBalanceValue").textContent = newVal;
       document.getElementById("shopBalanceValueClicker").textContent = newVal;
+      counterValue.textContent = newVal;
     }
   }
   animFrame = requestAnimationFrame(frame);
@@ -157,28 +150,25 @@ function animateCounter(oldVal,newVal){
 /* ---------------------------------------------- */
 /* КЛИКЕР */
 /* ---------------------------------------------- */
-const clickImg = document.getElementById("clickImg");
-clickImg.style.display = "block";
-const clickButton = document.getElementById("clickButton");
-
-function spawnFloatingCoin(x, y, value){
+function spawnFloatingCoin(x,y,value){
   const el = document.createElement("div");
-  el.className = "floating-coin";
+  el.className="floating-coin";
   el.style.left = (x-12) + "px";
   el.style.top = (y-12) + "px";
+  el.style.position = "absolute";
+  el.style.pointerEvents = "none";
+  el.style.zIndex = 9999;
   el.innerHTML = `<b style="font-size:18px;color:#ffd700">+${value}</b><img src="img/anti-coin.png" style="width:18px;height:18px;">`;
   document.body.appendChild(el);
-  setTimeout(()=>{ el.style.transform = "translateY(-80px)"; el.style.opacity = "0"; }, 10);
-  setTimeout(()=>el.remove(), 700);
+  setTimeout(()=>{ el.style.transform="translateY(-80px)"; el.style.opacity="0"; el.style.transition="all 0.7s ease-out"; },10);
+  setTimeout(()=>el.remove(),700);
 }
 
 function clickAction(x,y){
   coins += clickPower;
-  counterValue.textContent = coins;
-  document.getElementById("shopBalanceValue").textContent = coins;
-  document.getElementById("shopBalanceValueClicker").textContent = coins;
-  document.getElementById("plateBalanceValue").textContent = coins;
-  spawnFloatingCoin(x, y, clickPower);
+  animateCounter(coins-clickPower, coins);
+  animatePlateCoins(coins);
+  spawnFloatingCoin(x,y,clickPower);
   updatePricesColor();
 }
 
@@ -188,47 +178,56 @@ function animateClicker(){
   setTimeout(()=>{
     clickImg.style.transform = "scale(1)";
     clickImg.src = "img/click1.png";
-  }, 100);
+  },100);
 }
 
-clickButton.addEventListener("click", e => { clickAction(e.clientX, e.clientY); animateClicker(); });
-clickButton.addEventListener("touchstart", e => { e.preventDefault(); for(const t of e.changedTouches){ clickAction(t.clientX, t.clientY); } animateClicker(); }, {passive:false});
+clickButton.addEventListener("click", e=>{
+  const rect = clickButton.getBoundingClientRect();
+  clickAction(e.clientX, e.clientY);
+  animateClicker();
+});
+clickButton.addEventListener("touchstart", e=>{
+  e.preventDefault();
+  for(const t of e.changedTouches){
+    clickAction(t.clientX, t.clientY);
+  }
+  animateClicker();
+},{passive:false});
 
 /* ---------------------------------------------- */
 /* МАГАЗИН */
 /* ---------------------------------------------- */
 const itemsBlock = document.getElementById("items");
-
 function updateShopItems(){
-  shopItems = baseShopItems.map(item => {
-    const bought = boughtItems[item.id] || 0;
+  shopItems = baseShopItems.map(item=>{
+    const bought = boughtItems[item.id]||0;
     const newItem = {...item};
-    if(item.id === 1) newItem.cost = Math.floor(item.baseCost * Math.pow(1.2, bought));
-    if(item.id === 2) newItem.cost = item.baseCost + 250 * bought;
-    if(item.stock !== undefined) newItem.stock = Math.max(0, item.stock - bought);
+    if(item.id===1) newItem.cost = Math.floor(item.baseCost*Math.pow(1.2,bought));
+    if(item.id===2) newItem.cost = item.baseCost + 250*bought;
+    if(item.stock!==undefined) newItem.stock = Math.max(0,item.stock-bought);
     return newItem;
   });
 }
 
-function updateButtonText(item, btn){
-  btn.style.fontFamily = "'Montserrat', sans-serif";
-  btn.style.fontWeight = "600";
-  btn.innerHTML = "";
-  if(item.stock !== undefined && item.stock <= 0){
-    btn.textContent = "распродано";
-    btn.disabled = true;
+function updateButtonText(item,btn){
+  btn.style.fontFamily="'Montserrat', sans-serif";
+  btn.style.fontWeight="600";
+  btn.innerHTML="";
+  if(item.stock!==undefined && item.stock<=0){
+    btn.textContent="распродано";
+    btn.disabled=true;
     return;
   }
   const p = document.createElement("div");
-  p.className = "price";
+  p.className="price";
   p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
-  p.style.color = (coins<item.cost)?"#ff3333":"#fff";
+  p.style.color=(coins<item.cost)?"#ff3333":"#fff";
   btn.appendChild(p);
 }
 
 function renderShop(){
   updateShopItems();
-  itemsBlock.innerHTML = "";
+  itemsBlock.innerHTML="";
   shopItems.forEach(item=>{
     const wrap = document.createElement("div"); wrap.className="itemWrap"; wrap.style.background="none";
     const d = document.createElement("div"); d.className="item"; d.style.margin="0 auto"; d.style.backgroundImage='url("img/item-frame.png")';
@@ -246,10 +245,10 @@ function renderShop(){
       const s=document.createElement("p"); s.className="stock"; s.textContent="В наличии: "+item.stock; d.appendChild(s);
     }
     const btn=document.createElement("button"); d.appendChild(btn); updateButtonText(item,btn);
-    btn.addEventListener("click", ()=>{
+    btn.addEventListener("click",()=>{
       if(item.stock!==undefined && item.stock<=0) return;
-      if(coins < item.cost) return;
-      coins -= item.cost;
+      if(coins<item.cost) return;
+      coins-=item.cost;
       boughtItems[item.id] = (boughtItems[item.id]||0)+1;
       clickPower += item.id===1?1:item.power||0;
       animateCounter(coins+item.cost, coins);
@@ -274,42 +273,43 @@ function updatePricesColor(){
 /* SAVE */
 async function saveProgress(){
   if(isGuest) return;
-  await set(ref(db,'users/'+userId), {coins, clickPower, items: boughtItems});
+  await set(ref(db,'users/'+userId), {coins, clickPower, items:boughtItems});
 }
-setInterval(saveProgress, 5000);
+setInterval(saveProgress,5000);
 
 /* ---------------------------------------------- */
 /* AUTH */
-loginBtnEl.style.fontFamily = "'Montserrat', sans-serif";
-loginBtnEl.style.fontWeight = "600";
-loginBtnEl.onclick = async()=>{ try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);} };
-loginOutBtn.style.fontFamily = "'Montserrat', sans-serif";
-loginOutBtn.style.fontWeight = "600";
-loginOutBtn.onclick = async()=>{
-  if(isGuest){ await signInWithPopup(auth, provider); return; }
+loginBtnEl.style.fontFamily="'Montserrat', sans-serif";
+loginBtnEl.style.fontWeight="600";
+loginBtnEl.onclick=async()=>{ try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);} };
+loginOutBtn.style.fontFamily="'Montserrat', sans-serif";
+loginOutBtn.style.fontWeight="600";
+loginOutBtn.onclick=async()=>{
+  if(isGuest){ await signInWithPopup(auth,provider); return; }
   await signOut(auth);
   alert("Вы вышли из аккаунта");
   isGuest=true; userId=localUserId; coins=0; clickPower=1;
-  boughtItems = { "1":0, "2":0 };
+  boughtItems={ "1":0,"2":0 };
   renderShop(); animateCounter(0,0); animatePlateCoins(0);
 };
 
-onAuthStateChanged(auth, async user=>{
+onAuthStateChanged(auth,async user=>{
   if(user){
     isGuest=false;
-    userId = user.email.replaceAll(".","_");
+    userId=user.email.replaceAll(".","_");
     loginOutBtn.textContent="Выйти из аккаунта";
     loginBtnEl.style.display="none";
     const snap = await get(ref(db,'users/'+userId));
     if(snap.exists()){
-      const data = snap.val();
-      coins = data.coins || 0;
-      clickPower = data.clickPower || 1;
-      boughtItems = data.items || { "1":0, "2":0 };
+      const data=snap.val();
+      coins=data.coins||0;
+      clickPower=data.clickPower||1;
+      boughtItems=data.items||{ "1":0,"2":0 };
     }
     renderShop(); animateCounter(0,coins); animatePlateCoins(coins);
-  } else {
-    isGuest=true; loginOutBtn.textContent="Войти в аккаунт";
+  }else{
+    isGuest=true;
+    loginOutBtn.textContent="Войти в аккаунт";
   }
 });
 
@@ -318,24 +318,28 @@ onAuthStateChanged(auth, async user=>{
 const panels = document.getElementById("panels");
 let btnTimers={};
 
-function safeSetStyle(el, prop, value, delay=0){
-    const id = el.id + prop;
-    if(btnTimers[id]) clearTimeout(btnTimers[id]);
-    if(delay===0) el.style[prop] = value;
-    else btnTimers[id] = setTimeout(()=>{ el.style[prop] = value; }, delay);
+function safeSetStyle(el,prop,value,delay=0){
+  const id = el.id + prop;
+  if(btnTimers[id]) clearTimeout(btnTimers[id]);
+  if(delay===0) el.style[prop]=value;
+  else btnTimers[id]=setTimeout(()=>{ el.style[prop]=value; }, delay);
 }
 
 panels.style.transform="translateX(-392px)";
 function swingPlate(direction){
   const plate = document.getElementById("topPlate");
-  plate.style.animation = "none"; void plate.offsetWidth;
+  plate.style.animation="none"; void plate.offsetWidth;
   let deg1=8, deg2=-5, deg3=3;
   if(direction==="right"){ deg1=-deg1; deg2=-deg2; deg3=-deg3; }
-  plate.style.setProperty("--deg1", deg1+"deg");
-  plate.style.setProperty("--deg2", deg2+"deg");
-  plate.style.setProperty("--deg3", deg3+"deg");
+  plate.style.setProperty("--deg1",deg1+"deg");
+  plate.style.setProperty("--deg2",deg2+"deg");
+  plate.style.setProperty("--deg3",deg3+"deg");
   plate.style.animation="swingSuspended 0.9s ease-in-out";
-  plate.addEventListener("animationend", function handler(){ plate.style.transform="translateX(-50%) rotate(0deg)"; plate.style.animation="none"; plate.removeEventListener("animationend", handler); });
+  plate.addEventListener("animationend",function handler(){
+    plate.style.transform="translateX(-50%) rotate(0deg)";
+    plate.style.animation="none";
+    plate.removeEventListener("animationend",handler);
+  });
 }
 
 function goToShop(){ swingPlate("left"); panels.style.transform="translateX(-784px)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backToClickerBtn.style.display="block"; backToClickerBtn.style.right="-60px"; setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50); updatePricesColor(); }
@@ -343,12 +347,12 @@ function goBackFromShop(){ swingPlate("right"); panels.style.transform="translat
 function goToSettings(){ swingPlate("right"); panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; safeSetStyle(backBtnEl,"right","12px",50); }
 function goBackFromSettings(){ swingPlate("left"); panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; safeSetStyle(backBtnEl,"right","-60px"); safeSetStyle(backBtnEl,"display","none",500); loginBtnEl.style.left="12px"; }
 
-shopBtnEl.onclick = goToShop;
-settingsBtnEl.onclick = goToSettings;
-backBtnEl.onclick = goBackFromSettings;
-backToClickerBtn.onclick = goBackFromShop;
+shopBtnEl.onclick=goToShop;
+settingsBtnEl.onclick=goToSettings;
+backBtnEl.onclick=goBackFromSettings;
+backToClickerBtn.onclick=goBackFromShop;
 
-document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ clickImg.style.display="block"; animatePlateCoins(coins); animateCounter(parseInt(counterValue.textContent)||0, coins); } });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; animatePlateCoins(coins); animateCounter(parseInt(counterValue.textContent)||0, coins); } });
 
 /* ---------------------------------------------- */
 /* СТАРТ */
@@ -357,5 +361,5 @@ fakeLoad(()=>{
   renderShop();
   document.getElementById("topPlate").style.display="block";
   animateCounter(0,coins);
-  updatePricesColor();
+  animatePlateCoins(coins);
 });
