@@ -341,3 +341,277 @@ function updatePricesColor() {
         p.style.color = (coins < cost) ? "#ff3333" : "#fff";
     });
 }
+
+/* =========================================================
+    SAVE PROGRESS
+========================================================= */
+
+async function saveProgress() {
+    if (isGuest) return;
+
+    const data = {
+        coins,
+        clickPower,
+        shopItems
+    };
+
+    await set(ref(db, 'users/' + userId), data);
+}
+
+setInterval(saveProgress, 5000);
+
+/* =========================================================
+    LOGIN / LOGOUT
+========================================================= */
+
+loginBtnEl.onclick = async () => {
+    try {
+        await signInWithPopup(auth, provider);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+loginOutBtn.onclick = async () => {
+    if (isGuest) {
+        await signInWithPopup(auth, provider);
+        return;
+    }
+
+    await signOut(auth);
+
+    alert("Вы вышли из аккаунта");
+
+    isGuest = true;
+    userId = localUserId;
+    coins = 0;
+    clickPower = 1;
+
+    // сбросить магазин
+    shopItems.forEach(i => {
+        if (i.id === 2) i.stock = 5;
+        if (i.id === 1) i.cost = 50;
+    });
+
+    animateCounter(0, 0);
+    renderShop();
+};
+
+/* =========================================================
+    AUTH STATE CHANGE
+========================================================= */
+
+onAuthStateChanged(auth, async user => {
+
+    if (user) {
+        isGuest = false;
+        userId = user.uid;
+
+        loginOutBtn.textContent = "Выйти из аккаунта";
+        loginBtnEl.style.display = "none";
+
+        const snap = await get(ref(db, 'users/' + userId));
+
+        if (snap.exists()) {
+            const data = snap.val();
+            coins = data.coins || 0;
+            clickPower = data.clickPower || 1;
+
+            if (data.shopItems) {
+                data.shopItems.forEach((si, i) => {
+                    shopItems[i].cost = si.cost;
+                    if (shopItems[i].stock !== undefined)
+                        shopItems[i].stock = si.stock;
+                });
+            }
+        }
+
+        animateCounter(0, coins);
+        animatePlateCoins(coins);
+        renderShop();
+
+    } else {
+        isGuest = true;
+        loginOutBtn.textContent = "Войти в аккаунт";
+    }
+});
+
+/* =========================================================
+    PANELS & NAVIGATION
+========================================================= */
+
+const panels = document.getElementById("panels");
+let btnTimers = {};
+
+function safeSetStyle(el, prop, value, delay = 0) {
+    const id = el.id + prop;
+
+    if (btnTimers[id]) clearTimeout(btnTimers[id]);
+
+    if (delay === 0) {
+        el.style[prop] = value;
+    } else {
+        btnTimers[id] = setTimeout(() => {
+            el.style[prop] = value;
+        }, delay);
+    }
+}
+
+const shopBtnEl = document.getElementById("shopBtn");
+const backBtnEl = document.getElementById("backBtn");
+const settingsBtnEl = document.getElementById("settingsBtn");
+const backToClickerBtn = document.getElementById("backToClickerBtn");
+
+panels.style.transform = "translateX(-392px)";
+
+/* =========================================================
+    TOP PLATE SWING ANIMATION
+========================================================= */
+
+function swingPlate(direction) {
+    const plate = document.getElementById("topPlate");
+
+    plate.style.animation = "none";
+    void plate.offsetWidth;
+
+    let deg1 = 8, deg2 = -5, deg3 = 3;
+
+    if (direction === "right") {
+        deg1 = -deg1;
+        deg2 = -deg2;
+        deg3 = -deg3;
+    }
+
+    plate.style.setProperty("--deg1", deg1 + "deg");
+    plate.style.setProperty("--deg2", deg2 + "deg");
+    plate.style.setProperty("--deg3", deg3 + "deg");
+
+    plate.style.animation = "swingSuspended 0.9s ease-in-out";
+
+    plate.addEventListener("animationend", function handler() {
+        plate.style.transform = "translateX(-50%) rotate(0deg)";
+        plate.style.animation = "none";
+        plate.removeEventListener("animationend", handler);
+    });
+}
+
+/* =========================================================
+    PANEL TRANSITIONS
+========================================================= */
+
+function goToShop() {
+    swingPlate("left");
+
+    panels.style.transform = "translateX(-784px)";
+
+    shopBtnEl.style.right = "-60px";
+    settingsBtnEl.style.left = "-60px";
+    loginBtnEl.style.left = "-60px";
+
+    backToClickerBtn.style.display = "block";
+    backToClickerBtn.style.right = "-60px";
+
+    setTimeout(() => safeSetStyle(backToClickerBtn, "right", "12px"), 50);
+
+    updatePricesColor();
+}
+
+function goBackFromShop() {
+    swingPlate("right");
+
+    panels.style.transform = "translateX(-392px)";
+
+    safeSetStyle(backToClickerBtn, "right", "-60px");
+    safeSetStyle(backToClickerBtn, "display", "none", 400);
+
+    shopBtnEl.style.right = "12px";
+    settingsBtnEl.style.left = "12px";
+    loginBtnEl.style.left = "12px";
+}
+
+function goToSettings() {
+    swingPlate("right");
+
+    panels.style.transform = "translateX(0)";
+
+    shopBtnEl.style.right = "-60px";
+    settingsBtnEl.style.left = "-60px";
+    loginBtnEl.style.left = "-60px";
+
+    backBtnEl.style.display = "block";
+    safeSetStyle(backBtnEl, "right", "12px", 50);
+}
+
+function goBackFromSettings() {
+    swingPlate("left");
+
+    panels.style.transform = "translateX(-392px)";
+
+    shopBtnEl.style.right = "12px";
+    settingsBtnEl.style.left = "12px";
+
+    safeSetStyle(backBtnEl, "right", "-60px");
+    safeSetStyle(backBtnEl, "display", "none", 500);
+
+    loginBtnEl.style.left = "12px";
+}
+
+/* BUTTON EVENTS */
+shopBtnEl.onclick = goToShop;
+settingsBtnEl.onclick = goToSettings;
+backBtnEl.onclick = goBackFromSettings;
+backToClickerBtn.onclick = goBackFromShop;
+
+/* =========================================================
+    INITIAL STARTUP
+========================================================= */
+
+fakeLoad(() => {
+    panels.style.transform = "translateX(-392px)";
+    renderShop();
+    document.getElementById("topPlate").style.display = "block";
+    animateCounter(0, coins);
+    updatePricesColor();
+});
+
+/* =========================================================
+    RESPONSIVE FIXES / TOUCH SUPPORT / MOBILE UX
+========================================================= */
+
+// убрать выделение при тапах
+document.addEventListener("touchstart", () => {}, { passive: true });
+
+// отключение контекстного меню (по желанию — можешь удалить)
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+// переходы и кнопки на мобильных
+let lastTouch = 0;
+document.addEventListener("touchend", () => {
+    lastTouch = Date.now();
+});
+
+/* =========================================================
+    DEBUG (можно удалить)
+========================================================= */
+
+// показать текущее состояние игрока
+window.debugState = () => {
+    console.log({
+        coins,
+        clickPower,
+        shopItems,
+        userId,
+        isGuest
+    });
+};
+
+// очистить сохранения Firebase (только для теста)
+window.resetFirebase = async () => {
+    if (isGuest) return alert("Вы не авторизованы!");
+    await set(ref(db, 'users/' + userId), null);
+    alert("данные удалены");
+};
+
+/* =========================================================
+    END
+========================================================= */
