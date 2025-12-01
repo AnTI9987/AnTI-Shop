@@ -206,9 +206,7 @@ function renderShop(){
     const wrap = document.createElement("div");
     wrap.className = "itemWrap";
 
-    if ((itemsBlock.children.length % 2) === 1) {
-        wrap.style.background = "#8E663D";
-    }
+    wrap.style.background = "none";
 
     const d = document.createElement("div");
     d.className = "item";
