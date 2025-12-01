@@ -1,61 +1,80 @@
 <!DOCTYPE html>
-<html lang="ru">        
-<head>        
-<meta charset="UTF-8">        
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">        
-<title>AnTI Shop</title>        
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">        
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AnTI Shop</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ПОДКЛЮЧАЕМ ВНЕШНИЙ CSS -->
 <link rel="stylesheet" href="style.css">
-</head>        
-        
-<body>        
-        
-<!-- SPLASH -->        
-<div id="splashScreen">        
-<h1>AnTI-Shop</h1>        
-<div id="progressBarContainer"><div id="progressBar"></div></div>        
-<div id="progressPercent">0%</div>        
-</div>        
-        
-<div id="app">        
-<div id="topPlate">        
-    <img id="plateImg" src="img/stat-table.png">        
-    <div id="plateTitle">AnTI-Shop</div>        
-    <div id="plateBalance"><span id="plateBalanceValue">0</span> <img src="img/anti-coin.png"></div>        
-</div>        
-<button id="settingsBtn"><img src="img/settings.png"></button>        
-<button id="loginBtn"><img src="img/login.png"></button>        
-<button id="shopBtn"><img src="img/shop-icon.png"></button>        
-<button id="backBtn"><img src="img/back-icon.png"></button>        
-<button id="backToClickerBtn"><img src="img/back-icon.png"></button>        
-        
-<div id="panels">        
-<div id="settingsPanel">        
-<button id="loginOutBtn">Войти в аккаунт</button>        
-</div>        
-        
-<div id="clickerPanel">        
-<div id="clickButtonWrapper">        
-  <div id="ground"><img src="img/ground.png"></div>        
-  <button id="clickButton"><img id="clickImg" src="img/click1.png"></button>        
-</div>        
-        
-<div id="counter" style="margin-top:20px;">        
-  <span id="counterValue">0</span>        
-  <img src="img/anti-coin.png">        
-</div>        
-</div>        
-        
-<div id="shopPanel">        
-<div id="shopPanelInner">        
-  <div id="items"></div>        
-</div>        
-</div>        
-        
-</div>        
-</div>        
-        
+
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splashScreen">
+    <h1>AnTI-Shop</h1>
+    <div id="progressBarContainer"><div id="progressBar"></div></div>
+    <div id="progressPercent">0%</div>
+</div>
+
+<div id="app">
+
+    <!-- TOP PLATE -->
+    <div id="topPlate">
+        <img id="plateImg" src="img/stat-table.png">
+        <div id="plateTitle">AnTI-Shop</div>
+        <div id="plateBalance">
+            <span id="plateBalanceValue">0</span>
+            <img src="img/anti-coin.png">
+        </div>
+    </div>
+
+    <!-- BUTTONS -->
+    <button id="settingsBtn"><img src="img/settings.png"></button>
+    <button id="loginBtn"><img src="img/login.png"></button>
+    <button id="shopBtn"><img src="img/shop-icon.png"></button>
+    <button id="backBtn"><img src="img/back-icon.png"></button>
+    <button id="backToClickerBtn"><img src="img/back-icon.png"></button>
+
+    <div id="panels">
+
+        <!-- SETTINGS PANEL -->
+        <div id="settingsPanel">
+            <button id="loginOutBtn">Войти в аккаунт</button>
+        </div>
+
+        <!-- CLICKER PANEL -->
+        <div id="clickerPanel">
+
+            <div id="clickButtonWrapper">
+                <div id="ground"><img src="img/ground.png"></div>
+                <button id="clickButton">
+                    <img id="clickImg" src="img/click1.png">
+                </button>
+            </div>
+
+            <div id="counter">
+                <span id="counterValue">0</span>
+                <img src="img/anti-coin.png">
+            </div>
+
+        </div>
+
+        <!-- SHOP PANEL -->
+        <div id="shopPanel">
+            <div id="shopPanelInner">
+                <div id="items"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ПОДКЛЮЧАЕМ ТВОЙ script.js -->
 <script type="module" src="script.js"></script>
-</body>        
+
+</body>
 </html>
