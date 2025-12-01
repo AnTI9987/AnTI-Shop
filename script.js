@@ -137,9 +137,24 @@ function spawnFloatingCoin(x, y, value){
 }
 
 function clickAction(x,y){
-  coins+=clickPower;
-  spawnFloatingCoin(x,y,clickPower);
-  animateCounter(parseInt(counterValue.textContent)||0,coins);
+  const oldCoins = coins;
+  coins += clickPower;
+
+  // если сила клика = 1 → никаких анимаций, моментальное пополнение
+  if (clickPower === 1) {
+    counterValue.textContent = coins;
+    document.getElementById("shopBalanceValue").textContent = coins;
+    document.getElementById("shopBalanceValueClicker").textContent = coins;
+    document.getElementById("plateBalanceValue").textContent = coins;
+
+    spawnFloatingCoin(x, y, clickPower);
+    updatePricesColor();
+    return;
+  }
+
+  // обычный режим
+  spawnFloatingCoin(x, y, clickPower);
+  animateCounter(oldCoins, coins);
   animatePlateCoins(coins);
   updatePricesColor();
 }
@@ -185,6 +200,8 @@ clickButton.addEventListener("touchstart", e => {
 const itemsBlock=document.getElementById("items");
 
 function updateButtonText(item,btn){
+  btn.style.fontFamily = "'Montserrat', sans-serif";
+btn.style.fontWeight = "600";
   btn.innerHTML="";
   if(item.stock!==undefined&&item.stock<=0){
     btn.textContent="распродано";
@@ -315,10 +332,10 @@ loginOutBtn.onclick=async()=>{
   coins=0; clickPower=1;
 
   // сброс цен и стоков
-  shopItems.forEach(i=>{
-    if(i.id===1) i.cost = 50;
-    if(i.id===2) i.stock = 5;
-  });
+  shopItems = [
+  {id:1,name:'Оторванная пуговица',cost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
+  {id:2,name:'Страшная штука',cost:250,description:'Оно пугает.',property:'прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
+];
 
   // обновляем интерфейс
   animateCounter(0,0);
@@ -331,7 +348,7 @@ loginOutBtn.onclick=async()=>{
 onAuthStateChanged(auth,async user=>{
   if(user){
     isGuest=false;
-    userId=user.uid;
+    userId = user.email.replaceAll(".", "_");
     loginOutBtn.textContent="Выйти из аккаунта";
     loginBtnEl.style.display="none";
 
@@ -373,6 +390,8 @@ function safeSetStyle(el, prop, value, delay=0){
 const shopBtnEl=document.getElementById("shopBtn");
 const backBtnEl=document.getElementById("backBtn");
 const settingsBtnEl=document.getElementById("settingsBtn");
+settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";
+settingsBtnEl.style.fontWeight = "600";
 const backToClickerBtn=document.getElementById("backToClickerBtn");
 
 panels.style.transform="translateX(-392px)";
