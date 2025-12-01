@@ -259,10 +259,19 @@ loginOutBtn.onclick=async()=>{
   alert("Вы вышли из аккаунта");
   isGuest=true;
   userId=localUserId;
-  coins=0;clickPower=1;
-  shopItems.forEach(i=>{if(i.id===2)i.stock=5;if(i.id===1)i.cost=50;});
+  coins=0; clickPower=1;
+
+  // сброс цен и стоков
+  shopItems.forEach(i=>{
+    if(i.id===1) i.cost = 50;
+    if(i.id===2) i.stock = 5;
+  });
+
+  // обновляем интерфейс
   animateCounter(0,0);
+  animatePlateCoins(0);
   renderShop();
+  updatePricesColor(); // обновляем цвет цен
 };
 
 /* AUTH CHECK */
