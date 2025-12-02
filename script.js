@@ -343,13 +343,34 @@ function renderShop(){
   updateShopItems();
   itemsBlock.innerHTML="";
 
-  /* добавляем надпись над первым товаром */
   const tierLabel = document.createElement("div");
-  tierLabel.textContent = "——— Ⅰ ТИР ———";
-  tierLabel.style.color = "#FFDCC0";
-  tierLabel.style.textAlign = "center";
-  tierLabel.style.marginBottom = "8px";
-  itemsBlock.appendChild(tierLabel);
+tierLabel.style.display = "flex";
+tierLabel.style.alignItems = "center";
+tierLabel.style.justifyContent = "center";
+tierLabel.style.marginBottom = "12px";
+
+const lineLeft = document.createElement("div");
+lineLeft.style.height = "3px";        // толщина линии
+lineLeft.style.backgroundColor = "#FFDCC0";
+lineLeft.style.flex = "1";
+lineLeft.style.marginRight = "8px";   // отступ от текста
+
+const lineRight = document.createElement("div");
+lineRight.style.height = "3px";       // толщина линии
+lineRight.style.backgroundColor = "#FFDCC0";
+lineRight.style.flex = "1";
+lineRight.style.marginLeft = "8px";   // отступ от текста
+
+const text = document.createElement("span");
+text.textContent = "Ⅰ ТИР";
+text.style.color = "#FFDCC0";
+text.style.fontWeight = "800";        // жирнее текст
+text.style.fontSize = "18px";
+
+tierLabel.appendChild(lineLeft);
+tierLabel.appendChild(text);
+tierLabel.appendChild(lineRight);
+itemsBlock.appendChild(tierLabel);
 
   shopItems.forEach(item=>{
     const wrap = document.createElement("div"); wrap.className="itemWrap"; wrap.style.background="none";
