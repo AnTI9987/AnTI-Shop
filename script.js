@@ -34,6 +34,10 @@ const clickButton = document.getElementById("clickButton");
 const clickImg = document.getElementById("clickImg");
 clickImg.style.display = "block";
 
+/* also cache top plate elements to change their colors */
+const plateTitleEl = document.getElementById("plateTitle");
+const plateBalanceValueEl = document.getElementById("plateBalanceValue");
+
 /* ---------------------------------------------- */
 /* FIREBASE */
 /* ---------------------------------------------- */
@@ -92,6 +96,12 @@ let clickPower = 1;
 let plateAnimFrame = null;
 const counterValue = document.getElementById("counterValue");
 
+/* set requested top-plate text colors right away */
+try {
+  if (plateTitleEl) plateTitleEl.style.color = "#332614";
+  if (plateBalanceValueEl) plateBalanceValueEl.style.color = "#332614";
+} catch(e){ /* ignore if elements missing */ }
+
 /* ---------------------------------------------- */
 /* АНИМАЦИЯ ПЛАШКИ */
 /* ---------------------------------------------- */
@@ -134,18 +144,22 @@ function animateCounter(oldVal,newVal){
   let start = performance.now();
   function frame(ts){
     let p = Math.min((ts-start)/100,1);
-    document.getElementById("shopBalanceValue").textContent = Math.floor(oldVal + (newVal-oldVal)*p);
-    document.getElementById("shopBalanceValueClicker").textContent = Math.floor(oldVal + (newVal-oldVal)*p);
-    counterValue.textContent = Math.floor(oldVal + (newVal-oldVal)*p);
+    const intermediate = Math.floor(oldVal + (newVal-oldVal)*p);
+    document.getElementById("shopBalanceValue").textContent = intermediate;
+    document.getElementById("shopBalanceValueClicker").textContent = intermediate;
+    counterValue.textContent = intermediate;
     if(p<1) animFrame=requestAnimationFrame(frame);
     else {
       document.getElementById("shopBalanceValue").textContent = newVal;
-      document.getElementById("shopBalanceValueClicker").textContent = newVal;
+      document.getElementById("shopBalanceValueClicker").textContent = newValueOrZero(newVal);
       counterValue.textContent = newVal;
+      // ensure top plate color persists after changing text
+      if (plateBalanceValueEl) plateBalanceValueEl.style.color = "#332614";
     }
   }
   animFrame = requestAnimationFrame(frame);
 }
+function newValueOrZero(v){ return (typeof v === "number")? v : 0; } // helper
 
 /* ---------------------------------------------- */
 /* КЛИКЕР */
@@ -158,18 +172,39 @@ function spawnFloatingCoin(x,y,value){
   el.style.position = "absolute";
   el.style.pointerEvents = "none";
   el.style.zIndex = 9999;
-  el.innerHTML = `<b style="font-size:18px;color:#ffd700">+${value}</b><img src="img/anti-coin.png" style="width:18px;height:18px;">`;
+  // white text + small shadow
+  el.innerHTML = `<b style="font-size:18px;color:#ffffff;text-shadow:0 2px 6px rgba(0,0,0,0.5)">+${value}</b><img src="img/anti-coin.png" style="width:18px;height:18px;margin-left:6px;vertical-align:middle;">`;
+  // initial styles for smooth animation
+  el.style.opacity = "1";
+  el.style.transform = "translateY(0)";
+  el.style.transition = "transform 0.7s ease-out, opacity 0.7s ease-out";
   document.body.appendChild(el);
-  setTimeout(()=>{ el.style.transform="translateY(-80px)"; el.style.opacity="0"; el.style.transition="all 0.7s ease-out"; },10);
+  // animate a tick later to ensure layout applied
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      el.style.transform = "translateY(-80px)";
+      el.style.opacity = "0";
+    }, 10);
+  });
   setTimeout(()=>el.remove(),700);
 }
 
 function clickAction(x,y){
   coins += clickPower;
-  animateCounter(coins-clickPower, coins);
+  // If clickPower === 1 — show immediate text (no long animation)
+  if (clickPower === 1) {
+    counterValue.textContent = coins;
+    document.getElementById("shopBalanceValue").textContent = coins;
+    document.getElementById("shopBalanceValueClicker").textContent = coins;
+    if (plateBalanceValueEl) plateBalanceValueEl.textContent = coins;
+  } else {
+    animateCounter(coins - clickPower, coins);
+  }
   animatePlateCoins(coins);
   spawnFloatingCoin(x,y,clickPower);
   updatePricesColor();
+  // ensure plate color remains correct
+  if (plateBalanceValueEl) plateBalanceValueEl.style.color = "#332614";
 }
 
 function animateClicker(){
@@ -181,8 +216,13 @@ function animateClicker(){
   },100);
 }
 
+// ensure clickButton is on top and can receive pointer events
+if (clickButton) {
+  clickButton.style.zIndex = 50;
+  clickButton.style.pointerEvents = "auto";
+}
+
 clickButton.addEventListener("click", e=>{
-  const rect = clickButton.getBoundingClientRect();
   clickAction(e.clientX, e.clientY);
   animateClicker();
 });
@@ -280,17 +320,20 @@ setInterval(saveProgress,5000);
 /* ---------------------------------------------- */
 /* AUTH */
 loginBtnEl.style.fontFamily="'Montserrat', sans-serif";
-loginBtnEl.style.fontWeight="600";
-loginBtnEl.onclick=async()=>{ try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);} };
-loginOutBtn.style.fontFamily="'Montserrat', sans-serif";
-loginOutBtn.style.fontWeight="600";
-loginOutBtn.onclick=async()=>{
+loginBtnEl.style.fontWeight = "600";
+loginBtnEl.onclick = async()=>{ try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);} };
+loginOutBtn.style.fontFamily = "'Montserrat', sans-serif";
+loginOutBtn.style.fontWeight = "600";
+loginOutBtn.onclick = async()=>{
   if(isGuest){ await signInWithPopup(auth,provider); return; }
   await signOut(auth);
   alert("Вы вышли из аккаунта");
   isGuest=true; userId=localUserId; coins=0; clickPower=1;
-  boughtItems={ "1":0,"2":0 };
+  boughtItems = { "1":0, "2":0 };
   renderShop(); animateCounter(0,0); animatePlateCoins(0);
+  // make sure top plate text color preserved
+  if (plateTitleEl) plateTitleEl.style.color = "#332614";
+  if (plateBalanceValueEl) plateBalanceValueEl.style.color = "#332614";
 };
 
 onAuthStateChanged(auth,async user=>{
@@ -301,12 +344,15 @@ onAuthStateChanged(auth,async user=>{
     loginBtnEl.style.display="none";
     const snap = await get(ref(db,'users/'+userId));
     if(snap.exists()){
-      const data=snap.val();
-      coins=data.coins||0;
-      clickPower=data.clickPower||1;
-      boughtItems=data.items||{ "1":0,"2":0 };
+      const data = snap.val();
+      coins = data.coins || 0;
+      clickPower = data.clickPower || 1;
+      boughtItems = data.items || { "1":0,"2":0 };
     }
     renderShop(); animateCounter(0,coins); animatePlateCoins(coins);
+    // restore plate colors after load
+    if (plateTitleEl) plateTitleEl.style.color = "#332614";
+    if (plateBalanceValueEl) plateBalanceValueEl.style.color = "#332614";
   }else{
     isGuest=true;
     loginOutBtn.textContent="Войти в аккаунт";
@@ -347,10 +393,10 @@ function goBackFromShop(){ swingPlate("right"); panels.style.transform="translat
 function goToSettings(){ swingPlate("right"); panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; safeSetStyle(backBtnEl,"right","12px",50); }
 function goBackFromSettings(){ swingPlate("left"); panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; safeSetStyle(backBtnEl,"right","-60px"); safeSetStyle(backBtnEl,"display","none",500); loginBtnEl.style.left="12px"; }
 
-shopBtnEl.onclick=goToShop;
-settingsBtnEl.onclick=goToSettings;
-backBtnEl.onclick=goBackFromSettings;
-backToClickerBtn.onclick=goBackFromShop;
+shopBtnEl.onclick = goToShop;
+settingsBtnEl.onclick = goToSettings;
+backBtnEl.onclick = goBackFromSettings;
+backToClickerBtn.onclick = goBackFromShop;
 
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; animatePlateCoins(coins); animateCounter(parseInt(counterValue.textContent)||0, coins); } });
 
@@ -360,6 +406,16 @@ fakeLoad(()=>{
   panels.style.transform="translateX(-392px)";
   renderShop();
   document.getElementById("topPlate").style.display="block";
+  // ensure initial visible values and colors
+  counterValue.textContent = coins;
+  const shopBal = document.getElementById("shopBalanceValue");
+  const shopBalClicker = document.getElementById("shopBalanceValueClicker");
+  if (shopBal) shopBal.textContent = coins;
+  if (shopBalClicker) shopBalClicker.textContent = coins;
+  if (plateBalanceValueEl) plateBalanceValueEl.textContent = coins;
+  if (plateTitleEl) plateTitleEl.style.color = "#332614";
+  if (plateBalanceValueEl) plateBalanceValueEl.style.color = "#332614";
   animateCounter(0,coins);
   animatePlateCoins(coins);
+  updatePricesColor();
 });
