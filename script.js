@@ -427,7 +427,186 @@ loginBtnEl.style.fontFamily="'Montserrat', sans-serif";
 loginBtnEl.style.fontWeight = "600";          
 loginBtnEl.onclick=async()=>{ try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);} };          
 loginOutBtn.style.fontFamily="'Montserrat', sans-serif";          
-loginOutBtn.style.fontWeight = "600";          
+loginOutBtn.style.fontWeight = "600";     
+
+/* === Чит-коды: UI + логика === */
+const CHEAT_VERIFY_URL = null; // если есть serverless endpoint — подставь сюда строку URL
+
+// попытка найти панель настроек (если у тебя есть специальный контейнер — присвой ему id="settingsPanel")
+const settingsPanel = document.getElementById("settingsPanel") || document.getElementById("panels");
+
+// wrapper
+const cheatWrapper = document.createElement("div");
+cheatWrapper.id = "cheatWrapper";
+cheatWrapper.style.display = "flex";
+cheatWrapper.style.flexDirection = "column";
+cheatWrapper.style.alignItems = "center";
+cheatWrapper.style.gap = "8px";
+cheatWrapper.style.marginTop = "12px";
+cheatWrapper.style.width = "100%";
+cheatWrapper.style.maxWidth = "360px";
+
+// поле ввода (выглядит как кнопка, чуть темнее)
+const cheatInput = document.createElement("input");
+cheatInput.id = "cheatInput";
+cheatInput.type = "text";
+cheatInput.placeholder = "введите чит-код";
+cheatInput.maxLength = 6;
+cheatInput.style.width = "100%";
+cheatInput.style.boxSizing = "border-box";
+cheatInput.style.padding = "12px 14px";
+cheatInput.style.borderRadius = "8px";
+cheatInput.style.border = "none";
+cheatInput.style.fontFamily = "'Montserrat', sans-serif";
+cheatInput.style.fontWeight = "700";
+cheatInput.style.backgroundColor = "#e0d6c9"; // чуть темнее, чем кнопка входа
+cheatInput.style.color = "#2b1f14";
+cheatInput.style.textTransform = "uppercase";
+cheatInput.style.textAlign = "center";
+cheatInput.autocomplete = "off";
+cheatInput.spellcheck = false;
+
+// кнопка подтвердить
+const cheatConfirm = document.createElement("button");
+cheatConfirm.id = "cheatConfirm";
+cheatConfirm.textContent = "подтвердить";
+cheatConfirm.style.width = "100%";
+cheatConfirm.style.padding = "12px 14px";
+cheatConfirm.style.borderRadius = "8px";
+cheatConfirm.style.border = "none";
+cheatConfirm.style.fontFamily = "'Montserrat', sans-serif";
+cheatConfirm.style.fontWeight = "700";
+cheatConfirm.style.cursor = "pointer";
+cheatConfirm.style.opacity = "0.5";
+cheatConfirm.style.pointerEvents = "none";
+cheatConfirm.style.backgroundColor = "#FFDCC0";
+cheatConfirm.style.color = "#2b1f14";
+
+const cheatHint = document.createElement("div");
+cheatHint.style.fontSize = "12px";
+cheatHint.style.color = "#8a6f5a";
+cheatHint.style.textAlign = "center";
+cheatHint.textContent = "только цифры и латинские буквы, 6 символов";
+
+cheatWrapper.appendChild(cheatInput);
+cheatWrapper.appendChild(cheatConfirm);
+cheatWrapper.appendChild(cheatHint);
+
+if (settingsPanel && loginOutBtn && settingsPanel.contains(loginOutBtn)) {
+  settingsPanel.insertBefore(cheatWrapper, loginOutBtn);
+} else if (settingsPanel) {
+  settingsPanel.appendChild(cheatWrapper);
+} else {
+  document.body.appendChild(cheatWrapper);
+}
+
+// ввод: только 0-9 и A-Z, автоматически uppercase, maxlength=6
+cheatInput.addEventListener("input", (e) => {
+  const raw = e.target.value;
+  const filtered = raw.replace(/[^0-9a-zA-Z]/g, "");
+  const up = filtered.toUpperCase().slice(0, 6);
+  if (up !== raw) e.target.value = up; else e.target.value = up;
+
+  if (up.length >= 6) {
+    cheatConfirm.style.opacity = "1";
+    cheatConfirm.style.pointerEvents = "auto";
+  } else {
+    cheatConfirm.style.opacity = "0.5";
+    cheatConfirm.style.pointerEvents = "none";
+  }
+});
+
+cheatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && cheatConfirm.style.pointerEvents === "auto") {
+    cheatConfirm.click();
+  }
+});
+
+function applyCheatEffect(effect) {
+  if (!effect) return;
+  if (effect.reset) {
+    coins = 0;
+    clickPower = 1;
+    boughtItems = Object.keys(boughtItems || {}).reduce((acc, k) => { acc[k] = 0; return acc; }, {});
+    if (document.getElementById("counterValue")) document.getElementById("counterValue").textContent = coins;
+    if (document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
+    if (document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
+    if (document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
+    renderShop();
+  }
+  if (effect.coins) {
+    coins += Number(effect.coins) || 0;
+    startCounterAnimation(coins);
+    startPlateAnimation(coins);
+  }
+  if (effect.clickPower) {
+    clickPower += Number(effect.clickPower) || 0;
+  }
+}
+
+async function verifyCheat(code) {
+  code = (code || "").toUpperCase().slice(0, 6);
+  if (!code || code.length < 6) return { ok: false, msg: "код слишком короткий" };
+
+  if (CHEAT_VERIFY_URL) {
+    try {
+      const resp = await fetch(CHEAT_VERIFY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, userId: isGuest ? null : userId })
+      });
+      const data = await resp.json();
+      return data;
+    } catch (e) {
+      console.error(e);
+      return { ok: false, msg: "ошибка проверки" };
+    }
+  }
+
+  try {
+    const snap = await get(ref(db, "cheatCodes/" + code));
+    if (!snap.exists()) return { ok: false, msg: "неверный код" };
+    const effect = snap.val();
+    return { ok: true, effect };
+  } catch (e) {
+    console.error(e);
+    return { ok: false, msg: "ошибка сети" };
+  }
+}
+
+cheatConfirm.addEventListener("click", async () => {
+  const code = cheatInput.value.trim().toUpperCase();
+  if (code.length < 6) return;
+
+  cheatConfirm.textContent = "проверка...";
+  cheatConfirm.style.pointerEvents = "none";
+  cheatConfirm.style.opacity = "0.7";
+
+  const res = await verifyCheat(code);
+
+  if (res && res.ok) {
+    const effect = res.effect || {};
+    if (effect.reset) {
+      applyCheatEffect({ reset: true });
+      if (!isGuest && userId) {
+        try { await set(ref(db, 'users/' + userId), null); } catch (e) { console.error(e); }
+      }
+      alert("Чит-код применён: игровые данные сброшены.");
+    } else {
+      applyCheatEffect(effect);
+      alert("чит-код применён");
+    }
+  } else {
+    alert(res && res.msg ? res.msg : "неверный код");
+  }
+
+  cheatConfirm.textContent = "подтвердить";
+  cheatInput.value = "";
+  cheatConfirm.style.opacity = "0.5";
+  cheatConfirm.style.pointerEvents = "none";
+});
+/* === конец блока чит-кодов === */
+
 loginOutBtn.onclick=async()=>{          
   if(isGuest){ await signInWithPopup(auth,provider); return; }          
   await signOut(auth);          
