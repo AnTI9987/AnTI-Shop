@@ -587,11 +587,23 @@ cheatConfirm.addEventListener("click", async () => {
   if (res && res.ok) {
     const effect = res.effect || {};
     if (effect.reset) {
-      applyCheatEffect({ reset: true });
-      if (!isGuest && userId) {
-        try { await set(ref(db, 'users/' + userId), null); } catch (e) { console.error(e); }
+    // локально
+    applyCheatEffect({ reset: true });
+
+    if (!isGuest && userId) {
+      console.log("Обнуляем данные для:", userId); // проверка
+      try {
+        await set(ref(db, 'users/' + userId), {
+          coins: 0,
+          clickPower: 1,
+          items: { "1":0, "2":0 }
+        });
+        console.log("Данные обнулены в Firebase");
+      } catch (e) {
+        console.error("Ошибка при записи в Firebase:", e);
       }
-      alert("Чит-код применён: игровые данные сброшены.");
+    }
+    alert("Чит-код применён: игровые данные сброшены.");
     } else {
       applyCheatEffect(effect);
       alert("чит-код применён");
