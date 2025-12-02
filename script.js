@@ -33,7 +33,7 @@ const loginOutBtn = document.getElementById("loginOutBtn");
 const clickButton = document.getElementById("clickButton");
 const clickImg = document.getElementById("clickImg");
 clickImg.style.display = "block";
-/* изменение: опустим кликер-картинку на 50px */
+/* опускаем кликер-картинку на 50px вниз */
 clickImg.style.marginTop = "50px";
 
 /* поменяли цвет заголовка и значения баланса сверху на #332614 */
@@ -103,10 +103,18 @@ const counterValue = document.getElementById("counterValue");
 /* ---------------------------------------------- */
 /* АНИМАЦИЯ ПЛАШКИ (plate) */
 /* ---------------------------------------------- */
+
+/*
+  реализация variant B:
+  - если анимация уже бежит и пришла новая цель, мы не рвём анимацию, а
+    пересчитываем текущее значение и плавно продолжаем к новой цели,
+    немного ускоряя анимацию (умножаем базовую длительность на 0.6).
+*/
+
 const plateAnim = {
   running: false,
   startTime: 0,
-  duration: 400,
+  duration: 400,      // базовая длительность (мс) — чуть быстрее, чем раньше
   baseDuration: 400,
   from: 0,
   to: 0,
@@ -116,6 +124,7 @@ const plateAnim = {
 function startPlateAnimation(newTarget){
   const el = document.getElementById("plateBalanceValue");
   const now = performance.now();
+
   if(!plateAnim.running){
     plateAnim.running = true;
     plateAnim.from = Number(el.textContent) || 0;
@@ -126,11 +135,14 @@ function startPlateAnimation(newTarget){
     const progress = Math.min((now - plateAnim.startTime) / plateAnim.duration, 1);
     const easedProg = easeOutCubic(progress);
     const currentDisplayed = plateAnim.from + (plateAnim.to - plateAnim.from) * easedProg;
+
     plateAnim.from = currentDisplayed;
     plateAnim.to = newTarget;
     plateAnim.startTime = now;
+
     plateAnim.duration = Math.max(60, plateAnim.baseDuration * 0.6);
   }
+
   if(plateAnim.rafId) cancelAnimationFrame(plateAnim.rafId);
   plateTick();
 }
@@ -142,6 +154,7 @@ function plateTick(){
   const eased = easeOutCubic(p);
   const value = Math.floor(plateAnim.from + (plateAnim.to - plateAnim.from) * eased);
   el.textContent = value;
+
   if(p < 1){
     plateAnim.rafId = requestAnimationFrame(plateTick);
   } else {
@@ -149,11 +162,12 @@ function plateTick(){
     plateAnim.rafId = null;
     el.textContent = plateAnim.to;
   }
-      }
+}
 
 /* ---------------------------------------------- */
 /* АНИМАЦИЯ СЧЁТЧИКА (центральный counter и shop balances) */
 /* ---------------------------------------------- */
+
 const counterAnim = {
   running: false,
   startTime: 0,
@@ -169,6 +183,7 @@ function startCounterAnimation(newTarget){
   const clickerEl = document.getElementById("shopBalanceValueClicker");
   const mainEl = counterValue;
   const now = performance.now();
+
   if(!counterAnim.running){
     counterAnim.running = true;
     counterAnim.from = Number(mainEl.textContent) || 0;
@@ -179,11 +194,14 @@ function startCounterAnimation(newTarget){
     const progress = Math.min((now - counterAnim.startTime) / counterAnim.duration, 1);
     const easedProg = easeOutCubic(progress);
     const currentDisplayed = counterAnim.from + (counterAnim.to - counterAnim.from) * easedProg;
+
     counterAnim.from = currentDisplayed;
     counterAnim.to = newTarget;
     counterAnim.startTime = now;
+
     counterAnim.duration = Math.max(60, counterAnim.baseDuration * 0.6);
   }
+
   if(counterAnim.rafId) cancelAnimationFrame(counterAnim.rafId);
   counterTick();
 }
@@ -196,9 +214,11 @@ function counterTick(){
   const p = Math.min((now - counterAnim.startTime) / counterAnim.duration, 1);
   const eased = easeOutCubic(p);
   const value = Math.floor(counterAnim.from + (counterAnim.to - counterAnim.from) * eased);
+
   if(shopEl) shopEl.textContent = value;
   if(clickerEl) clickerEl.textContent = value;
   if(mainEl) mainEl.textContent = value;
+
   if(p < 1){
     counterAnim.rafId = requestAnimationFrame(counterTick);
   } else {
@@ -216,6 +236,8 @@ function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
 /* ---------------------------------------------- */
 /* КЛИКЕР */
 /* ---------------------------------------------- */
+
+/* spawnFloatingCoin — белые +монеты с небольшой тенью */
 function spawnFloatingCoin(x,y,value){
   const el = document.createElement("div");
   el.className = "floating-coin";
@@ -226,11 +248,13 @@ function spawnFloatingCoin(x,y,value){
   el.style.zIndex = 9999;
   el.innerHTML = `<span style="font-weight:700;font-size:18px;color:#ffffff;text-shadow:0 2px 6px rgba(0,0,0,0.45);">+${value}</span><img src="img/anti-coin.png" style="width:18px;height:18px;margin-left:6px;vertical-align:middle;">`;
   document.body.appendChild(el);
+
   requestAnimationFrame(()=>{
     el.style.transition = "transform 0.7s ease-out, opacity 0.7s ease-out";
     el.style.transform = "translateY(-80px)";
     el.style.opacity = "0";
   });
+
   setTimeout(()=>el.remove(), 750);
 }
 
@@ -245,11 +269,14 @@ function clickAction(x,y){
     updatePricesColor();
     return;
   }
+
   const oldCoins = coins;
   coins += clickPower;
+
   startCounterAnimation(coins);
   startPlateAnimation(coins);
   spawnFloatingCoin(x,y,clickPower);
+
   updatePricesColor();
 }
 
@@ -289,8 +316,8 @@ function updateShopItems(){
   shopItems = baseShopItems.map(item=>{
     const bought = boughtItems[item.id]||0;
     const newItem = {...item};
-    if(item.id===1) newItem.cost = Math.floor(item.baseCost*Math.pow(1.5,bought)); // исправлено ×1.5
-    if(item.id===2) newItem.cost = item.baseCost + 250*bought;
+    if(item.id===1) newItem.cost = Math.floor(item.baseCost*Math.pow(1.7,bought));
+    if(item.id===2) newItem.cost = Math.floor(item.baseCost*Math.pow(3.0,bought));
     if(item.stock!==undefined) newItem.stock = Math.max(0,item.stock-bought);
     return newItem;
   });
@@ -299,7 +326,7 @@ function updateShopItems(){
 function updateButtonText(item,btn){
   btn.style.fontFamily="'Montserrat', sans-serif";
   btn.style.fontWeight="600";
-  btn.innerHTML = "";
+  btn.innerHTML="";
   if(item.stock!==undefined && item.stock<=0){
     btn.textContent="распродано";
     btn.disabled=true;
@@ -315,22 +342,17 @@ function updateButtonText(item,btn){
 function renderShop(){
   updateShopItems();
   itemsBlock.innerHTML="";
-  shopItems.forEach((item,index)=>{
+
+  /* добавляем надпись над первым товаром */
+  const tierLabel = document.createElement("div");
+  tierLabel.textContent = "——— Ⅰ ТИР ———";
+  tierLabel.style.color = "#FFDCC0";
+  tierLabel.style.textAlign = "center";
+  tierLabel.style.marginBottom = "8px";
+  itemsBlock.appendChild(tierLabel);
+
+  shopItems.forEach(item=>{
     const wrap = document.createElement("div"); wrap.className="itemWrap"; wrap.style.background="none";
-
-    // добавляем тир-надпись над первым товаром
-    if(index===0){
-      const tierLabel = document.createElement("div");
-      tierLabel.style.display="flex";
-      tierLabel.style.alignItems="center";
-      tierLabel.style.justifyContent="center";
-      tierLabel.style.color="#FFDCC0";
-      tierLabel.style.fontWeight="600";
-      tierLabel.style.marginBottom="6px";
-      tierLabel.innerHTML = `<span style="flex:1;border-bottom:2px solid #FFDCC0;margin-right:12px;"></span> Ⅰ ТИР <span style="flex:1;border-bottom:2px solid #FFDCC0;margin-left:12px;"></span>`;
-      wrap.appendChild(tierLabel);
-    }
-
     const d = document.createElement("div"); d.className="item"; d.style.margin="0 auto"; d.style.backgroundImage='url("img/item-frame.png")';
     d.innerHTML=`
       <div class="item-top">
@@ -368,147 +390,189 @@ function updatePricesColor(){
     const cost=parseInt(txt)||0;
     p.style.color=(coins<cost)?"#ff3333":"#fff";
   });
+      }
+
+function updateShopItems(){          
+  shopItems = baseShopItems.map(item=>{          
+    const bought = boughtItems[item.id]||0;          
+    const newItem = {...item};          
+    if(item.id===1) newItem.cost = Math.floor(item.baseCost*Math.pow(1.7,bought));  // множитель ×1.7          
+    if(item.id===2) newItem.cost = Math.floor(item.baseCost*3.0); // множитель ×3.0 (фиксированная цена)          
+    if(item.stock!==undefined) newItem.stock = Math.max(0,item.stock-bought);          
+    return newItem;          
+  });          
+}          
+          
+function updateButtonText(item,btn){          
+  btn.style.fontFamily="'Montserrat', sans-serif";          
+  btn.style.fontWeight="600";          
+  btn.innerHTML="";          
+  if(item.stock!==undefined && item.stock<=0){          
+    btn.textContent="распродано";          
+    btn.disabled=true;          
+    return;          
+  }          
+  const p = document.createElement("div");          
+  p.className="price";          
+  p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;          
+  p.style.color=(coins<item.cost)?"#ff3333":"#fff";          
+  btn.appendChild(p);          
+}          
+          
+function renderShop(){          
+  updateShopItems();          
+  itemsBlock.innerHTML="";          
+          
+  // добавляем надпись над первым товаром          
+  const tierLabel = document.createElement("div");          
+  tierLabel.textContent="——— Ⅰ ТИР ———";          
+  tierLabel.style.color="#FFDCC0";          
+  tierLabel.style.fontWeight="600";          
+  tierLabel.style.textAlign="center";          
+  tierLabel.style.marginBottom="10px";          
+  itemsBlock.appendChild(tierLabel);          
+          
+  shopItems.forEach(item=>{          
+    const wrap = document.createElement("div"); wrap.className="itemWrap"; wrap.style.background="none";          
+    const d = document.createElement("div"); d.className="item"; d.style.margin="0 auto"; d.style.backgroundImage='url("img/item-frame.png")';          
+    d.innerHTML=`          
+      <div class="item-top">          
+        <img src="${item.img}" style="margin-top:50px;"> <!-- опускаем кликер-картинку на 50px -->          
+        <div class="item-text">          
+          <b>${item.name}</b>          
+          <p>${item.description}</p>          
+          <p class="prop">${item.id===1?"+1 к прибыли за клик":"+5 к прибыли за клик"}</p> <!-- свойства товаров -->          
+        </div>          
+      </div>          
+    `;          
+    if(item.stock!==undefined){          
+      const s=document.createElement("p"); s.className="stock"; s.textContent="В наличии: "+item.stock; d.appendChild(s);          
+    }          
+    const btn=document.createElement("button"); d.appendChild(btn); updateButtonText(item,btn);          
+    btn.addEventListener("click",()=>{          
+      if(item.stock!==undefined && item.stock<=0) return;          
+      if(coins<item.cost) return;          
+      coins-=item.cost;          
+      boughtItems[item.id] = (boughtItems[item.id]||0)+1;          
+      clickPower += item.id===1?1:5; // корректировка прироста для второго товара          
+      startCounterAnimation(coins);          
+      startPlateAnimation(coins);          
+      updatePricesColor();          
+      renderShop();          
+    });          
+    wrap.appendChild(d);          
+    itemsBlock.appendChild(wrap);          
+  });          
+}          
+          
+function updatePricesColor(){          
+  document.querySelectorAll('.item .price').forEach(p=>{          
+    const txt=p.childNodes[0]?p.childNodes[0].textContent:p.textContent;          
+    const cost=parseInt(txt)||0;          
+    p.style.color=(coins<cost)?"#ff3333":"#fff";          
+  });          
 }
 
-/* ---------------------------------------------- */
-/* SAVE */
-async function saveProgress(){
-  if(isGuest) return;
-  await set(ref(db,'users/'+userId), {coins, clickPower, items:boughtItems});
-}
-setInterval(saveProgress,5000);
-
-/* ---------------------------------------------- */
-/* AUTH */
-loginBtnEl.style.fontFamily="'Montserrat', sans-serif";
-loginBtnEl.style.fontWeight = "600";
-loginBtnEl.onclick=async()=>{
-  try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);}
-};
-loginOutBtn.style.fontFamily="'Montserrat', sans-serif";
-loginOutBtn.style.fontWeight = "600";
-loginOutBtn.onclick=async()=>{
-  if(isGuest){ await signInWithPopup(auth,provider); return; }
-  await signOut(auth);
-  alert("Вы вышли из аккаунта");
-  isGuest=true; userId=localUserId; coins=0; clickPower=1;
-  boughtItems={ "1":0,"2":0 };
-  document.getElementById("counterValue").textContent = 0;
-  if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = 0;
-  if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = 0;
-  if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = 0;
-  renderShop();
-};
-
-onAuthStateChanged(auth,async user=>{
-  if(user){
-    isGuest=false;
-    userId=user.email.replaceAll(".","_");
-    loginOutBtn.textContent="Выйти из аккаунта";
-    loginBtnEl.style.display="none";
-    const snap = await get(ref(db,'users/'+userId));
-    if(snap.exists()){
-      const data = snap.val();
-      coins=data.coins||0;
-      clickPower=data.clickPower||1;
-      boughtItems=data.items||{ "1":0,"2":0 };
-    }
-    renderShop(); startCounterAnimation(coins); startPlateAnimation(coins);
-  }else{
-    isGuest=true;
-    loginOutBtn.textContent="Войти в аккаунт";
-  }
-});
-
-/* ---------------------------------------------- */
-/* PANELS */
-const panels = document.getElementById("panels");
-let btnTimers={};
-
-function safeSetStyle(el,prop,value,delay=0){
-  const id = el.id + prop;
-  if(btnTimers[id]) clearTimeout(btnTimers[id]);
-  if(delay===0) el.style[prop]=value;
-  else btnTimers[id]=setTimeout(()=>{ el.style[prop]=value; }, delay);
-}
-
-panels.style.transform="translateX(-392px)";
-function swingPlate(direction){
-  const plate = document.getElementById("topPlate");
-  plate.style.animation="none"; void plate.offsetWidth;
-  let deg1=8, deg2=-5, deg3=3;
-  if(direction==="right"){ deg1=-deg1; deg2=-deg2; deg3=-deg3; }
-  plate.style.setProperty("--deg1",deg1+"deg");
-  plate.style.setProperty("--deg2",deg2+"deg");
-  plate.style.setProperty("--deg3",deg3+"deg");
-  plate.style.animation="swingSuspended 0.9s ease-in-out";
-  plate.addEventListener("animationend",function handler(){
-    plate.style.transform="translateX(-50%) rotate(0deg)";
-    plate.style.animation="none";
-    plate.removeEventListener("animationend",handler);
-  });
-}
-
-function goToShop(){ 
-  swingPlate("left");
-  panels.style.transform="translateX(-784px)";
-  shopBtnEl.style.right="-60px";
-  settingsBtnEl.style.left="-60px";
-  loginBtnEl.style.left="-60px";
-  backToClickerBtn.style.display="block";
-  backToClickerBtn.style.right="-60px";
-  setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50);
-  updatePricesColor();
-}
-function goBackFromShop(){
-  swingPlate("right");
-  panels.style.transform="translateX(-392px)";
-  safeSetStyle(backToClickerBtn,"right","-60px");
-  safeSetStyle(backToClickerBtn,"display","none",400);
-  shopBtnEl.style.right="12px";
-  settingsBtnEl.style.left="12px";
-  loginBtnEl.style.left="12px";
-}
-function goToSettings(){
-  swingPlate("right");
-  panels.style.transform="translateX(0)";
-  shopBtnEl.style.right="-60px";
-  settingsBtnEl.style.left="-60px";
-  loginBtnEl.style.left="-60px";
-  backBtnEl.style.display="block";
-  safeSetStyle(backBtnEl,"right","12px",50);
-}
-function goBackFromSettings(){
-  swingPlate("left");
-  panels.style.transform="translateX(-392px)";
-  shopBtnEl.style.right="12px";
-  settingsBtnEl.style.left="12px";
-  safeSetStyle(backBtnEl,"right","-60px");
-  safeSetStyle(backBtnEl,"display","none",500);
-  loginBtnEl.style.left="12px";
-}
-
-shopBtnEl.onclick=goToShop;
-settingsBtnEl.onclick=goToSettings;
-backBtnEl.onclick=goBackFromSettings;
-backToClickerBtn.onclick=goBackFromShop;
-
-document.addEventListener("visibilitychange",()=>{
-  if(!document.hidden){
-    clickImg.style.display="block";
-    startPlateAnimation(coins);
-    startCounterAnimation(coins);
-  }
-});
-
-/* ---------------------------------------------- */
-/* СТАРТ */
-fakeLoad(()=>{
-  panels.style.transform="translateX(-392px)";
-  renderShop();
-  document.getElementById("topPlate").style.display="block";
-  document.getElementById("counterValue").textContent = coins;
-  if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
-  if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
-  if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
+/* ---------------------------------------------- */          
+/* SAVE */          
+async function saveProgress(){          
+  if(isGuest) return;          
+  await set(ref(db,'users/'+userId), {coins, clickPower, items:boughtItems});          
+}          
+setInterval(saveProgress,5000);          
+          
+/* ---------------------------------------------- */          
+/* AUTH */          
+loginBtnEl.style.fontFamily="'Montserrat', sans-serif";          
+loginBtnEl.style.fontWeight = "600";          
+loginBtnEl.onclick=async()=>{ try{ await signInWithPopup(auth, provider); }catch(e){console.error(e);} };          
+loginOutBtn.style.fontFamily="'Montserrat', sans-serif";          
+loginOutBtn.style.fontWeight = "600";          
+loginOutBtn.onclick=async()=>{          
+  if(isGuest){ await signInWithPopup(auth,provider); return; }          
+  await signOut(auth);          
+  alert("Вы вышли из аккаунта");          
+  isGuest=true; userId=localUserId; coins=0; clickPower=1;          
+  boughtItems={ "1":0,"2":0 };          
+  // при выходе сбрасываем отображения мгновенно          
+  document.getElementById("counterValue").textContent = 0;          
+  if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = 0;          
+  if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = 0;          
+  if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = 0;          
+  renderShop();          
+};          
+          
+onAuthStateChanged(auth,async user=>{          
+  if(user){          
+    isGuest=false;          
+    userId=user.email.replaceAll(".","_");          
+    loginOutBtn.textContent="Выйти из аккаунта";          
+    loginBtnEl.style.display="none";          
+    const snap = await get(ref(db,'users/'+userId));          
+    if(snap.exists()){          
+      const data = snap.val();          
+      coins=data.coins||0;          
+      clickPower=data.clickPower||1;          
+      boughtItems=data.items||{ "1":0,"2":0 };          
+    }          
+    renderShop(); startCounterAnimation(coins); startPlateAnimation(coins);          
+  }else{          
+    isGuest=true;          
+    loginOutBtn.textContent="Войти в аккаунт";          
+  }          
+});          
+          
+/* ---------------------------------------------- */          
+/* PANELS */          
+const panels = document.getElementById("panels");          
+let btnTimers={};          
+          
+function safeSetStyle(el,prop,value,delay=0){          
+  const id = el.id + prop;          
+  if(btnTimers[id]) clearTimeout(btnTimers[id]);          
+  if(delay===0) el.style[prop]=value;          
+  else btnTimers[id]=setTimeout(()=>{ el.style[prop]=value; }, delay);          
+}          
+          
+panels.style.transform="translateX(-392px)";          
+function swingPlate(direction){          
+  const plate = document.getElementById("topPlate");          
+  plate.style.animation="none"; void plate.offsetWidth;          
+  let deg1=8, deg2=-5, deg3=3;          
+  if(direction==="right"){ deg1=-deg1; deg2=-deg2; deg3=-deg3; }          
+  plate.style.setProperty("--deg1",deg1+"deg");          
+  plate.style.setProperty("--deg2",deg2+"deg");          
+  plate.style.setProperty("--deg3",deg3+"deg");          
+  plate.style.animation="swingSuspended 0.9s ease-in-out";          
+  plate.addEventListener("animationend",function handler(){          
+    plate.style.transform="translateX(-50%) rotate(0deg)";          
+    plate.style.animation="none";          
+    plate.removeEventListener("animationend",handler);          
+  });          
+}          
+          
+function goToShop(){ swingPlate("left"); panels.style.transform="translateX(-784px)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backToClickerBtn.style.display="block"; backToClickerBtn.style.right="-60px"; setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50); updatePricesColor(); }          
+function goBackFromShop(){ swingPlate("right"); panels.style.transform="translateX(-392px)"; safeSetStyle(backToClickerBtn,"right","-60px"); safeSetStyle(backToClickerBtn,"display","none",400); shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtnEl.style.left="12px"; }          
+function goToSettings(){ swingPlate("right"); panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; safeSetStyle(backBtnEl,"right","12px",50); }          
+function goBackFromSettings(){ swingPlate("left"); panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; safeSetStyle(backBtnEl,"right","-60px"); safeSetStyle(backBtnEl,"display","none",500); loginBtnEl.style.left="12px"; }          
+          
+shopBtnEl.onclick=goToShop;          
+settingsBtnEl.onclick=goToSettings;          
+backBtnEl.onclick=goBackFromSettings;          
+backToClickerBtn.onclick=goBackFromShop;          
+          
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; startPlateAnimation(coins); startCounterAnimation(coins); } });          
+          
+/* ---------------------------------------------- */          
+/* СТАРТ */          
+fakeLoad(()=>{          
+  panels.style.transform="translateX(-392px)";          
+  renderShop();          
+  document.getElementById("topPlate").style.display="block";          
+  // инициализация видимостей значений          
+  document.getElementById("counterValue").textContent = coins;          
+  if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;          
+  if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;          
+  if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;          
+  // запускаем пустую анимацию синхронизации (если нужно)          
 });
