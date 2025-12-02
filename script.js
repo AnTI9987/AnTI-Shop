@@ -99,93 +99,213 @@ let plateAnimFrame = null;
 const counterValue = document.getElementById("counterValue");
 
 /* ---------------------------------------------- */
-/* АНИМАЦИЯ ПЛАШКИ */
+/* АНИМАЦИЯ ПЛАШКИ (plate) */
 /* ---------------------------------------------- */
-function animatePlateCoins(newValue){
-    const el = document.getElementById("plateBalanceValue");
-    let startVal = Number(el.textContent) || 0;
-    const diff = newValue - startVal;
-    const duration = 500;
-    const startTime = performance.now();
-    if(plateAnimFrame) cancelAnimationFrame(plateAnimFrame);
-    function frame(now){
-        let t = Math.min((now-startTime)/duration,1);
-        let eased = 1 - Math.pow(1-t,3);
-        el.textContent = Math.floor(startVal + diff*eased);
-        if(t<1) plateAnimFrame = requestAnimationFrame(frame);
-        else el.textContent = newValue;
-    }
-    plateAnimFrame = requestAnimationFrame(frame);
-}
 
-/* ---------------------------------------------- */
-/* ТОВАРЫ */
-/* ---------------------------------------------- */
-const baseShopItems = [
-  {id:1,name:'Оторванная пуговица',baseCost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
-  {id:2,name:'Страшная штука',baseCost:250,description:'Оно пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
-];
-let shopItems = baseShopItems.map(item => ({...item}));
-let boughtItems = { "1":0, "2":0 };
+/*
+  реализация variant B:
+  - если анимация уже бежит и пришла новая цель, мы не рвём анимацию, а
+    пересчитываем текущее значение и плавно продолжаем к новой цели,
+    немного ускоряя анимацию (умножаем базовую длительность на 0.6).
+*/
 
-/* ---------------------------------------------- */
-/* АНИМАЦИЯ СЧЁТЧИКА */
-/* ---------------------------------------------- */
-let animFrame = null;
-function animateCounter(oldVal,newVal){
-  oldVal = Number(oldVal)||0;
-  newVal = Number(newVal)||0;
-  if(newVal-oldVal===1){ counterValue.textContent = newVal; return; }
-  if(animFrame) cancelAnimationFrame(animFrame);
-  let start = performance.now();
-  function frame(ts){
-    let p = Math.min((ts-start)/100,1);
-    document.getElementById("shopBalanceValue").textContent = Math.floor(oldVal + (newVal-oldVal)*p);
-    document.getElementById("shopBalanceValueClicker").textContent = Math.floor(oldVal + (newVal-oldVal)*p);
-    counterValue.textContent = Math.floor(oldVal + (newVal-oldVal)*p);
-    if(p<1) animFrame=requestAnimationFrame(frame);
-    else {
-      document.getElementById("shopBalanceValue").textContent = newVal;
-      document.getElementById("shopBalanceValueClicker").textContent = newVal;
-      counterValue.textContent = newVal;
-    }
+const plateAnim = {
+  running: false,
+  startTime: 0,
+  duration: 400,      // базовая длительность (мс) — чуть быстрее, чем раньше
+  baseDuration: 400,
+  from: 0,
+  to: 0,
+  rafId: null
+};
+
+function startPlateAnimation(newTarget){
+  const el = document.getElementById("plateBalanceValue");
+  const now = performance.now();
+
+  if(!plateAnim.running){
+    plateAnim.running = true;
+    plateAnim.from = Number(el.textContent) || 0;
+    plateAnim.to = newTarget;
+    plateAnim.startTime = now;
+    plateAnim.duration = plateAnim.baseDuration;
+  } else {
+    // вычисляем текущ отображаемое значение
+    const progress = Math.min((now - plateAnim.startTime) / plateAnim.duration, 1);
+    const easedProg = easeOutCubic(progress);
+    const currentDisplayed = plateAnim.from + (plateAnim.to - plateAnim.from) * easedProg;
+
+    // переносим начало к текущему значению и задаём новую цель
+    plateAnim.from = currentDisplayed;
+    plateAnim.to = newTarget;
+    plateAnim.startTime = now;
+
+    // ускоряем анимацию чуть-чуть для плавности (вариант B)
+    plateAnim.duration = Math.max(60, plateAnim.baseDuration * 0.6);
   }
-  animFrame = requestAnimationFrame(frame);
+
+  if(plateAnim.rafId) cancelAnimationFrame(plateAnim.rafId);
+  plateTick();
 }
+
+function plateTick(){
+  const el = document.getElementById("plateBalanceValue");
+  const now = performance.now();
+  const p = Math.min((now - plateAnim.startTime) / plateAnim.duration, 1);
+  const eased = easeOutCubic(p);
+  const value = Math.floor(plateAnim.from + (plateAnim.to - plateAnim.from) * eased);
+  el.textContent = value;
+
+  if(p < 1){
+    plateAnim.rafId = requestAnimationFrame(plateTick);
+  } else {
+    plateAnim.running = false;
+    plateAnim.rafId = null;
+    el.textContent = plateAnim.to;
+  }
+}
+
+/* ---------------------------------------------- */
+/* АНИМАЦИЯ СЧЁТЧИКА (центральный counter и shop balances) */
+/* ---------------------------------------------- */
+
+const counterAnim = {
+  running: false,
+  startTime: 0,
+  duration: 220,    // базовая — стал быстрее
+  baseDuration: 220,
+  from: 0,
+  to: 0,
+  rafId: null
+};
+
+function startCounterAnimation(newTarget){
+  const shopEl = document.getElementById("shopBalanceValue");
+  const clickerEl = document.getElementById("shopBalanceValueClicker");
+  const mainEl = counterValue;
+  const now = performance.now();
+
+  if(!counterAnim.running){
+    counterAnim.running = true;
+    counterAnim.from = Number(mainEl.textContent) || 0;
+    counterAnim.to = newTarget;
+    counterAnim.startTime = now;
+    counterAnim.duration = counterAnim.baseDuration;
+  } else {
+    // вычисляем текущее отображаемое значение и продолжаем
+    const progress = Math.min((now - counterAnim.startTime) / counterAnim.duration, 1);
+    const easedProg = easeOutCubic(progress);
+    const currentDisplayed = counterAnim.from + (counterAnim.to - counterAnim.from) * easedProg;
+
+    counterAnim.from = currentDisplayed;
+    counterAnim.to = newTarget;
+    counterAnim.startTime = now;
+
+    // ускорение при смене цели — вариант B
+    counterAnim.duration = Math.max(60, counterAnim.baseDuration * 0.6);
+  }
+
+  if(counterAnim.rafId) cancelAnimationFrame(counterAnim.rafId);
+  counterTick();
+}
+
+function counterTick(){
+  const shopEl = document.getElementById("shopBalanceValue");
+  const clickerEl = document.getElementById("shopBalanceValueClicker");
+  const mainEl = counterValue;
+  const now = performance.now();
+  const p = Math.min((now - counterAnim.startTime) / counterAnim.duration, 1);
+  const eased = easeOutCubic(p);
+  const value = Math.floor(counterAnim.from + (counterAnim.to - counterAnim.from) * eased);
+
+  // Пишем значения во все элементы
+  if(shopEl) shopEl.textContent = value;
+  if(clickerEl) clickerEl.textContent = value;
+  if(mainEl) mainEl.textContent = value;
+
+  if(p < 1){
+    counterAnim.rafId = requestAnimationFrame(counterTick);
+  } else {
+    counterAnim.running = false;
+    counterAnim.rafId = null;
+    if(shopEl) shopEl.textContent = counterAnim.to;
+    if(clickerEl) clickerEl.textContent = counterAnim.to;
+    if(mainEl) mainEl.textContent = counterAnim.to;
+  }
+}
+
+/* easing */
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
 
 /* ---------------------------------------------- */
 /* КЛИКЕР */
+/* ---------------------------------------------- */
+
+/* spawnFloatingCoin — белые +монеты с небольшой тенью */
 function spawnFloatingCoin(x,y,value){
   const el = document.createElement("div");
-  el.className="floating-coin";
-  el.style.left = (x-12) + "px";
-  el.style.top = (y-12) + "px";
+  el.className = "floating-coin";
+  el.style.left = (x - 12) + "px";
+  el.style.top  = (y - 12) + "px";
   el.style.position = "absolute";
   el.style.pointerEvents = "none";
   el.style.zIndex = 9999;
-  el.innerHTML = `<b style="font-size:18px;color:#ffd700">+${value}</b><img src="img/anti-coin.png" style="width:18px;height:18px;">`;
+  // белый текст + тень, немного больше
+  el.innerHTML = `<span style="font-weight:700;font-size:18px;color:#ffffff;text-shadow:0 2px 6px rgba(0,0,0,0.45);">+${value}</span><img src="img/anti-coin.png" style="width:18px;height:18px;margin-left:6px;vertical-align:middle;">`;
   document.body.appendChild(el);
-  setTimeout(()=>{ el.style.transform="translateY(-80px)"; el.style.opacity="0"; el.style.transition="all 0.7s ease-out"; },10);
-  setTimeout(()=>el.remove(),700);
+
+  // делаем анимацию (translateY и fade)
+  // set transition заранее — чтобы не было рывка
+  requestAnimationFrame(()=>{
+    el.style.transition = "transform 0.7s ease-out, opacity 0.7s ease-out";
+    el.style.transform = "translateY(-80px)";
+    el.style.opacity = "0";
+  });
+
+  setTimeout(()=>el.remove(), 750);
 }
 
 function clickAction(x,y){
+  // при clickPower === 1 — засчитываем мгновенно (без анимации пополнения)
+  if(clickPower === 1){
+    coins += 1;
+    // моментальное обновление всех видимых полей
+    document.getElementById("counterValue").textContent = coins;
+    if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
+    if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
+    if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
+    spawnFloatingCoin(x,y,1);
+    updatePricesColor();
+    return;
+  }
+
+  // иначе — включаем анимации (variant B behaviour)
+  const oldCoins = coins;
   coins += clickPower;
-  animateCounter(coins-clickPower, coins);
-  animatePlateCoins(coins);
+
+  // запускаем или обновляем анимацию центрального счётчика
+  startCounterAnimation(coins);
+
+  // запускаем или обновляем анимацию таблички сверху
+  startPlateAnimation(coins);
+
+  // всплывающая монета
   spawnFloatingCoin(x,y,clickPower);
+
   updatePricesColor();
 }
 
 function animateClicker(){
+  // визуальная анимация нажатия
   clickImg.style.transform = "scale(0.93)";
   clickImg.src = "img/click2.png";
   setTimeout(()=>{
     clickImg.style.transform = "scale(1)";
     clickImg.src = "img/click1.png";
-  },100);
+  }, 100);
 }
 
+/* события */
 clickButton.addEventListener("click", e=>{
   clickAction(e.clientX, e.clientY);
   animateClicker();
@@ -200,7 +320,15 @@ clickButton.addEventListener("touchstart", e=>{
 
 /* ---------------------------------------------- */
 /* МАГАЗИН */
+const baseShopItems = [
+  {id:1,name:'Оторванная пуговица',baseCost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'Прибавляет +1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},
+  {id:2,name:'Страшная штука',baseCost:250,description:'Оно пугает.',property:'Прибавляет +10 к прибыли за клик',power:10,stock:5,img:'img/item-2.png'}
+];
+let shopItems = baseShopItems.map(item => ({...item}));
+let boughtItems = { "1":0, "2":0 };
+
 const itemsBlock = document.getElementById("items");
+
 function updateShopItems(){
   shopItems = baseShopItems.map(item=>{
     const bought = boughtItems[item.id]||0;
@@ -254,8 +382,9 @@ function renderShop(){
       coins-=item.cost;
       boughtItems[item.id] = (boughtItems[item.id]||0)+1;
       clickPower += item.id===1?1:item.power||0;
-      animateCounter(coins+item.cost, coins);
-      animatePlateCoins(coins);
+      // запустим анимации корректно (variant B)
+      startCounterAnimation(coins);
+      startPlateAnimation(coins);
       updatePricesColor();
       renderShop();
     });
@@ -293,7 +422,12 @@ loginOutBtn.onclick=async()=>{
   alert("Вы вышли из аккаунта");
   isGuest=true; userId=localUserId; coins=0; clickPower=1;
   boughtItems={ "1":0,"2":0 };
-  renderShop(); animateCounter(0,0); animatePlateCoins(0);
+  // при выходе сбрасываем отображения мгновенно
+  document.getElementById("counterValue").textContent = 0;
+  if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = 0;
+  if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = 0;
+  if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = 0;
+  renderShop();
 };
 
 onAuthStateChanged(auth,async user=>{
@@ -309,7 +443,7 @@ onAuthStateChanged(auth,async user=>{
       clickPower=data.clickPower||1;
       boughtItems=data.items||{ "1":0,"2":0 };
     }
-    renderShop(); animateCounter(0,coins); animatePlateCoins(coins);
+    renderShop(); startCounterAnimation(coins); startPlateAnimation(coins);
   }else{
     isGuest=true;
     loginOutBtn.textContent="Войти в аккаунт";
@@ -355,7 +489,7 @@ settingsBtnEl.onclick=goToSettings;
 backBtnEl.onclick=goBackFromSettings;
 backToClickerBtn.onclick=goBackFromShop;
 
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; animatePlateCoins(coins); animateCounter(parseInt(counterValue.textContent)||0, coins); } });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; startPlateAnimation(coins); startCounterAnimation(coins); } });
 
 /* ---------------------------------------------- */
 /* СТАРТ */
@@ -363,6 +497,10 @@ fakeLoad(()=>{
   panels.style.transform="translateX(-392px)";
   renderShop();
   document.getElementById("topPlate").style.display="block";
-  animateCounter(0,coins);
-  animatePlateCoins(coins);
+  // инициализация видимостей значений
+  document.getElementById("counterValue").textContent = coins;
+  if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
+  if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
+  if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
+  // запускаем пустую анимацию синхронизации (если нужно)
 });
