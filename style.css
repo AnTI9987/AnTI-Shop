@@ -178,6 +178,8 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   transform: translateX(-50%);
   transform-origin: 50% -50px;
   z-index: 100;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #topPlate img#plateImg {
