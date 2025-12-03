@@ -33,15 +33,20 @@ const loginOutBtn = document.getElementById("loginOutBtn");
 const clickButton = document.getElementById("clickButton");  
 const clickImg = document.getElementById("clickImg");  
 clickImg.style.display = "block";  
-/* опускаем кликер-картинку на 50px вниз */  
-clickImg.style.marginTop = "50px";  
-  
-/* поменяли цвет заголовка и значения баланса сверху на #332614 */  
+clickImg.style.marginTop = "50px";  // опускаем кликер-картинку на 50px вниз
+
+// поднимаем ground.png на 100px
+const groundImg = document.getElementById("groundImg");  
+if(groundImg){
+  groundImg.style.position = "relative";  
+  groundImg.style.transform = "translateY(-100px)";
+}
+
 const plateTitleEl = document.getElementById("plateTitle");  
 const plateBalanceValueEl = document.getElementById("plateBalanceValue");  
 if (plateTitleEl) plateTitleEl.style.color = "#332614";  
 if (plateBalanceValueEl) plateBalanceValueEl.style.color = "#332614";  
-  
+
 /* ---------------------------------------------- */  
 /* FIREBASE */  
 /* ---------------------------------------------- */  
@@ -58,7 +63,7 @@ const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);  
 const auth = getAuth(appFB);  
 const provider = new GoogleAuthProvider();  
-  
+
 /* ---------------------------------------------- */  
 /* SPLASH */  
 /* ---------------------------------------------- */  
@@ -83,7 +88,7 @@ function fakeLoad(onDone){
     progressPercent.textContent = Math.floor(progress) + "%";  
   },80);  
 }  
-  
+
 /* ---------------------------------------------- */  
 /* ПЕРЕМЕННЫЕ */  
 /* ---------------------------------------------- */  
@@ -99,6 +104,45 @@ let coins = 0;
 let clickPower = 1;  
 let plateAnimFrame = null;  
 const counterValue = document.getElementById("counterValue");  
+
+/* ---------------------------------------------- */  
+/* кнопка Сбросить прогресс */  
+/* ---------------------------------------------- */  
+const resetProgressBtn = document.createElement("button");  
+resetProgressBtn.textContent = "Сбросить прогресс";  
+resetProgressBtn.style.fontFamily="'Montserrat', sans-serif";  
+resetProgressBtn.style.fontWeight="600";  
+resetProgressBtn.style.display = "block";  
+resetProgressBtn.style.marginTop = "12px";  
+loginOutBtn.parentNode.insertBefore(resetProgressBtn, loginOutBtn.nextSibling);  
+
+resetProgressBtn.onclick = async () => {  
+  let msg = "";  
+  if(!isGuest){  
+    msg = "Вы уверены, что хотите сбросить прогресс? Все достижения на вашем аккаунте будут испепелены!";  
+  }else{  
+    msg = "Вы уверены, что хотите сбросить прогресс? Все локальные достижения будут испепелены!";  
+  }  
+
+  const confirmReset = confirm(msg);  
+  if(confirmReset){  
+    coins = 0;  
+    clickPower = 1;  
+    boughtItems = {"1":0,"2":0};  
+
+    document.getElementById("counterValue").textContent = coins;  
+    if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;  
+    if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;  
+    if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;  
+    renderShop();  
+    startCounterAnimation(coins);  
+    startPlateAnimation(coins);  
+
+    if(!isGuest){  
+      await set(ref(db, 'users/' + userId), {coins, clickPower, items: boughtItems});  
+    }  
+  }  
+};  
   
 /* ---------------------------------------------- */  
 /* АНИМАЦИЯ ПЛАШКИ (plate) */  
