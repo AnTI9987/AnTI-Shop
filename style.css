@@ -37,10 +37,12 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}
 
 /* CLICKER */
-#clickerPanel{width:392px;height:100%;background:linear-gradient(to bottom,#CEEDFF,#A1E6FF);padding-top:20px;position:relative;overflow:hidden;}
+/* заменил фон на градиент заката */
+#clickerPanel{width:392px;height:100%;background:linear-gradient(180deg,#FF9A76 0%, #FF6A88 40%, #7C3F99 100%);padding-top:20px;position:relative;overflow:hidden;}
 #counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
 #counter img{width:24px;height:24px;}
 #clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}
+/* ground позиция */
 #ground{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}
 #ground img{width:100%;}
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
@@ -49,6 +51,25 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   display: block;
   pointer-events: none;
   transition: transform 0.07s ease;
+}
+
+/* добавляем запрет выделения текста на табличке (topPlate) и её детям */
+#topPlate, #topPlate * {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer; /* даём подсказку, что её можно нажать */
+}
+
+/* CSS-анимация "удар по табличке" */
+.plate-hit {
+  animation: plateHit 180ms ease;
+}
+@keyframes plateHit {
+  0%   { transform: translateX(-50%) rotate(0deg) translateY(0); }
+  30%  { transform: translateX(-50%) rotate(-6deg) translateY(-6px); }
+  60%  { transform: translateX(-50%) rotate(4deg) translateY(-2px); }
+  100% { transform: translateX(-50%) rotate(0deg) translateY(0); }
 }
 
 /* SHOP */
