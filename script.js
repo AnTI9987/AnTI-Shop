@@ -559,4 +559,68 @@ function swingPlate(direction){
     plate.style.transform="translateX(-50%) rotate(0deg)";
     plate.style.animation="none";
     plate.removeEventListener("animationend",handler);
-  })
+  });
+}
+
+function goToShop(){ swingPlate("left"); panels.style.transform="translateX(-784px)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backToClickerBtn.style.display="block"; backToClickerBtn.style.right="-60px"; setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50); updatePricesColor(); }
+function goBackFromShop(){ swingPlate("right"); panels.style.transform="translateX(-392px)"; safeSetStyle(backToClickerBtn,"right","-60px"); safeSetStyle(backToClickerBtn,"display","none",400); shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtnEl.style.left="12px"; }
+function goToSettings(){ swingPlate("right"); panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; safeSetStyle(backBtnEl,"right","12px",50); }
+function goBackFromSettings(){ swingPlate("left"); panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; safeSetStyle(backBtnEl,"right","-60px"); safeSetStyle(backBtnEl,"display","none",500); loginBtnEl.style.left="12px"; }
+
+shopBtnEl.onclick=goToShop;
+settingsBtnEl.onclick=goToSettings;
+backBtnEl.onclick=goBackFromSettings;
+backToClickerBtn.onclick=goBackFromShop;
+
+/* plate click: короткая анимация и звук */
+const topPlateEl = document.getElementById('topPlate');
+if(topPlateEl){
+  topPlateEl.addEventListener('click', (e)=>{
+    // play wood click sound
+    playSound(sClickWood);
+    // add class to trigger CSS animation
+    topPlateEl.classList.remove('plate-hit');
+    void topPlateEl.offsetWidth;
+    topPlateEl.classList.add('plate-hit');
+    // remove after animation
+    setTimeout(()=>{ topPlateEl.classList.remove('plate-hit'); }, 220);
+  });
+}
+
+/* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  // не воспроизводим звук для кнопок покупки (они имеют класс buy-btn)
+  if(btn.classList.contains('buy-btn')) return;
+  // не воспроизводим звук для clickButton — он сам играет свой звук
+  if(btn.id === 'clickButton') return;
+  // кнопка авторизации/настройки/навигации и т.д. — проигрываем звук
+  playSound(sClickButton);
+});
+
+/* document-level touchstart handler (for mobile) to catch button touches */
+document.addEventListener('touchstart', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  if(btn.classList.contains('buy-btn')) return;
+  if(btn.id === 'clickButton') return;
+  playSound(sClickButton);
+}, {passive:true});
+
+/* ---------------------------------------------- */
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; startPlateAnimation(coins); startCounterAnimation(coins); } });
+
+/* ---------------------------------------------- */
+/* СТАРТ */
+fakeLoad(()=>{
+  panels.style.transform="translateX(-392px)";
+  renderShop();
+  document.getElementById("topPlate").style.display="block";
+  // инициализация видимостей значений
+  document.getElementById("counterValue").textContent = coins;
+  if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
+  if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
+  if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
+  // запускаем пустую анимацию синхронизации (если нужно)
+});
