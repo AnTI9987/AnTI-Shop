@@ -86,30 +86,51 @@ splashScreen.style.background = "#000";
 progressBar.style.background = "#fff";
 progressPercent.style.color = "#fff";
 
-function fakeLoad(callback){
-  const splash = document.getElementById("splashScreen");
-  const progress = document.getElementById("progressBar");
+function fakeLoad() {
+  const container = document.getElementById("progressBarContainer");
+  const bar = document.getElementById("progressBar");
   const percent = document.getElementById("progressPercent");
-  const playBtn = document.getElementById("playBtn");
+  const playBtn = document.getElementById("playBtnInside"); // внутренняя надпись
+  const splash = document.getElementById("splashScreen");
 
   let width = 0;
-  const interval = setInterval(()=>{
-    width += Math.random()*2 + 0.5; // медленнее и плавнее
-    if(width>100) width=100;
-    progress.style.width = width + "%";
+
+  const interval = setInterval(() => {
+    width += Math.random() * 1.5 + 0.5; // чуть медленнее
+    if (width > 100) width = 100;
+
+    bar.style.width = width + "%";
     percent.textContent = Math.floor(width) + "%";
-    if(width>=100){
+
+    if (width === 100) {
       clearInterval(interval);
-      splash.classList.add("loaded"); // кнопка вылетает, прогресс и надпись поднимаются
-      if(callback) callback();
+
+      // скрываем цифры
+      percent.style.opacity = "0";
+      bar.style.opacity = "0";
+
+      // контейнер становится кнопкой
+      setTimeout(() => {
+        container.classList.add("to-button");
+      }, 150);
+
+      // появляется текст "Играть"
+      setTimeout(() => {
+        playBtn.style.opacity = "1";
+        playBtn.style.pointerEvents = "auto";
+      }, 600);
+
+      // клик по кнопке
+      playBtn.onclick = () => {
+        splash.style.transition = "opacity 0.9s ease";
+        splash.style.opacity = "0";
+
+        setTimeout(() => {
+          splash.style.display = "none";
+        }, 900);
+      };
     }
   }, 50);
-
-  playBtn.onclick = ()=>{
-    splash.style.transition = "opacity 1s ease";
-    splash.style.opacity = "0";  // плавное затухание
-    setTimeout(()=>{ splash.style.display = "none"; }, 1000);
-  };
 }
               
 /* ---------------------------------------------- */              
