@@ -86,45 +86,31 @@ splashScreen.style.background = "#000";
 progressBar.style.background = "#fff";
 progressPercent.style.color = "#fff";
 
-function fakeLoad(onDone){
-  progress = 1;
-  progressBar.style.width = "1%";
-  progressPercent.textContent = "1%";
+function fakeLoad(callback){
+  const splash = document.getElementById("splashScreen");
+  const progress = document.getElementById("progressBar");
 
-  const interval = setInterval(() => {
-    progress += 10 + Math.random()*15;
-    if(progress >= 100){
-      progress = 100;
+  const playBtn = document.createElement("button");
+  playBtn.id = "playBtn";
+  playBtn.textContent = "Играть";
+  splash.appendChild(playBtn);
+
+  let width = 0;
+  const interval = setInterval(()=>{
+    width += Math.random()*4 + 1; // медленнее прогресс
+    if(width>=100) width=100;
+    progress.style.width = width + "%";
+    if(width>=100){
       clearInterval(interval);
-
-      // создаем кнопку "играть"
-      const playBtn = document.createElement("button");
-      playBtn.textContent = "Играть";
-      playBtn.style.position = "absolute";
-      playBtn.style.top = "50%";
-      playBtn.style.left = "50%";
-      playBtn.style.transform = "translate(-50%, -50%)";
-      playBtn.style.fontSize = "24px";
-      playBtn.style.padding = "12px 24px";
-      playBtn.style.cursor = "pointer";
-      playBtn.style.fontFamily = "'Montserrat', sans-serif";
-      playBtn.style.fontWeight = "600";
-      splashScreen.appendChild(playBtn);
-
-      playBtn.onclick = () => {
-        playBtn.remove();
-        splashScreen.style.transition = "opacity 1s";
-        splashScreen.style.opacity = 0;
-        setTimeout(() => {
-          splashScreen.style.display = "none";
-          if(onDone) onDone();
-        }, 1000);
-        // теперь можно безопасно загружать и проигрывать звуки
-      };
+      splash.classList.add("loaded"); // кнопка плавно появится
+      if(callback) callback();
     }
-    progressBar.style.width = Math.min(progress,100) + "%";
-    progressPercent.textContent = Math.floor(progress) + "%";
-  },80);
+  }, 40);
+
+  playBtn.onclick = ()=>{
+    splash.style.opacity = "0";  // плавное затухание
+    setTimeout(()=>{ splash.style.display = "none"; }, 1200);
+  };
 }
               
 /* ---------------------------------------------- */              
