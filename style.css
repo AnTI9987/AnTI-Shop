@@ -38,7 +38,14 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 /* CLICKER */
 /* заменил фон на градиент заката */
-#clickerPanel{width:392px;height:100%;background:linear-gradient(180deg,#FF9A76 0%, #FF6A88 40%, #7C3F99 100%);padding-top:20px;position:relative;overflow:hidden;}
+#clickerPanel{
+  width:392px;
+  height:100%;
+  background: linear-gradient(180deg, #C66066 0%, #F79D56 100%);
+  padding-top:20px;
+  position:relative;
+  overflow:hidden;
+}
 #counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
 #counter img{width:24px;height:24px;}
 #clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}
