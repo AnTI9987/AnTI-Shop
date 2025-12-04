@@ -89,27 +89,26 @@ progressPercent.style.color = "#fff";
 function fakeLoad(callback){
   const splash = document.getElementById("splashScreen");
   const progress = document.getElementById("progressBar");
-
-  const playBtn = document.createElement("button");
-  playBtn.id = "playBtn";
-  playBtn.textContent = "Играть";
-  splash.appendChild(playBtn);
+  const percent = document.getElementById("progressPercent");
+  const playBtn = document.getElementById("playBtn");
 
   let width = 0;
   const interval = setInterval(()=>{
-    width += Math.random()*4 + 1; // медленнее прогресс
-    if(width>=100) width=100;
+    width += Math.random()*2 + 0.5; // медленнее и плавнее
+    if(width>100) width=100;
     progress.style.width = width + "%";
+    percent.textContent = Math.floor(width) + "%";
     if(width>=100){
       clearInterval(interval);
-      splash.classList.add("loaded"); // кнопка плавно появится
+      splash.classList.add("loaded"); // кнопка плавно вылетает
       if(callback) callback();
     }
-  }, 40);
+  }, 50);
 
   playBtn.onclick = ()=>{
+    splash.style.transition = "opacity 1s ease";
     splash.style.opacity = "0";  // плавное затухание
-    setTimeout(()=>{ splash.style.display = "none"; }, 1200);
+    setTimeout(()=>{ splash.style.display = "none"; }, 1000);
   };
 }
               
