@@ -61,15 +61,16 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   cursor: pointer; /* даём подсказку, что её можно нажать */
 }
 
-/* CSS-анимация "удар по табличке" */
+/* мягкий удар по табличке при клике */
 .plate-hit {
-  animation: plateHit 180ms ease;
+  animation: plateHitClick 180ms ease-out;
 }
-@keyframes plateHit {
-  0%   { transform: translateX(-50%) rotate(0deg) translateY(0); }
-  30%  { transform: translateX(-50%) rotate(-6deg) translateY(-6px); }
-  60%  { transform: translateX(-50%) rotate(4deg) translateY(-2px); }
-  100% { transform: translateX(-50%) rotate(0deg) translateY(0); }
+
+@keyframes plateHitClick {
+  0%   { transform: translateY(0) rotate(0deg); }
+  25%  { transform: translateY(-4px) rotate(-2deg); }
+  50%  { transform: translateY(-2px) rotate(1deg); }
+  100% { transform: translateY(0) rotate(0deg); }
 }
 
 /* SHOP */
