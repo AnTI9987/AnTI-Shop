@@ -100,7 +100,7 @@ function fakeLoad(callback){
     percent.textContent = Math.floor(width) + "%";
     if(width>=100){
       clearInterval(interval);
-      splash.classList.add("loaded"); // кнопка плавно вылетает
+      splash.classList.add("loaded"); // кнопка вылетает, прогресс и надпись поднимаются
       if(callback) callback();
     }
   }, 50);
