@@ -105,14 +105,14 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 
 /* мягкий удар по табличке при клике */
 .plate-hit {
-  animation: plateHitClick 180ms ease-out;
+  animation: hitPlate 120ms ease-out;
 }
 
-@keyframes plateHitClick {
-  0%   { transform: translateY(0) rotate(0deg); }
-  25%  { transform: translateY(-4px) rotate(-2deg); }
-  50%  { transform: translateY(-2px) rotate(1deg); }
-  100% { transform: translateY(0) rotate(0deg); }
+@keyframes hitPlate {
+  0%   { transform: translateX(-50%) translateY(0) rotate(0deg); }
+  30%  { transform: translateX(-50%) translateY(-4px) rotate(-3deg); }
+  60%  { transform: translateX(-50%) translateY(-1px) rotate(2deg); }
+  100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
 }
 
 /* SHOP */
