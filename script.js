@@ -34,26 +34,22 @@ sClickButton.preload = 'auto';
 const shopBtnEl = document.getElementById("shopBtn");                
 const backBtnEl = document.getElementById("backBtn");                
 const settingsBtnEl = document.getElementById("settingsBtn");                
-if (settingsBtnEl) {
-  settingsBtnEl.classList.add("settings-btn");
-  settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";
-  settingsBtnEl.style.fontWeight = "600";
-}
+settingsBtnEl.classList.add("settings-btn");                
+settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";                
+settingsBtnEl.style.fontWeight = "600";                
 const backToClickerBtn = document.getElementById("backToClickerBtn");                
 const loginBtnEl = document.getElementById("loginBtn");                
 const loginOutBtn = document.getElementById("loginOutBtn");                
 const clickButton = document.getElementById("clickButton");                
 const clickImg = document.getElementById("clickImg");                
-if(clickImg){
-  clickImg.style.display = "block";                
-  clickImg.style.marginTop = "50px";  // опускаем кликер-картинку на 50px вниз
-}
+clickImg.style.display = "block";                
+clickImg.style.marginTop = "50px";  // опускаем кликер-картинку на 50px вниз                
                 
 // groundImg — теперь в index.html у <img id="groundImg">                
 const groundImg = document.getElementById("groundImg");                
 if(groundImg){                
-  // делаем изображение ground на 90% непрозрачным (10% прозрачности)
-  groundImg.style.opacity = "0.9";
+  // если хочешь сдвинуть картинку дополнительно, делай здесь                
+  // groundImg.style.transform = "translateY(-100px)";                
 }                
                 
 const plateTitleEl = document.getElementById("plateTitle");                
@@ -85,10 +81,10 @@ const progressBar = document.getElementById("progressBar");
 const progressPercent = document.getElementById("progressPercent");  
 let progress = 0;  
   
-// стиль для загрузки (защиты на null)  
-if (splashScreen) splashScreen.style.background = "#000";  
-if (progressBar) progressBar.style.background = "#fff";  
-if (progressPercent) progressPercent.style.color = "#fff";  
+// стиль для загрузки  
+splashScreen.style.background = "#000";  
+progressBar.style.background = "#fff";  
+progressPercent.style.color = "#fff";  
   
 function fakeLoad(callback){  
   const splash = document.getElementById("splashScreen");  
@@ -100,24 +96,20 @@ function fakeLoad(callback){
   const interval = setInterval(()=>{  
     width += Math.random()*2 + 0.5; // медленнее и плавнее  
     if(width>100) width=100;  
-    if(progress) progress.style.width = width + "%";  
-    if(percent) percent.textContent = Math.floor(width) + "%";  
+    progress.style.width = width + "%";  
+    percent.textContent = Math.floor(width) + "%";  
     if(width>=100){  
       clearInterval(interval);  
-      if(splash) splash.classList.add("loaded"); // кнопка вылетает, прогресс и надпись поднимаются  
+      splash.classList.add("loaded"); // кнопка вылетает, прогресс и надпись поднимаются  
       if(callback) callback();  
     }  
   }, 50);  
   
-  if(playBtn){  
-    playBtn.onclick = ()=>{  
-      if(splash){  
-        splash.style.transition = "opacity 1s ease";  
-        splash.style.opacity = "0";  // плавное затухание  
-        setTimeout(()=>{ splash.style.display = "none"; }, 1000);  
-      }  
-    };  
-  }  
+  playBtn.onclick = ()=>{  
+    splash.style.transition = "opacity 1s ease";  
+    splash.style.opacity = "0";  // плавное затухание  
+    setTimeout(()=>{ splash.style.display = "none"; }, 1000);  
+  };  
 }  
                 
 /* ---------------------------------------------- */                
@@ -141,11 +133,11 @@ const counterValue = document.getElementById("counterValue");
 /* ---------------------------------------------- */                
 const resetProgressBtn = document.createElement("button");                
 resetProgressBtn.textContent = "Сбросить прогресс";                
-resetProgressBtn.style.fontFamily="'Montserrat',sans-serif";                
+resetProgressBtn.style.fontFamily="'Montserrat', sans-serif";                
 resetProgressBtn.style.fontWeight="600";                
 resetProgressBtn.style.display = "block";                
 resetProgressBtn.style.marginTop = "12px";                
-if (loginOutBtn && loginOutBtn.parentNode) loginOutBtn.parentNode.insertBefore(resetProgressBtn, loginOutBtn.nextSibling);                
+loginOutBtn.parentNode.insertBefore(resetProgressBtn, loginOutBtn.nextSibling);                
                 
 resetProgressBtn.onclick = async () => {                
   let msg = "";                
@@ -161,7 +153,7 @@ resetProgressBtn.onclick = async () => {
     clickPower = 1;                
     boughtItems = {"1":0,"2":0};                
                 
-    if(document.getElementById("counterValue")) document.getElementById("counterValue").textContent = coins;                
+    document.getElementById("counterValue").textContent = coins;                
     if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;                
     if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;                
     if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;                
@@ -179,14 +171,17 @@ resetProgressBtn.onclick = async () => {
 /* АНИМАЦИЯ ПЛАШКИ (plate) */                
 /* ---------------------------------------------- */                
                 
-/*              
-  реализация variant B:              
+/*                
+  реализация variant B:                
+  - если анимация уже бежит и пришла новая цель, мы не рвём анимацию, а                
+    пересчитываем текущее значение и плавно продолжаем к новой цели,                
+    немного ускоряя анимацию (умножаем базовую длительность на 0.6).                
 */                
                 
 const plateAnim = {                
   running: false,                
   startTime: 0,                
-  duration: 400,                
+  duration: 400,      // базовая длительность (мс) — чуть быстрее, чем раньше                
   baseDuration: 400,                
   from: 0,                
   to: 0,                
@@ -199,7 +194,7 @@ function startPlateAnimation(newTarget){
                 
   if(!plateAnim.running){                
     plateAnim.running = true;                
-    plateAnim.from = Number(el?.textContent) || 0;                
+    plateAnim.from = Number(el.textContent) || 0;                
     plateAnim.to = newTarget;                
     plateAnim.startTime = now;                
     plateAnim.duration = plateAnim.baseDuration;                
@@ -225,21 +220,21 @@ function plateTick(){
   const p = Math.min((now - plateAnim.startTime) / plateAnim.duration, 1);                
   const eased = easeOutCubic(p);                
   const value = Math.floor(plateAnim.from + (plateAnim.to - plateAnim.from) * eased);                
-  if(el) el.textContent = value;                
+  el.textContent = value;                
                 
   if(p < 1){                
     plateAnim.rafId = requestAnimationFrame(plateTick);                
   } else {                
     plateAnim.running = false;                
     plateAnim.rafId = null;                
-    if(el) el.textContent = plateAnim.to;                
+    el.textContent = plateAnim.to;                
   }                
-}
-
+}                
+                
 /* ---------------------------------------------- */                
 /* АНИМАЦИЯ СЧЁТЧИКА (центральный counter и shop balances) */                
 /* ---------------------------------------------- */                
-                                
+                
 const counterAnim = {                
   running: false,                
   startTime: 0,                
@@ -258,7 +253,7 @@ function startCounterAnimation(newTarget){
                 
   if(!counterAnim.running){                
     counterAnim.running = true;                
-    counterAnim.from = Number(mainEl?.textContent) || 0;                
+    counterAnim.from = Number(mainEl.textContent) || 0;                
     counterAnim.to = newTarget;                
     counterAnim.startTime = now;                
     counterAnim.duration = counterAnim.baseDuration;                
@@ -300,12 +295,15 @@ function counterTick(){
     if(clickerEl) clickerEl.textContent = counterAnim.to;                
     if(mainEl) mainEl.textContent = counterAnim.to;                
   }                
-}                
+  }
 
-/* ---------------------------------------------- */                
-/* КЛИКЕР и МАГАЗИН (оставил без изменений) */                
-/ * (далее повторяю оригинальные функции — spawnFloatingCoin, clickAction, animateClicker, playSound, обработчики кликов, renderShop и т.д.) */                
-
+/* easing */                  
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }                  
+                  
+/* ---------------------------------------------- */                  
+/* КЛИКЕР */                  
+/* ---------------------------------------------- */                  
+                  
 /* spawnFloatingCoin — белые +монеты с небольшой тенью */                  
 function spawnFloatingCoin(x,y,value){                  
   const el = document.createElement("div");                  
@@ -330,7 +328,7 @@ function spawnFloatingCoin(x,y,value){
 function clickAction(x,y){                  
   if(clickPower === 1){                  
     coins += 1;                  
-    if(document.getElementById("counterValue")) document.getElementById("counterValue").textContent = coins;                  
+    document.getElementById("counterValue").textContent = coins;                  
     if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;                  
     if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;                  
     if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;                  
@@ -339,22 +337,23 @@ function clickAction(x,y){
     return;                  
   }                  
                   
+  const oldCoins = coins;                  
   coins += clickPower;                  
+                  
   startCounterAnimation(coins);                  
   startPlateAnimation(coins);                  
   spawnFloatingCoin(x,y,clickPower);                  
+                  
   updatePricesColor();                  
 }                  
                   
 function animateClicker(){                  
-  if(clickImg){                  
-    clickImg.style.transform = "scale(0.93)";                  
-    clickImg.src = "img/click2.png";                  
-    setTimeout(()=>{                  
-      clickImg.style.transform = "scale(1)";                  
-      clickImg.src = "img/click1.png";                  
-    }, 100);                  
-  }                  
+  clickImg.style.transform = "scale(0.93)";                  
+  clickImg.src = "img/click2.png";                  
+  setTimeout(()=>{                  
+    clickImg.style.transform = "scale(1)";                  
+    clickImg.src = "img/click1.png";                  
+  }, 100);                  
 }                  
                   
 /* play audio helper: reset time and play (catch promise) */                  
@@ -369,22 +368,21 @@ function playSound(audio){
 }                  
                   
 /* clicker events — тоже проигрываем звук click-clicker */                  
-if(clickButton){                
-  clickButton.addEventListener("click", e=>{                  
-    playSound(sClickClicker);                  
-    clickAction(e.clientX, e.clientY);                  
-    animateClicker();                  
-  });                  
-  clickButton.addEventListener("touchstart", e=>{                  
-    e.preventDefault();                  
-    playSound(sClickClicker);                  
-    for(const t of e.changedTouches){                  
-      clickAction(t.clientX, t.clientY);                  
-    }                  
-    animateClicker();                  
-  },{passive:false});                  
-}                  
-                  
+clickButton.addEventListener("click", e=>{                  
+  // sound for clicker                  
+  playSound(sClickClicker);                  
+  clickAction(e.clientX, e.clientY);                  
+  animateClicker();                  
+});                  
+clickButton.addEventListener("touchstart", e=>{                  
+  e.preventDefault();                  
+  playSound(sClickClicker);                  
+  for(const t of e.changedTouches){                  
+    clickAction(t.clientX, t.clientY);                  
+  }                  
+  animateClicker();                  
+},{passive:false});                  
+    
 /* ---------------------------------------------- */                  
 /* МАГАЗИН */                  
 const baseShopItems = [                  
@@ -543,33 +541,36 @@ settingsBtnEl.onclick=goToSettings;
 backBtnEl.onclick=goBackFromSettings;                  
 backToClickerBtn.onclick=goBackFromShop;                  
                   
-/* plate click: короткая анимация и звук (оставляем оригинал, не создаём внутренний таргет) */                  
+/* plate click: короткая анимация и звук */                  
 const topPlateEl = document.getElementById('topPlate');                  
 if(topPlateEl){                  
   topPlateEl.addEventListener('click', (e)=>{    
     if(topPlateEl.style.display === 'none') return; // защита если plate скрыта    
     playSound(sClickWood);    
     
-    // перезапуск оригинального класса plate-hit (как у тебя было изначально)
+    // запускаем короткую анимацию клика через класс    
     topPlateEl.classList.remove('plate-hit');    
-    void topPlateEl.offsetWidth; // reflow    
+    void topPlateEl.offsetWidth; // сброс для перезапуска анимации    
     topPlateEl.classList.add('plate-hit');    
-  });    
+});    
     
-  // очищаем по окончанию анимации plateHit — только если это именно plateHit
-  topPlateEl.addEventListener('animationend', (e)=>{    
-    if(e.animationName === "plateHit"){    
-      topPlateEl.classList.remove('plate-hit');    
+// вместо setTimeout используем animationend для очистки класса    
+topPlateEl.addEventListener('animationend', (e)=>{    
+    if(e.animationName === "plateHit"){ // убедись, что CSS анимация клика называется plateHit    
+        topPlateEl.classList.remove('plate-hit');    
     }    
-  });  
-}                
-                
+});    
+}                  
+                  
 /* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */                  
 document.addEventListener('click', (e)=>{                  
   const btn = e.target.closest('button');                  
   if(!btn) return;                  
+  // не воспроизводим звук для кнопок покупки (они имеют класс buy-btn)                  
   if(btn.classList.contains('buy-btn')) return;                  
+  // не воспроизводим звук для clickButton — он сам играет свой звук                  
   if(btn.id === 'clickButton') return;                  
+  // кнопка авторизации/настройки/навигации и т.д. — проигрываем звук                  
   playSound(sClickButton);                  
 });                  
     
@@ -583,16 +584,18 @@ document.addEventListener('touchstart', (e)=>{
 }, {passive:true});                  
                   
 /* ---------------------------------------------- */                  
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ if(clickImg) clickImg.style.display="block"; startPlateAnimation(coins); startCounterAnimation(coins); } });                  
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; startPlateAnimation(coins); startCounterAnimation(coins); } });                  
                   
 /* ---------------------------------------------- */                  
 /* СТАРТ */                  
 fakeLoad(()=>{                  
-  if(panels) panels.style.transform="translateX(-392px)";                  
+  panels.style.transform="translateX(-392px)";                  
   renderShop();                  
-  const tp = document.getElementById("topPlate"); if(tp) tp.style.display="block";                  
-  if(document.getElementById("counterValue")) document.getElementById("counterValue").textContent = coins;                  
+  document.getElementById("topPlate").style.display="block";                  
+  // инициализация видимостей значений                  
+  document.getElementById("counterValue").textContent = coins;                  
   if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;                  
   if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;                  
   if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;                  
+  // запускаем пустую анимацию синхронизации (если нужно)                  
 });
