@@ -85,7 +85,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 #counter img{width:24px;height:24px;}
 #clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}
 /* ground позиция */
-#ground{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;}
+#ground{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;opacity:0.9;}
 #ground img{width:100%;}
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
 #clickImg {
