@@ -79,7 +79,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   background: linear-gradient(
         180deg, 
         #C66066 0%, 
-        #C66066 40%, 
+        #C66066 20%, 
         #F79D56 100%
     );
   padding-top:20px;
