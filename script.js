@@ -34,23 +34,26 @@ sClickButton.preload = 'auto';
 const shopBtnEl = document.getElementById("shopBtn");                
 const backBtnEl = document.getElementById("backBtn");                
 const settingsBtnEl = document.getElementById("settingsBtn");                
-settingsBtnEl.classList.add("settings-btn");                
-settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";                
-settingsBtnEl.style.fontWeight = "600";                
+if (settingsBtnEl) {
+  settingsBtnEl.classList.add("settings-btn");
+  settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";
+  settingsBtnEl.style.fontWeight = "600";
+}
 const backToClickerBtn = document.getElementById("backToClickerBtn");                
 const loginBtnEl = document.getElementById("loginBtn");                
 const loginOutBtn = document.getElementById("loginOutBtn");                
 const clickButton = document.getElementById("clickButton");                
 const clickImg = document.getElementById("clickImg");                
-clickImg.style.display = "block";                
-clickImg.style.marginTop = "50px";  // опускаем кликер-картинку на 50px вниз                
+if(clickImg){
+  clickImg.style.display = "block";                
+  clickImg.style.marginTop = "50px";  // опускаем кликер-картинку на 50px вниз
+}
                 
 // groundImg — теперь в index.html у <img id="groundImg">                
 const groundImg = document.getElementById("groundImg");                
 if(groundImg){                
   // делаем изображение ground на 90% непрозрачным (10% прозрачности)
   groundImg.style.opacity = "0.9";
-  // если захочешь — можно добавить transition: groundImg.style.transition = "opacity .3s ease";
 }                
                 
 const plateTitleEl = document.getElementById("plateTitle");                
@@ -82,7 +85,7 @@ const progressBar = document.getElementById("progressBar");
 const progressPercent = document.getElementById("progressPercent");  
 let progress = 0;  
   
-// стиль для загрузки  
+// стиль для загрузки (защиты на null)  
 if (splashScreen) splashScreen.style.background = "#000";  
 if (progressBar) progressBar.style.background = "#fff";  
 if (progressPercent) progressPercent.style.color = "#fff";  
@@ -142,7 +145,7 @@ resetProgressBtn.style.fontFamily="'Montserrat',sans-serif";
 resetProgressBtn.style.fontWeight="600";                
 resetProgressBtn.style.display = "block";                
 resetProgressBtn.style.marginTop = "12px";                
-loginOutBtn.parentNode.insertBefore(resetProgressBtn, loginOutBtn.nextSibling);                
+if (loginOutBtn && loginOutBtn.parentNode) loginOutBtn.parentNode.insertBefore(resetProgressBtn, loginOutBtn.nextSibling);                
                 
 resetProgressBtn.onclick = async () => {                
   let msg = "";                
@@ -158,7 +161,7 @@ resetProgressBtn.onclick = async () => {
     clickPower = 1;                
     boughtItems = {"1":0,"2":0};                
                 
-    document.getElementById("counterValue").textContent = coins;                
+    if(document.getElementById("counterValue")) document.getElementById("counterValue").textContent = coins;                
     if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;                
     if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;                
     if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;                
@@ -176,17 +179,14 @@ resetProgressBtn.onclick = async () => {
 /* АНИМАЦИЯ ПЛАШКИ (plate) */                
 /* ---------------------------------------------- */                
                 
-/*                
-  реализация variant B:                
-  - если анимация уже бежит и пришла новая цель, мы не рвём анимацию, а                
-    пересчитываем текущее значение и плавно продолжаем к новой цели,                
-    немного ускоряя анимацию (умножаем базовую длительность на 0.6).                
+/*              
+  реализация variant B:              
 */                
                 
 const plateAnim = {                
   running: false,                
   startTime: 0,                
-  duration: 400,      // базовая длительность (мс) — чуть быстрее, чем раньше                
+  duration: 400,                
   baseDuration: 400,                
   from: 0,                
   to: 0,                
@@ -199,7 +199,7 @@ function startPlateAnimation(newTarget){
                 
   if(!plateAnim.running){                
     plateAnim.running = true;                
-    plateAnim.from = Number(el.textContent) || 0;                
+    plateAnim.from = Number(el?.textContent) || 0;                
     plateAnim.to = newTarget;                
     plateAnim.startTime = now;                
     plateAnim.duration = plateAnim.baseDuration;                
@@ -225,17 +225,17 @@ function plateTick(){
   const p = Math.min((now - plateAnim.startTime) / plateAnim.duration, 1);                
   const eased = easeOutCubic(p);                
   const value = Math.floor(plateAnim.from + (plateAnim.to - plateAnim.from) * eased);                
-  el.textContent = value;                
+  if(el) el.textContent = value;                
                 
   if(p < 1){                
     plateAnim.rafId = requestAnimationFrame(plateTick);                
   } else {                
     plateAnim.running = false;                
     plateAnim.rafId = null;                
-    el.textContent = plateAnim.to;                
+    if(el) el.textContent = plateAnim.to;                
   }                
-}                
-                
+}
+
 /* ---------------------------------------------- */                
 /* АНИМАЦИЯ СЧЁТЧИКА (центральный counter и shop balances) */                
 /* ---------------------------------------------- */                
@@ -258,7 +258,7 @@ function startCounterAnimation(newTarget){
                 
   if(!counterAnim.running){                
     counterAnim.running = true;                
-    counterAnim.from = Number(mainEl.textContent) || 0;                
+    counterAnim.from = Number(mainEl?.textContent) || 0;                
     counterAnim.to = newTarget;                
     counterAnim.startTime = now;                
     counterAnim.duration = counterAnim.baseDuration;                
@@ -302,9 +302,9 @@ function counterTick(){
   }                
 }                
 
-/* ---------------------------------------------- */
-/* КЛИКЕР и МАГАЗИН и PANELS — оставил без изменений, только подправил блок с plate click ниже */
-/* ---------------------------------------------- */
+/* ---------------------------------------------- */                
+/* КЛИКЕР и МАГАЗИН (оставил без изменений) */                
+/ * (далее повторяю оригинальные функции — spawnFloatingCoin, clickAction, animateClicker, playSound, обработчики кликов, renderShop и т.д.) */                
 
 /* spawnFloatingCoin — белые +монеты с небольшой тенью */                  
 function spawnFloatingCoin(x,y,value){                  
@@ -330,7 +330,7 @@ function spawnFloatingCoin(x,y,value){
 function clickAction(x,y){                  
   if(clickPower === 1){                  
     coins += 1;                  
-    document.getElementById("counterValue").textContent = coins;                  
+    if(document.getElementById("counterValue")) document.getElementById("counterValue").textContent = coins;                  
     if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;                  
     if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;                  
     if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;                  
@@ -339,23 +339,22 @@ function clickAction(x,y){
     return;                  
   }                  
                   
-  const oldCoins = coins;                  
   coins += clickPower;                  
-                  
   startCounterAnimation(coins);                  
   startPlateAnimation(coins);                  
   spawnFloatingCoin(x,y,clickPower);                  
-                  
   updatePricesColor();                  
 }                  
                   
 function animateClicker(){                  
-  clickImg.style.transform = "scale(0.93)";                  
-  clickImg.src = "img/click2.png";                  
-  setTimeout(()=>{                  
-    clickImg.style.transform = "scale(1)";                  
-    clickImg.src = "img/click1.png";                  
-  }, 100);                  
+  if(clickImg){                  
+    clickImg.style.transform = "scale(0.93)";                  
+    clickImg.src = "img/click2.png";                  
+    setTimeout(()=>{                  
+      clickImg.style.transform = "scale(1)";                  
+      clickImg.src = "img/click1.png";                  
+    }, 100);                  
+  }                  
 }                  
                   
 /* play audio helper: reset time and play (catch promise) */                  
@@ -370,21 +369,22 @@ function playSound(audio){
 }                  
                   
 /* clicker events — тоже проигрываем звук click-clicker */                  
-clickButton.addEventListener("click", e=>{                  
-  // sound for clicker                  
-  playSound(sClickClicker);                  
-  clickAction(e.clientX, e.clientY);                  
-  animateClicker();                  
-});                  
-clickButton.addEventListener("touchstart", e=>{                  
-  e.preventDefault();                  
-  playSound(sClickClicker);                  
-  for(const t of e.changedTouches){                  
-    clickAction(t.clientX, t.clientY);                  
-  }                  
-  animateClicker();                  
-},{passive:false});                  
-
+if(clickButton){                
+  clickButton.addEventListener("click", e=>{                  
+    playSound(sClickClicker);                  
+    clickAction(e.clientX, e.clientY);                  
+    animateClicker();                  
+  });                  
+  clickButton.addEventListener("touchstart", e=>{                  
+    e.preventDefault();                  
+    playSound(sClickClicker);                  
+    for(const t of e.changedTouches){                  
+      clickAction(t.clientX, t.clientY);                  
+    }                  
+    animateClicker();                  
+  },{passive:false});                  
+}                  
+                  
 /* ---------------------------------------------- */                  
 /* МАГАЗИН */                  
 const baseShopItems = [                  
@@ -542,59 +542,34 @@ shopBtnEl.onclick=goToShop;
 settingsBtnEl.onclick=goToSettings;                  
 backBtnEl.onclick=goBackFromSettings;                  
 backToClickerBtn.onclick=goBackFromShop;                  
-
-/* plate click: короткая анимация и звук — REWORKED to avoid teleport */
-const topPlateEl = document.getElementById('topPlate');
-let plateAnimTarget = null;
-
-if(topPlateEl){
-  // if there isn't already a dedicated animation target, create one and move existing children into it
-  plateAnimTarget = topPlateEl.querySelector('.plate-anim-target');
-  if(!plateAnimTarget){
-    plateAnimTarget = document.createElement('div');
-    plateAnimTarget.className = 'plate-anim-target';
-    // copy/move children (preserve structure)
-    while(topPlateEl.firstChild){
-      plateAnimTarget.appendChild(topPlateEl.firstChild);
-    }
-    topPlateEl.appendChild(plateAnimTarget);
-  }
-
-  // ensure plate wrapper stays centered
-  topPlateEl.style.left = '50%';
-  topPlateEl.style.transform = 'translateX(-50%)';
-
-  // click handler — add class to inner target (so translateX from wrapper isn't overridden)
-  topPlateEl.addEventListener('click', (e)=>{
-    if(topPlateEl.style.display === 'none') return; // защита если plate скрыта
-    playSound(sClickWood);
-
-    // restart animation on the inner target
-    plateAnimTarget.classList.remove('plate-hit');
-    void plateAnimTarget.offsetWidth; // reflow to restart
-    plateAnimTarget.classList.add('plate-hit');
-
-    // remove class once animation ends (one-time listener)
-    const onAnimEnd = (ev) => {
-      // If the browser sends multiple animationend events, only clear when the element actually has the class
-      if(plateAnimTarget.classList.contains('plate-hit')){
-        plateAnimTarget.classList.remove('plate-hit');
-      }
-      plateAnimTarget.removeEventListener('animationend', onAnimEnd);
-    };
-    plateAnimTarget.addEventListener('animationend', onAnimEnd, { once: true });
-  });
-}
-
+                  
+/* plate click: короткая анимация и звук (оставляем оригинал, не создаём внутренний таргет) */                  
+const topPlateEl = document.getElementById('topPlate');                  
+if(topPlateEl){                  
+  topPlateEl.addEventListener('click', (e)=>{    
+    if(topPlateEl.style.display === 'none') return; // защита если plate скрыта    
+    playSound(sClickWood);    
+    
+    // перезапуск оригинального класса plate-hit (как у тебя было изначально)
+    topPlateEl.classList.remove('plate-hit');    
+    void topPlateEl.offsetWidth; // reflow    
+    topPlateEl.classList.add('plate-hit');    
+  });    
+    
+  // очищаем по окончанию анимации plateHit — только если это именно plateHit
+  topPlateEl.addEventListener('animationend', (e)=>{    
+    if(e.animationName === "plateHit"){    
+      topPlateEl.classList.remove('plate-hit');    
+    }    
+  });  
+}                
+                
 /* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */                  
 document.addEventListener('click', (e)=>{                  
   const btn = e.target.closest('button');                  
   if(!btn) return;                  
-  // не воспроизводим звук для кнопок покупки (они имеют класс buy-btn)                  
   if(btn.classList.contains('buy-btn')) return;                  
-  // не воспроизводим звук для clickButton — он сам играет свой звук                  
   if(btn.id === 'clickButton') return;                  
-  // кнопка авторизации/настройки/навигации и т.д. — проигрываем звук                  
   playSound(sClickButton);                  
 });                  
     
@@ -608,18 +583,16 @@ document.addEventListener('touchstart', (e)=>{
 }, {passive:true});                  
                   
 /* ---------------------------------------------- */                  
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; startPlateAnimation(coins); startCounterAnimation(coins); } });                  
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ if(clickImg) clickImg.style.display="block"; startPlateAnimation(coins); startCounterAnimation(coins); } });                  
                   
 /* ---------------------------------------------- */                  
 /* СТАРТ */                  
 fakeLoad(()=>{                  
-  panels.style.transform="translateX(-392px)";                  
+  if(panels) panels.style.transform="translateX(-392px)";                  
   renderShop();                  
-  document.getElementById("topPlate").style.display="block";                  
-  // инициализация видимостей значений                  
-  document.getElementById("counterValue").textContent = coins;                  
+  const tp = document.getElementById("topPlate"); if(tp) tp.style.display="block";                  
+  if(document.getElementById("counterValue")) document.getElementById("counterValue").textContent = coins;                  
   if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;                  
   if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;                  
   if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;                  
-  // запускаем пустую анимацию синхронизации (если нужно)                  
 });
