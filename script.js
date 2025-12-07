@@ -92,6 +92,18 @@ function fakeLoad(callback){
   const progress = document.getElementById("progressBar");  
   const percent = document.getElementById("progressPercent");  
   const playBtn = document.getElementById("playBtn");  
+
+  const menuMusic = document.getElementById("menuMusic");
+
+  playBtn.addEventListener("click", () => {
+    try {
+        menuMusic.volume = 0.8;
+        const playPromise = menuMusic.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {});
+        }
+    } catch (e) {}
+});
   
   let width = 0;  
   const interval = setInterval(()=>{  
@@ -590,10 +602,6 @@ document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickIm
 /* ---------------------------------------------- */                  
 /* СТАРТ */                  
 fakeLoad(()=>{
-  try {
-    menuMusic.volume = 0.8;
-    menuMusic.play().catch(()=>{});
-} catch(e){}
   panels.style.transform="translateX(-392px)";                  
   renderShop();                  
   document.getElementById("topPlate").style.display="block";                  
