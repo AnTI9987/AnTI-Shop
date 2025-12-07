@@ -26,7 +26,8 @@ sClickWood.preload = 'auto';
 const sClickClicker = new Audio('sounds/click-clicker.mp3');                
 sClickClicker.preload = 'auto';                
 const sClickButton = new Audio('sounds/click-button.mp3');                
-sClickButton.preload = 'auto';                
+sClickButton.preload = 'auto';       
+const menuMusic = document.getElementById("menuMusic");
                 
 /* ---------------------------------------------- */                
 /* ЭЛЕМЕНТЫ */                
@@ -588,7 +589,11 @@ document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickIm
                   
 /* ---------------------------------------------- */                  
 /* СТАРТ */                  
-fakeLoad(()=>{                  
+fakeLoad(()=>{
+  try {
+    menuMusic.volume = 0.8;
+    menuMusic.play().catch(()=>{});
+} catch(e){}
   panels.style.transform="translateX(-392px)";                  
   renderShop();                  
   document.getElementById("topPlate").style.display="block";                  
