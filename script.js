@@ -522,27 +522,34 @@ function safeSetStyle(el,prop,value,delay=0){
 }                  
                   
 panels.style.transform="translateX(-392px)";                  
-function swingPlate(direction){    
-  const plate = document.getElementById("topPlate");    
-    
-  // если уже анимация идёт, отменяем    
-  plate.classList.remove("swinging");    
-  void plate.offsetWidth;    
-    
-  // задаём углы    
-  let deg1=8, deg2=-5, deg3=3;    
-  if(direction==="right"){ deg1=-deg1; deg2=-deg2; deg3=-deg3; }    
-  plate.style.setProperty("--deg1",deg1+"deg");    
-  plate.style.setProperty("--deg2",deg2+"deg");    
-  plate.style.setProperty("--deg3",deg3+"deg");    
-    
-  plate.classList.add("swinging");    
-    
-  plate.addEventListener("animationend", function handler(){    
-    plate.classList.remove("swinging");    
-    plate.removeEventListener("animationend", handler);    
-  });    
-}       
+function swingPlate(direction){
+  const plate = document.getElementById("topPlate");
+
+  // ⛔ ГЛАВНОЕ: отключаем удар, если он был
+  plate.classList.remove("plate-hit");
+
+  // если уже идёт покачивание — сбрасываем
+  plate.classList.remove("swinging");
+  void plate.offsetWidth;
+
+  let deg1 = 8, deg2 = -5, deg3 = 3;
+  if(direction === "right"){
+    deg1 = -deg1;
+    deg2 = -deg2;
+    deg3 = -deg3;
+  }
+
+  plate.style.setProperty("--deg1", deg1 + "deg");
+  plate.style.setProperty("--deg2", deg2 + "deg");
+  plate.style.setProperty("--deg3", deg3 + "deg");
+
+  plate.classList.add("swinging");
+
+  plate.addEventListener("animationend", function handler(){
+    plate.classList.remove("swinging");
+    plate.removeEventListener("animationend", handler);
+  });
+}
                   
 function goToShop(){ swingPlate("left"); panels.style.transform="translateX(-784px)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backToClickerBtn.style.display="block"; backToClickerBtn.style.right="-60px"; setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50); updatePricesColor(); }                  
 function goBackFromShop(){ swingPlate("right"); panels.style.transform="translateX(-392px)"; safeSetStyle(backToClickerBtn,"right","-60px"); safeSetStyle(backToClickerBtn,"display","none",400); shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtnEl.style.left="12px"; }                  
