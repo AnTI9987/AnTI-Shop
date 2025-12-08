@@ -134,6 +134,15 @@ body {
   cursor: pointer; /* даём подсказку, что её можно нажать */
 }
 
+body, #app {
+  overflow: hidden; /* запрещаем скролл */
+}
+
+#shopPanel {
+  overflow-y: auto; /* только магазин можно листать */
+  -webkit-overflow-scrolling: touch; /* плавный скролл на мобильных */
+}
+
 /* мягкий удар по табличке при клике */
 .plate-hit {
   animation: hitPlate 120ms ease-out;
