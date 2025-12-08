@@ -562,13 +562,15 @@ if(topPlateEl){
     playSound(sClickWood);
 
     // запускаем анимацию удара только если она ещё не запущена
-    if(!topPlateEl.classList.contains('plate-hit')){
+    if(!topPlateEl.dataset.hitActive){
+      topPlateEl.dataset.hitActive = "true"; // помечаем, что удар активен
       topPlateEl.classList.add('plate-hit');
 
-      // отдельный слушатель для окончания анимации удара
+      // слушатель для окончания только этой анимации
       const handleAnimationEnd = (ev)=>{
         if(ev.animationName === "plateHit"){
           topPlateEl.classList.remove('plate-hit');
+          topPlateEl.dataset.hitActive = ""; // снимаем флаг
           topPlateEl.removeEventListener('animationend', handleAnimationEnd);
         }
       }
@@ -576,7 +578,7 @@ if(topPlateEl){
       topPlateEl.addEventListener('animationend', handleAnimationEnd);
     }
   });
-}  
+}
                   
 /* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */                  
 document.addEventListener('click', (e)=>{                  
