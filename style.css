@@ -114,14 +114,10 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 }
 
 @keyframes hitPlate {
-  0%   { transform: translateY(0) rotate(0deg); }
-  30%  { transform: translateY(-4px) rotate(-3deg); }
-  60%  { transform: translateY(-1px) rotate(2deg); }
-  100% { transform: translateY(0) rotate(0deg); }
-}
-
-#topPlate.swinging {
-  animation: swingSuspended 0.9s ease-in-out;
+  0%   { transform: translateX(-50%) translateY(0) rotate(0deg); }
+  30%  { transform: translateX(-50%) translateY(-4px) rotate(-3deg); }
+  60%  { transform: translateX(-50%) translateY(-1px) rotate(2deg); }
+  100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
 }
 
 /* SHOP */
