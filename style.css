@@ -78,14 +78,9 @@ body {
   transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1);
 }
 
-#settingsPanel, #clickerPanel, #shopPanel {
-  width: 100vw;
-  height: 100%;
-}
-
 /* SETTINGS */
 #settingsPanel{
-  width:392px;
+  width: 100vw;
   height:100%;
   background:linear-gradient(to bottom,#A7794C,#8E663D);
   padding-top:140px;
@@ -100,7 +95,7 @@ body {
 /* CLICKER */
 /* заменил фон на градиент заката */
 #clickerPanel{
-  width:392px;
+  width: 100vw;
   height:100%;
   background: linear-gradient(
         180deg, 
@@ -138,11 +133,6 @@ body, #app {
   overflow: hidden; /* запрещаем скролл */
 }
 
-#shopPanel {
-  overflow-y: auto; /* только магазин можно листать */
-  -webkit-overflow-scrolling: touch; /* плавный скролл на мобильных */
-}
-
 /* мягкий удар по табличке при клике */
 .plate-hit {
   animation: hitPlate 120ms ease-out;
@@ -157,11 +147,12 @@ body, #app {
 
 /* SHOP */
 #shopPanel{
-  width:392px;
+  width: 100vw;
   height:100%;
   background:#A7794C;
   padding-top:140px;
   overflow-y:auto;
+  -webkit-overflow-scrolling: touch; /* плавный скролл на мобильных */
 }
 
 /* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
