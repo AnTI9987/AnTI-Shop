@@ -12,6 +12,7 @@ body {
   position: relative;
   overflow: hidden;
   background: #0000;
+  margin: 0; /* ← важно */
 }
 
 /* SPLASH */
@@ -81,7 +82,7 @@ body {
 /* SETTINGS */
 #settingsPanel{
   width: 100vw;
-  height:100%;
+  height:100vh;
   background:linear-gradient(to bottom,#A7794C,#8E663D);
   padding-top:140px;
   display:flex;
@@ -96,7 +97,7 @@ body {
 /* заменил фон на градиент заката */
 #clickerPanel{
   width: 100vw;
-  height:100%;
+  height:100vh;
   background: linear-gradient(
         180deg, 
         #C66066 0%, 
@@ -148,7 +149,7 @@ body, #app {
 /* SHOP */
 #shopPanel{
   width: 100vw;
-  height:100%;
+  height:100vh;
   background:#A7794C;
   padding-top:140px;
   overflow-y:auto;
@@ -373,6 +374,6 @@ body, #app {
 }
 
 #app {
-  margin-top: 90px;     /* отступ под верхнюю панель */
-  margin-bottom: 90px;  /* отступ под нижнюю панель */
+  padding-top: 90px;
+  padding-bottom: 90px;
 }
