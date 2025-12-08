@@ -318,7 +318,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 }
 
 /* ============================= */
-/* ИСКУССТВЕННЫЕ БРАУЗЕРНЫЕ ПАНЕЛИ (80px) */
+/* ИСКУССТВЕННЫЕ БРАУЗЕРНЫЕ ПАНЕЛИ (90px) */
 /* ============================= */
 
 #fakeTopBrowserPanel,
@@ -326,11 +326,11 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   position: fixed;
   left: 0;
   width: 100vw;
-  height: 80px;              /* новая точная высота */
+  height: 90px;              /* новая точная высота */
   z-index: 99999;
-  pointer-events: none;      /* не мешают нажимать элементы */
+  pointer-events: none;
   background-repeat: no-repeat;
-  background-size: 100% 80px; /* картинка строго 80px высотой */
+  background-size: 100% 90px; /* картинка всегда 90px высотой */
   background-position: center;
 }
 
@@ -347,6 +347,6 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 }
 
 #app {
-  margin-top: 80px;     /* отступ под верхнюю панель */
-  margin-bottom: 80px;  /* отступ под нижнюю */
+  margin-top: 90px;     /* отступ под верхнюю панель */
+  margin-bottom: 90px;  /* отступ под нижнюю панель */
 }
