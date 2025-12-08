@@ -2,179 +2,167 @@ body {
   margin: 0;
   padding: 0;
   background: #000;
-  overflow-x: hidden;
+  overflow-x: hidden; /* запрет горизонтального скролла */
   font-family: 'Montserrat', sans-serif;
 }
 
-/* ===== APP ===== */
 #app {
   width: 100%;
-  height: calc(100vh - 180px);
+  height: 100vh;
   position: relative;
   overflow: hidden;
   background: #0000;
-  margin-top: 90px;
-  margin-bottom: 90px;
 }
 
-/* ===== SPLASH ===== */
-#splashScreen{
-  position:fixed;top:0;left:0;width:100vw;height:100vh;
-  background-color:#888;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-  z-index:9999;transition:opacity 0.8s ease;
-}
-#splashScreen h1{
-  color:#fff;font-size:38px;margin-bottom:26px;
-}
-#progressBarContainer{
-  width:300px;height:24px;background:#555;border-radius:12px;
-  overflow:hidden;margin-bottom:12px;position:relative;
-  transition:all 0.6s ease;
-}
-#progressBarContainer.to-button{
-  width:260px;height:54px;border-radius:14px;
-  background:linear-gradient(90deg,#ffba67,#ff7749);
-}
-#progressBar{
-  width:0%;height:100%;
-  background:linear-gradient(90deg,#ffba67,#ff7749);
-  border-radius:12px;
-  transition:width 0.2s ease,opacity 0.4s ease;
-}
-#playBtnInside{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  font-size:22px;font-weight:700;color:#000;
-  opacity:0;pointer-events:none;transition:opacity 0.6s ease;
+/* SPLASH */
+#splashScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background-color:#888;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity 0.8s ease;}
+#splashScreen h1{color:#fff;font-size:38px;margin-bottom:26px;}
+#progressBarContainer {
+  width: 300px;
+  height: 24px;
+  background: #555;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  position: relative;
+  transition: all 0.6s ease; /* плавная трансформация в кнопку */
 }
 
-/* ===== UI BUTTONS ===== */
+#progressBarContainer.to-button {
+  width: 260px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #ffba67, #ff7749);
+}
+
+#progressBar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg,#ffba67,#ff7749);
+  border-radius: 12px;
+  transition: width 0.2s ease, opacity 0.4s ease;
+}
+
+#playBtnInside {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+  opacity: 0;
+  pointer-events: none; /* нельзя нажать пока не появится */
+  transition: opacity 0.6s ease;
+}
+
+/* PANELS */
 #shopBtn,#backBtn,#settingsBtn,#loginBtn,#backToClickerBtn{
   position:absolute;width:48px;height:48px;background:none;border:none;padding:0;z-index:50;
-  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1), right 0.55s cubic-bezier(0.35,0.15,0.1,1);
+  transition:left 0.55s cubic-bezier(0.35,0.15,0.1,1),right 0.55s cubic-bezier(0.35,0.15,0.1,1);
 }
 #shopBtn{top:12px;right:12px;}
 #backBtn{top:12px;right:12px;display:none;}
 #backToClickerBtn{top:12px;right:-60px;display:none;}
 #settingsBtn{top:12px;left:12px;}
 #loginBtn{top:70px;left:12px;display:block;}
+#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{width:100%;height:100%;}
 
-#shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{
-  width:100%;height:100%;
+#panels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100vw * 3); /* три панели */
+  height: 100%;
+  display: flex;
+  transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1);
 }
 
-/* ===== PANELS WRAPPER ===== */
-#panels{
-  position:absolute;top:0;left:0;
-  width:calc(100vw * 3); height:100%;
-  display:flex;
-  transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1);
+#settingsPanel, #clickerPanel, #shopPanel {
+  width: 100vw;
+  height: 100%;
 }
 
-/* каждая панель строго 100vw */
-#settingsPanel,#clickerPanel,#shopPanel{
-  width:100vw;height:100%;
-  flex-shrink:0;
-  overflow:hidden;
-}
-
-/* ===== SETTINGS PANEL ===== */
+/* SETTINGS */
 #settingsPanel{
+  width:392px;
+  height:100%;
   background:linear-gradient(to bottom,#A7794C,#8E663D);
   padding-top:140px;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:flex-start;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
   overflow-y:auto;
 }
-#settingsPanel button{
-  margin-top:20px;width:300px;padding:14px;
-  background:#332614;color:#fff;border:none;border-radius:8px;
-  font-size:18px;transition:transform .12s ease;
-}
+#settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}
 
-/* ===== CLICKER PANEL ===== */
+/* CLICKER */
+/* заменил фон на градиент заката */
 #clickerPanel{
-  background:linear-gradient(180deg,#C66066 0%,#F79D56 30%,#F79D56 100%);
+  width:392px;
+  height:100%;
+  background: linear-gradient(
+        180deg, 
+        #C66066 0%, 
+        #F79D56 30%, 
+        #F79D56 100%
+    );
   padding-top:20px;
-  position:relative;overflow:hidden;
+  position:relative;
+  overflow:hidden;
 }
-
 #counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
 #counter img{width:24px;height:24px;}
-
-#clickButtonWrapper{
-  position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;
-}
-
-#ground{
-  position:absolute;left:50%;top:-30px;transform:translateX(-50%);
-  width:100%;pointer-events:none;z-index:0;opacity:0.9;
-}
+#clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}
+/* ground позиция */
+#ground{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;opacity:0.9;}
 #ground img{width:100%;}
-
-#clickButton{
-  background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;
-}
-#clickImg{
-  width:220px;display:block;pointer-events:none;
-  transition:transform 0.07s ease;
-}
-
-/* запрет выделения таблички */
-#topPlate,#topPlate *{
-  -webkit-user-select:none;
-  -ms-user-select:none;
-  user-select:none;
-  cursor:pointer;
+#clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
+#clickImg {
+  width: 220px;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.07s ease;
 }
 
-/* запрет скролла на всём сайте */
-body, #app { overflow: hidden; }
+/* добавляем запрет выделения текста на табличке (topPlate) и её детям */
+#topPlate, #topPlate * {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer; /* даём подсказку, что её можно нажать */
+}
 
-/* ===== SHOP PANEL (скролл только здесь) ===== */
+body, #app {
+  overflow: hidden; /* запрещаем скролл */
+}
+
+#shopPanel {
+  overflow-y: auto; /* только магазин можно листать */
+  -webkit-overflow-scrolling: touch; /* плавный скролл на мобильных */
+}
+
+/* мягкий удар по табличке при клике */
+.plate-hit {
+  animation: hitPlate 120ms ease-out;
+}
+
+@keyframes hitPlate {
+  0%   { transform: translateX(-50%) translateY(0) rotate(0deg); }
+  30%  { transform: translateX(-50%) translateY(-4px) rotate(-3deg); }
+  60%  { transform: translateX(-50%) translateY(-1px) rotate(2deg); }
+  100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+}
+
+/* SHOP */
 #shopPanel{
+  width:392px;
+  height:100%;
   background:#A7794C;
   padding-top:140px;
   overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
 }
-
-/* ===== SHOP INNER ===== */
-#shopPanelInner{
-  background:none;margin:0 auto;padding:32px 24px 24px;border-radius:0;
-  width:350px;min-height:calc(100vh - 70px);box-shadow:none;
-}
-
-/* ===== ITEMS ===== */
-.item{
-  width:310px;background-image:url("img/item-frame.png");background-size:100% 100%;
-  padding:10px 14px;
-  display:flex;flex-direction:column;
-  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));
-  margin:0 auto 22px;
-}
-
-.item-top{display:flex;align-items:center;}
-.item-top img{width:72px;height:72px;margin-right:14px;object-fit:contain;}
-
-.item-text b{font-size:18px;color:#FFDBBF;font-weight:700;}
-.item-text p{margin:2px 0;font-size:14px;color:#FFDBBF;font-weight:400;}
-.item-text .prop{color:#B48E70;font-weight:500;}
-
-.item .stock{
-  color:#FFDBBF;text-align:center;width:100%;
-  margin-top:6px;margin-bottom:-4px;font-weight:500;
-}
-
-.item button{
-  margin-top:12px;width:100%;padding:12px;
-  background:#332614;color:#fff;border:none;border-radius:8px;
-  font-size:16px;transition:transform .12s ease;
-}
-
-.price{display:flex;align-items:center;justify-content:center;gap:6px;}
-.price img{width:18px;height:18px;}
 
 /* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
 #shopPanelInner{
@@ -229,17 +217,7 @@ body, #app { overflow: hidden; }
 .price img{width:18px;height:18px;}
 
 /* FLOATING COIN */
-.floating-coin{
-  font-size:15px;
-  position:absolute;
-  pointer-events:none;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  color:lime;
-  transition:transform .4s ease-out, opacity .4s ease-out;
-  z-index:60;
-}
+.floating-coin{font-size:15px;position:absolute;pointer-events:none;display:flex;align-items:center;gap:6px;color:lime;transition:transform .4s ease-out, opacity .4s ease-out;z-index:60;}
 .floating-coin img{width:18px;height:18px;}
 
 .shopTitle{
@@ -336,10 +314,10 @@ body, #app { overflow: hidden; }
 
 #playBtn {
   opacity: 0;
-  transform: translateY(-30px);
+  transform: translateY(-30px); /* кнопка будет вылетать сверху вниз */
   transition: transform 0.6s ease, opacity 0.6s ease;
-  font-size: 24px;
-  padding: 16px 40px;
+  font-size: 24px; /* увеличиваем размер кнопки */
+  padding: 16px 40px; /* больше кнопка */
   border-radius: 12px;
   background: linear-gradient(90deg, #FFBA67, #FF7749);
   color: #000;
@@ -350,7 +328,7 @@ body, #app { overflow: hidden; }
 
 #splashScreen.loaded #playBtn {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0); /* кнопка плавно опускается вниз */
 }
 
 #splashScreen h1,
@@ -362,7 +340,7 @@ body, #app { overflow: hidden; }
 #splashScreen.loaded h1,
 #splashScreen.loaded #progressBarContainer,
 #splashScreen.loaded #progressPercent {
-  transform: translateY(-50px);
+  transform: translateY(-50px); /* прогресс и надпись поднимаются вверх */
 }
 
 /* Анимации покачивания */
@@ -375,7 +353,7 @@ body, #app { overflow: hidden; }
 }
 
 /* ============================= */
-/* ИСКУССТВЕННЫЕ БРАУЗЕРНЫЕ ПАНЕЛИ */
+/* ИСКУССТВЕННЫЕ БРАУЗЕРНЫЕ ПАНЕЛИ (90px) */
 /* ============================= */
 
 #fakeTopBrowserPanel,
@@ -383,25 +361,27 @@ body, #app { overflow: hidden; }
   position: fixed;
   left: 0;
   width: 100vw;
-  height: 90px;
+  height: 90px;              /* новая точная высота */
   z-index: 99999;
   pointer-events: none;
   background-repeat: no-repeat;
-  background-size: 100% 90px;
+  background-size: 100% 90px; /* картинка всегда 90px высотой */
   background-position: center;
 }
 
+/* верхняя панель */
 #fakeTopBrowserPanel {
   top: 0;
   background-image: url("img/top-browser-panel.png");
 }
 
+/* нижняя панель */
 #fakeBottomBrowserPanel {
   bottom: 0;
   background-image: url("img/bottom-browser-panel.png");
 }
 
 #app {
-  margin-top: 90px;
-  margin-bottom: 90px;
+  margin-top: 90px;     /* отступ под верхнюю панель */
+  margin-bottom: 90px;  /* отступ под нижнюю панель */
 }
