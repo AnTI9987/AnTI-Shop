@@ -344,3 +344,9 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   bottom: 0;
   background-image: url("img/bottom-browser-panel.png");
 }
+
+/* Чтобы твой интерфейс не попадал под "браузерные" панели */
+#app {
+  margin-top: 263px;
+  margin-bottom: 263px;
+}
