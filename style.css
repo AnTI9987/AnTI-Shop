@@ -318,7 +318,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 }
 
 /* ============================= */
-/* ИСКУССТВЕННЫЕ БРАУЗЕРНЫЕ ПАНЕЛИ */
+/* ИСКУССТВЕННЫЕ БРАУЗЕРНЫЕ ПАНЕЛИ (80px) */
 /* ============================= */
 
 #fakeTopBrowserPanel,
@@ -326,10 +326,11 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   position: fixed;
   left: 0;
   width: 100vw;
-  height: 263px;
-  z-index: 99999; /* выше всего */
-  pointer-events: none; /* чтобы не мешали нажимать UI */
-  background-size: cover;
+  height: 80px;              /* новая точная высота */
+  z-index: 99999;
+  pointer-events: none;      /* не мешают нажимать элементы */
+  background-repeat: no-repeat;
+  background-size: 100% 80px; /* картинка строго 80px высотой */
   background-position: center;
 }
 
@@ -345,8 +346,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   background-image: url("img/bottom-browser-panel.png");
 }
 
-/* Чтобы твой интерфейс не попадал под "браузерные" панели */
 #app {
-  margin-top: 263px;
-  margin-bottom: 263px;
+  margin-top: 80px;     /* отступ под верхнюю панель */
+  margin-bottom: 80px;  /* отступ под нижнюю */
 }
