@@ -316,3 +316,31 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
   75%  { transform: translateX(-50.25%) rotate(var(--deg3,3deg)); }
   100% { transform: translateX(-50%) rotate(0deg); }
 }
+
+/* ============================= */
+/* ИСКУССТВЕННЫЕ БРАУЗЕРНЫЕ ПАНЕЛИ */
+/* ============================= */
+
+#fakeTopBrowserPanel,
+#fakeBottomBrowserPanel {
+  position: fixed;
+  left: 0;
+  width: 100vw;
+  height: 263px;
+  z-index: 99999; /* выше всего */
+  pointer-events: none; /* чтобы не мешали нажимать UI */
+  background-size: cover;
+  background-position: center;
+}
+
+/* верхняя панель */
+#fakeTopBrowserPanel {
+  top: 0;
+  background-image: url("img/top-browser-panel.png");
+}
+
+/* нижняя панель */
+#fakeBottomBrowserPanel {
+  bottom: 0;
+  background-image: url("img/bottom-browser-panel.png");
+}
