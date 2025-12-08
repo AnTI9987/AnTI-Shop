@@ -554,22 +554,26 @@ settingsBtnEl.onclick=goToSettings;
 backBtnEl.onclick=goBackFromSettings;                  
 backToClickerBtn.onclick=goBackFromShop;                  
                   
-/* plate click: короткая анимация и звук */
-const topPlateEl = document.getElementById('topPlate');
-const plateInnerEl = document.getElementById('plateInner');
-
-plateInnerEl.addEventListener('click', (e)=>{
-  if(topPlateEl.style.display === 'none') return;
-  playSound(sClickWood);
-
-  plateInnerEl.classList.add('plate-hit');
-  plateInnerEl.addEventListener('animationend', function handler(ev){
-    if(ev.animationName === "hitPlate"){
-      plateInnerEl.classList.remove('plate-hit');
-      plateInnerEl.removeEventListener('animationend', handler);
-    }
-  });
-});
+/* plate click: короткая анимация и звук */                  
+const topPlateEl = document.getElementById('topPlate');                  
+if(topPlateEl){                  
+  topPlateEl.addEventListener('click', (e)=>{    
+    if(topPlateEl.style.display === 'none') return; // защита если plate скрыта    
+    playSound(sClickWood);    
+    
+    // запускаем короткую анимацию клика через класс    
+    topPlateEl.classList.remove('plate-hit');    
+    void topPlateEl.offsetWidth; // сброс для перезапуска анимации    
+    topPlateEl.classList.add('plate-hit');    
+});    
+    
+// вместо setTimeout используем animationend для очистки класса    
+topPlateEl.addEventListener('animationend', (e)=>{    
+    if(e.animationName === "plateHit"){ // убедись, что CSS анимация клика называется plateHit    
+        topPlateEl.classList.remove('plate-hit');    
+    }    
+});    
+}                  
                   
 /* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */                  
 document.addEventListener('click', (e)=>{                  
