@@ -554,26 +554,29 @@ settingsBtnEl.onclick=goToSettings;
 backBtnEl.onclick=goBackFromSettings;                  
 backToClickerBtn.onclick=goBackFromShop;                  
                   
-/* plate click: короткая анимация и звук */                  
-const topPlateEl = document.getElementById('topPlate');                  
-if(topPlateEl){                  
-  topPlateEl.addEventListener('click', (e)=>{    
-    if(topPlateEl.style.display === 'none') return; // защита если plate скрыта    
-    playSound(sClickWood);    
-    
-    // запускаем короткую анимацию клика через класс    
-    topPlateEl.classList.remove('plate-hit');    
-    void topPlateEl.offsetWidth; // сброс для перезапуска анимации    
-    topPlateEl.classList.add('plate-hit');    
-});    
-    
-// вместо setTimeout используем animationend для очистки класса    
-topPlateEl.addEventListener('animationend', (e)=>{    
-    if(e.animationName === "plateHit"){ // убедись, что CSS анимация клика называется plateHit    
-        topPlateEl.classList.remove('plate-hit');    
-    }    
-});    
-}                  
+/* plate click: короткая анимация и звук */
+const topPlateEl = document.getElementById('topPlate');
+if(topPlateEl){
+  topPlateEl.addEventListener('click', (e)=>{
+    if(topPlateEl.style.display === 'none') return; // защита если plate скрыта
+    playSound(sClickWood);
+
+    // запускаем анимацию удара только если она ещё не запущена
+    if(!topPlateEl.classList.contains('plate-hit')){
+      topPlateEl.classList.add('plate-hit');
+
+      // отдельный слушатель для окончания анимации удара
+      const handleAnimationEnd = (ev)=>{
+        if(ev.animationName === "plateHit"){
+          topPlateEl.classList.remove('plate-hit');
+          topPlateEl.removeEventListener('animationend', handleAnimationEnd);
+        }
+      }
+
+      topPlateEl.addEventListener('animationend', handleAnimationEnd);
+    }
+  });
+}  
                   
 /* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */                  
 document.addEventListener('click', (e)=>{                  
