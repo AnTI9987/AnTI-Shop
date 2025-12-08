@@ -68,7 +68,20 @@ body {
 #loginBtn{top:70px;left:12px;display:block;}
 #shopBtn img,#backBtn img,#settingsBtn img,#loginBtn img,#backToClickerBtn img{width:100%;height:100%;}
 
-#panels{position:absolute;top:0;left:0;width:calc(392px*3);height:100%;display:flex;transition:transform 0.55s cubic-bezier(0.35,0.15,0.1,1);}
+#panels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100vw * 3); /* три панели */
+  height: 100%;
+  display: flex;
+  transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1);
+}
+
+#settingsPanel, #clickerPanel, #shopPanel {
+  width: 100vw;
+  height: 100%;
+}
 
 /* SETTINGS */
 #settingsPanel{
