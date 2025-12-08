@@ -109,7 +109,7 @@ body{margin:0;padding:0;background:#000;display:flex;justify-content:center;over
 }
 
 /* мягкий удар по табличке при клике */
-#plateInner.plate-hit {
+.plate-hit {
   animation: hitPlate 120ms ease-out;
 }
 
