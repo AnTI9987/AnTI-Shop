@@ -556,32 +556,20 @@ backToClickerBtn.onclick=goBackFromShop;
                   
 /* plate click: короткая анимация и звук */
 const topPlateEl = document.getElementById('topPlate');
+const plateInnerEl = document.getElementById('plateInner');
 
-if(topPlateEl){
-  // флаг, что сейчас проигрывается удар
-  let hitActive = false;
+plateInnerEl.addEventListener('click', (e)=>{
+  if(topPlateEl.style.display === 'none') return;
+  playSound(sClickWood);
 
-  topPlateEl.addEventListener('click', (e)=>{
-    if(topPlateEl.style.display === 'none') return;
-    playSound(sClickWood);
-
-    if(hitActive) return; // если удар уже идёт, игнорируем
-    hitActive = true;
-
-    // временно добавляем класс удара
-    topPlateEl.classList.add('plate-hit');
-
-    const handleAnimationEnd = (ev)=>{
-      if(ev.animationName === "plateHit"){
-        topPlateEl.classList.remove('plate-hit');
-        hitActive = false; // снимаем флаг после окончания удара
-        topPlateEl.removeEventListener('animationend', handleAnimationEnd);
-      }
-    };
-
-    topPlateEl.addEventListener('animationend', handleAnimationEnd);
+  plateInnerEl.classList.add('plate-hit');
+  plateInnerEl.addEventListener('animationend', function handler(ev){
+    if(ev.animationName === "hitPlate"){
+      plateInnerEl.classList.remove('plate-hit');
+      plateInnerEl.removeEventListener('animationend', handler);
+    }
   });
-}
+});
                   
 /* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */                  
 document.addEventListener('click', (e)=>{                  
