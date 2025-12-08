@@ -556,27 +556,30 @@ backToClickerBtn.onclick=goBackFromShop;
                   
 /* plate click: короткая анимация и звук */
 const topPlateEl = document.getElementById('topPlate');
+
 if(topPlateEl){
+  // флаг, что сейчас проигрывается удар
+  let hitActive = false;
+
   topPlateEl.addEventListener('click', (e)=>{
-    if(topPlateEl.style.display === 'none') return; // защита если plate скрыта
+    if(topPlateEl.style.display === 'none') return;
     playSound(sClickWood);
 
-    // запускаем анимацию удара только если она ещё не запущена
-    if(!topPlateEl.dataset.hitActive){
-      topPlateEl.dataset.hitActive = "true"; // помечаем, что удар активен
-      topPlateEl.classList.add('plate-hit');
+    if(hitActive) return; // если удар уже идёт, игнорируем
+    hitActive = true;
 
-      // слушатель для окончания только этой анимации
-      const handleAnimationEnd = (ev)=>{
-        if(ev.animationName === "plateHit"){
-          topPlateEl.classList.remove('plate-hit');
-          topPlateEl.dataset.hitActive = ""; // снимаем флаг
-          topPlateEl.removeEventListener('animationend', handleAnimationEnd);
-        }
+    // временно добавляем класс удара
+    topPlateEl.classList.add('plate-hit');
+
+    const handleAnimationEnd = (ev)=>{
+      if(ev.animationName === "plateHit"){
+        topPlateEl.classList.remove('plate-hit');
+        hitActive = false; // снимаем флаг после окончания удара
+        topPlateEl.removeEventListener('animationend', handleAnimationEnd);
       }
+    };
 
-      topPlateEl.addEventListener('animationend', handleAnimationEnd);
-    }
+    topPlateEl.addEventListener('animationend', handleAnimationEnd);
   });
 }
                   
