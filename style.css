@@ -372,8 +372,3 @@ body, #app {
   bottom: 0;
   background-image: url("img/bottom-browser-panel.png");
 }
-
-#app {
-  padding-top: 90px;
-  padding-bottom: 90px;
-}
