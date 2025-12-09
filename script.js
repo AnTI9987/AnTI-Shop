@@ -179,6 +179,83 @@ resetProgressBtn.onclick = async () => {
   }                
 };
 
+/* ---------------------------------------------- */
+/* АВТОРИЗАЦИЯ И UI КНОПОК */
+/* ---------------------------------------------- */
+
+// Приводим стиль loginOutBtn к стилю resetProgressBtn
+loginOutBtn.style.fontFamily = "'Montserrat', sans-serif";
+loginOutBtn.style.fontWeight = "600";
+
+// Функция обновления отображения кнопок
+function updateAuthUI(user){
+  if(user){
+    // пользователь вошёл
+    loginOutBtn.textContent = "Выйти из аккаунта";
+    loginBtnEl.style.display = "none"; // скрываем верхнюю кнопку входа
+  } else {
+    // пользователь гость
+    loginOutBtn.textContent = "Войти в аккаунт";
+    loginBtnEl.style.display = "block"; // показываем верхнюю кнопку
+  }
+}
+
+// Обработчик: верхняя кнопка входа
+loginBtnEl.addEventListener("click", async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    isGuest = false;
+    userId = user.uid;
+    localStorage.setItem("userId", userId);
+
+    updateAuthUI(user);
+  } catch(e){
+    console.error(e);
+  }
+});
+
+// Обработчик: кнопка в настройках
+loginOutBtn.addEventListener("click", async () => {
+  try {
+    if(isGuest){
+      // вход
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      isGuest = false;
+      userId = user.uid;
+      localStorage.setItem("userId", userId);
+
+      updateAuthUI(user);
+    } else {
+      // выход
+      await signOut(auth);
+
+      isGuest = true;
+      userId = "guest_" + Math.random().toString(36).substring(2,9);
+      localStorage.setItem("userId", userId);
+
+      updateAuthUI(null);
+    }
+  } catch(e){
+    console.error(e);
+  }
+});
+
+// Отслеживаем факт входа/выхода
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    isGuest = false;
+    userId = user.uid;
+    updateAuthUI(user);
+  } else {
+    isGuest = true;
+    updateAuthUI(null);
+  }
+});
+
 /* ---------------------------------------------- */                
 /* АНИМАЦИЯ ПЛАШКИ (plate) */                
 /* ---------------------------------------------- */                
