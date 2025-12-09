@@ -849,7 +849,7 @@ onAuthStateChanged(auth, (user) => {
 /* START */
 /* ---------------------------------------------- */
 fakeLoad(()=>{
-  panels.style.transform="translateX(-392px)";
+  panels.style.transform="translateX(-100vw)";
   renderShop();
   document.getElementById("topPlate").style.display="block";
   // инициализация видимостей значений
