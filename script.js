@@ -76,9 +76,31 @@ const auth = getAuth(appFB);
 const provider = new GoogleAuthProvider();    
 
 /* ---------------------------------------------- */
-/* АВТОРИЗАЦИЯ */
+/* АВТОРИЗАЦИЯ И UI КНОПОК */
 /* ---------------------------------------------- */
 
+// Привязка стиля loginOutBtn к resetProgressBtn
+if(resetProgressBtn){
+  loginOutBtn.style.fontFamily = resetProgressBtn.style.fontFamily;
+  loginOutBtn.style.fontWeight = resetProgressBtn.style.fontWeight;
+  loginOutBtn.style.width = resetProgressBtn.style.width;
+  loginOutBtn.style.padding = resetProgressBtn.style.padding;
+}
+
+// Функция обновления состояния кнопок авторизации
+function updateAuthUI(user){
+  if(user){
+    // Пользователь вошёл
+    loginOutBtn.textContent = "Выйти из аккаунта";
+    loginBtnEl.style.display = "none";
+  } else {
+    // Пользователь гость
+    loginOutBtn.textContent = "Войти в аккаунт";
+    loginBtnEl.style.display = "block";
+  }
+}
+
+// Клик по верхней кнопке авторизации
 loginBtnEl.addEventListener("click", async () => {
   try {
     const result = await signInWithPopup(auth, provider);
@@ -86,13 +108,14 @@ loginBtnEl.addEventListener("click", async () => {
     isGuest = false;
     userId = user.uid;
     localStorage.setItem("userId", userId);
-    alert(`Привет, ${user.displayName}!`);
+    updateAuthUI(user); // обновляем UI
   } catch (error) {
     console.error(error);
-    alert("Ошибка входа в аккаунт");
+    // никаких alert не вызываем
   }
 });
 
+// Клик по кнопке в настройках
 loginOutBtn.addEventListener("click", async () => {
   try {
     if(isGuest){
@@ -101,28 +124,28 @@ loginOutBtn.addEventListener("click", async () => {
       isGuest = false;
       userId = user.uid;
       localStorage.setItem("userId", userId);
-      alert(`Привет, ${user.displayName}!`);
+      updateAuthUI(user);
     } else {
       await signOut(auth);
       isGuest = true;
       userId = "guest_" + Math.random().toString(36).substring(2,9);
       localStorage.setItem("userId", userId);
-      alert("Вы вышли из аккаунта");
+      updateAuthUI(null);
     }
   } catch (error) {
     console.error(error);
-    alert("Ошибка авторизации");
   }
 });
 
+// Отслеживаем изменения состояния авторизации
 onAuthStateChanged(auth, (user) => {
   if(user){
     isGuest = false;
     userId = user.uid;
-    // можно обновить UI
+    updateAuthUI(user);
   } else {
     isGuest = true;
-    // UI возвращаем в гостевой режим
+    updateAuthUI(null);
   }
 });
                 
