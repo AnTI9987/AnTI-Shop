@@ -353,7 +353,7 @@ body, #app {
   left: 0;
   width: 100vw;
   height: 90px;              /* новая точная высота */
-  z-index: 99999;
+  z-index: 60;
   pointer-events: none;
   background-repeat: no-repeat;
   background-size: 100% 90px; /* картинка всегда 90px высотой */
