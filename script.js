@@ -138,7 +138,31 @@ let userId = localUserId;
 let coins = 0;                
 let clickPower = 1;                
 let plateAnimFrame = null;                
-const counterValue = document.getElementById("counterValue");                
+const counterValue = document.getElementById("counterValue");  
+
+let userKey = null;        // email пользователя для Firebase
+let lastSavedCoins = coins; // для отслеживания изменений монет
+
+async function savePlayerData() {
+  if(!isGuest && userKey){
+    try{
+      await set(ref(db, 'users/' + userKey), {
+        coins: coins,
+        clickPower: clickPower,
+        items: boughtItems
+      });
+      lastSavedCoins = coins;
+    } catch(e){
+      console.error("Ошибка сохранения данных в Firebase:", e);
+    }
+  }
+}
+
+setInterval(()=>{
+  if(!isGuest && coins !== lastSavedCoins){
+    savePlayerData();
+  }
+}, 5000);
 
 /* ---------------------------------------------- */                
 /* кнопка Сбросить прогресс */                
@@ -249,12 +273,46 @@ onAuthStateChanged(auth, (user) => {
   if(user){
     isGuest = false;
     userId = user.uid;
+    userKey = user.email.replace('.', '_'); // email в качестве ключа
     updateAuthUI(user);
+
+    // подгружаем данные игрока из Firebase
+    get(ref(db, 'users/' + userKey)).then(snapshot=>{
+      if(snapshot.exists()){
+        const data = snapshot.val();
+        coins = data.coins || 0;
+        clickPower = data.clickPower || 1;
+        boughtItems = data.items || {"1":0,"2":0};
+
+        counterValue.textContent = coins;
+        startCounterAnimation(coins);
+        startPlateAnimation(coins);
+        renderShop();
+      }
+    }).catch(err=>console.error(err));
+
   } else {
     isGuest = true;
+    userKey = null;
     updateAuthUI(null);
   }
 });
+
+function purchaseItem(item){
+  if(item.stock !== undefined && item.stock <=0) return;
+  if(coins < item.cost) return;
+
+  coins -= item.cost;
+  boughtItems[item.id] = (boughtItems[item.id]||0)+1;
+  clickPower += item.id===1?1:item.power||0;
+
+  startCounterAnimation(coins);
+  startPlateAnimation(coins);
+  updatePricesColor();
+  renderShop();
+
+  if(!isGuest) savePlayerData(); // мгновенное сохранение
+}
 
 /* ---------------------------------------------- */                
 /* АНИМАЦИЯ ПЛАШКИ (plate) */                
