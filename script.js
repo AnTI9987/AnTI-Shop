@@ -295,6 +295,21 @@ onAuthStateChanged(auth, (user) => {
     isGuest = true;
     userKey = null;
     updateAuthUI(null);
+
+    // Сброс данных в интерфейсе
+    coins = 0;
+    clickPower = 1;
+    boughtItems = {"1":0,"2":0};
+
+    // Обновляем UI
+    counterValue.textContent = coins;
+    if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
+    if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
+    if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
+
+    startCounterAnimation(coins);
+    startPlateAnimation(coins);
+    renderShop();
   }
 });
 
