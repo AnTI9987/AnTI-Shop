@@ -778,6 +778,78 @@ document.addEventListener("visibilitychange",()=>{
   } 
 });
 
+const musicVolumeSlider = document.getElementById("musicVolumeSlider");
+const soundVolumeSlider = document.getElementById("soundVolumeSlider");
+
+// Звуки
+const sClickWood = new Audio('sounds/click-wood.mp3');
+const sClickClicker = new Audio('sounds/click-clicker.mp3');
+const sClickButton = new Audio('sounds/click-button.mp3');
+const menuMusic = document.getElementById("menuMusic");
+
+// Устанавливаем значения по умолчанию
+let musicVolume = 0.8;
+let soundVolume = 0.8;
+
+menuMusic.volume = musicVolume;
+sClickWood.volume = soundVolume;
+sClickClicker.volume = soundVolume;
+sClickButton.volume = soundVolume;
+
+async function saveVolumeSettings() {
+  if(!isGuest && userKey){
+    try{
+      await set(ref(db, 'users/' + userKey + '/volume'), {
+        music: musicVolume,
+        sound: soundVolume
+      });
+    } catch(e){
+      console.error("Ошибка сохранения громкости в Firebase:", e);
+    }
+  }
+}
+
+musicVolumeSlider.addEventListener("input", (e) => {
+  musicVolume = parseFloat(e.target.value);
+  menuMusic.volume = musicVolume;
+  saveVolumeSettings(); // сохраняем изменения
+});
+
+soundVolumeSlider.addEventListener("input", (e) => {
+  soundVolume = parseFloat(e.target.value);
+  sClickWood.volume = soundVolume;
+  sClickClicker.volume = soundVolume;
+  sClickButton.volume = soundVolume;
+  saveVolumeSettings(); // сохраняем изменения
+});
+
+
+if(snapshot.exists()){
+  const data = snapshot.val();
+
+  coins = data.coins || 0;
+  clickPower = data.clickPower || 1;
+  boughtItems = data.items || {"1":0,"2":0};
+
+  // Подгружаем громкость, если есть
+  if(data.volume){
+    musicVolume = data.volume.music ?? 0.8;
+    soundVolume = data.volume.sound ?? 0.8;
+    musicVolumeSlider.value = musicVolume;
+    soundVolumeSlider.value = soundVolume;
+
+    menuMusic.volume = musicVolume;
+    sClickWood.volume = soundVolume;
+    sClickClicker.volume = soundVolume;
+    sClickButton.volume = soundVolume;
+  }
+
+  counterValue.textContent = coins;
+  startCounterAnimation(coins);
+  startPlateAnimation(coins);
+  renderShop();
+}
+  
 /* ---------------------------------------------- */
 /* СТАРТ */
 /* ---------------------------------------------- */
