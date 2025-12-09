@@ -82,7 +82,6 @@ const progressBar = document.getElementById("progressBar");
 const progressPercent = document.getElementById("progressPercent");  
 let progress = 0;  
   
-// стиль для загрузки  
 splashScreen.style.background = "#000";  
 progressBar.style.background = "#fff";  
 progressPercent.style.color = "#fff";  
@@ -107,24 +106,24 @@ function fakeLoad(callback){
   
   let width = 0;  
   const interval = setInterval(()=>{  
-    width += Math.random()*2 + 0.5; // медленнее и плавнее  
+    width += Math.random()*2 + 0.5; 
     if(width>100) width=100;  
     progress.style.width = width + "%";  
     percent.textContent = Math.floor(width) + "%";  
     if(width>=100){  
       clearInterval(interval);  
-      splash.classList.add("loaded"); // кнопка вылетает, прогресс и надпись поднимаются  
+      splash.classList.add("loaded"); 
       if(callback) callback();  
     }  
   }, 50);  
   
   playBtn.onclick = ()=>{  
     splash.style.transition = "opacity 1s ease";  
-    splash.style.opacity = "0";  // плавное затухание  
+    splash.style.opacity = "0"; 
     setTimeout(()=>{ splash.style.display = "none"; }, 1000);  
   };  
 }  
-                
+
 /* ---------------------------------------------- */                
 /* ПЕРЕМЕННЫЕ */                
 /* ---------------------------------------------- */                
@@ -140,7 +139,7 @@ let coins = 0;
 let clickPower = 1;                
 let plateAnimFrame = null;                
 const counterValue = document.getElementById("counterValue");                
-                
+
 /* ---------------------------------------------- */                
 /* кнопка Сбросить прогресс */                
 /* ---------------------------------------------- */                
@@ -155,9 +154,9 @@ loginOutBtn.parentNode.insertBefore(resetProgressBtn, loginOutBtn.nextSibling);
 resetProgressBtn.onclick = async () => {                
   let msg = "";                
   if(!isGuest){                
-    msg = "Вы уверены, что хотите сбросить прогресс? Все достижения на вашем аккаунте будут испепелены!";                
+    msg = "Вы уверены, что хотите сбросить прогресс?";                
   }else{                
-    msg = "Вы уверены, что хотите сбросить прогресс? Все локальные достижения будут испепелены!";                
+    msg = "Вы уверены, что хотите сбросить прогресс?";                
   }                
                 
   const confirmReset = confirm(msg);                
@@ -178,23 +177,16 @@ resetProgressBtn.onclick = async () => {
       await set(ref(db, 'users/' + userId), {coins, clickPower, items: boughtItems});                
     }                
   }                
-};                
-                
+};
+
 /* ---------------------------------------------- */                
 /* АНИМАЦИЯ ПЛАШКИ (plate) */                
 /* ---------------------------------------------- */                
-                
-/*                
-  реализация variant B:                
-  - если анимация уже бежит и пришла новая цель, мы не рвём анимацию, а                
-    пересчитываем текущее значение и плавно продолжаем к новой цели,                
-    немного ускоряя анимацию (умножаем базовую длительность на 0.6).                
-*/                
-                
+
 const plateAnim = {                
   running: false,                
   startTime: 0,                
-  duration: 400,      // базовая длительность (мс) — чуть быстрее, чем раньше                
+  duration: 400,      
   baseDuration: 400,                
   from: 0,                
   to: 0,                
@@ -219,7 +211,6 @@ function startPlateAnimation(newTarget){
     plateAnim.from = currentDisplayed;                
     plateAnim.to = newTarget;                
     plateAnim.startTime = now;                
-                
     plateAnim.duration = Math.max(60, plateAnim.baseDuration * 0.6);                
   }                
                 
@@ -245,9 +236,9 @@ function plateTick(){
 }                
                 
 /* ---------------------------------------------- */                
-/* АНИМАЦИЯ СЧЁТЧИКА (центральный counter и shop balances) */                
+/* АНИМАЦИЯ СЧЁТЧИКА */                
 /* ---------------------------------------------- */                
-                
+
 const counterAnim = {                
   running: false,                
   startTime: 0,                
@@ -278,7 +269,6 @@ function startCounterAnimation(newTarget){
     counterAnim.from = currentDisplayed;                
     counterAnim.to = newTarget;                
     counterAnim.startTime = now;                
-                
     counterAnim.duration = Math.max(60, counterAnim.baseDuration * 0.6);                
   }                
                 
@@ -308,16 +298,14 @@ function counterTick(){
     if(clickerEl) clickerEl.textContent = counterAnim.to;                
     if(mainEl) mainEl.textContent = counterAnim.to;                
   }                
-}
-
-/* easing */                  
+}                
+                
 function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }                  
                   
 /* ---------------------------------------------- */                  
 /* КЛИКЕР */                  
 /* ---------------------------------------------- */                  
                   
-/* spawnFloatingCoin — белые +монеты с небольшой тенью */                  
 function spawnFloatingCoin(x,y,value){                  
   const el = document.createElement("div");                  
   el.className = "floating-coin";                  
@@ -350,13 +338,10 @@ function clickAction(x,y){
     return;                  
   }                  
                   
-  const oldCoins = coins;                  
   coins += clickPower;                  
-                  
   startCounterAnimation(coins);                  
   startPlateAnimation(coins);                  
   spawnFloatingCoin(x,y,clickPower);                  
-                  
   updatePricesColor();                  
 }                  
                   
@@ -369,20 +354,17 @@ function animateClicker(){
   }, 100);                  
 }                  
                   
-/* play audio helper: reset time and play (catch promise) */                  
 function playSound(audio){                  
   try{                  
     if(!audio) return;                  
     audio.pause();                  
     audio.currentTime = 0;                  
     const p = audio.play();                  
-    if(p && p.catch) p.catch(()=>{/* ignore autoplay errors */});                  
+    if(p && p.catch) p.catch(()=>{});                  
   }catch(e){}                  
 }                  
                   
-/* clicker events — тоже проигрываем звук click-clicker */                  
 clickButton.addEventListener("click", e=>{                  
-  // sound for clicker                  
   playSound(sClickClicker);                  
   clickAction(e.clientX, e.clientY);                  
   animateClicker();                  
@@ -390,23 +372,21 @@ clickButton.addEventListener("click", e=>{
 clickButton.addEventListener("touchstart", e=>{                  
   e.preventDefault();                  
   playSound(sClickClicker);                  
-  for(const t of e.changedTouches){                  
-    clickAction(t.clientX, t.clientY);                  
-  }                  
+  for(const t of e.changedTouches){ clickAction(t.clientX, t.clientY); }                  
   animateClicker();                  
 },{passive:false});                  
-    
+                  
 /* ---------------------------------------------- */                  
 /* МАГАЗИН */                  
 const baseShopItems = [                  
-  {id:1,name:'Оторванная пуговица',baseCost:50,description:'Кажеться, раньше это служило подобием глаза для плюшевой игрушки.',property:'+1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},                  
+  {id:1,name:'Оторванная пуговица',baseCost:50,description:'Кажется, раньше это была часть игрушки.',property:'+1 к прибыли за клик',incrementCost:50,img:'img/item-1.png'},                  
   {id:2,name:'Страшная штука',baseCost:250,description:'Оно пугает.',property:'+5 к прибыли за клик',power:5,stock:5,img:'img/item-2.png'}                  
 ];                  
 let shopItems = baseShopItems.map(item => ({...item}));                  
 let boughtItems = { "1":0, "2":0 };                  
                   
 const itemsBlock = document.getElementById("items");                  
-                  
+
 function updateShopItems(){                  
   shopItems = baseShopItems.map(item=>{                  
     const bought = boughtItems[item.id]||0;                  
@@ -416,8 +396,8 @@ function updateShopItems(){
     if(item.stock!==undefined) newItem.stock = Math.max(0,item.stock-bought);                  
     return newItem;                  
   });                  
-}                  
-                  
+}
+
 function updateButtonText(item,btn){                  
   btn.style.fontFamily="'Montserrat', sans-serif";                  
   btn.style.fontWeight="600";                  
@@ -445,21 +425,21 @@ function renderShop(){
   tierLabel.style.marginBottom = "12px";                  
                   
   const lineLeft = document.createElement("div");                  
-  lineLeft.style.height = "3px";        // толщина линии                  
+  lineLeft.style.height = "3px";                  
   lineLeft.style.backgroundColor = "#FFDCC0";                  
   lineLeft.style.flex = "1";                  
-  lineLeft.style.marginRight = "8px";   // отступ от текста                  
+  lineLeft.style.marginRight = "8px";                  
                   
   const lineRight = document.createElement("div");                  
-  lineRight.style.height = "3px";       // толщина линии                  
+  lineRight.style.height = "3px";                  
   lineRight.style.backgroundColor = "#FFDCC0";                  
   lineRight.style.flex = "1";                  
-  lineRight.style.marginLeft = "8px";   // отступ от текста                  
+  lineRight.style.marginLeft = "8px";                  
                   
   const text = document.createElement("span");                  
   text.textContent = "Ⅰ ТИР";                  
   text.style.color = "#FFDCC0";                  
-  text.style.fontWeight = "800";        // жирнее текст                  
+  text.style.fontWeight = "800";                  
   text.style.fontSize = "18px";                  
                   
   tierLabel.appendChild(lineLeft);                  
@@ -468,8 +448,15 @@ function renderShop(){
   itemsBlock.appendChild(tierLabel);                  
                   
   shopItems.forEach(item=>{                  
-    const wrap = document.createElement("div"); wrap.className="itemWrap"; wrap.style.background="none";                  
-    const d = document.createElement("div"); d.className="item"; d.style.margin="0 auto"; d.style.backgroundImage='url("img/item-frame.png")';                  
+    const wrap = document.createElement("div"); 
+    wrap.className="itemWrap"; 
+    wrap.style.background="none";                  
+                  
+    const d = document.createElement("div"); 
+    d.className="item"; 
+    d.style.margin="0 auto"; 
+    d.style.backgroundImage='url("img/item-frame.png")';                  
+                  
     d.innerHTML=`                  
       <div class="item-top">                  
         <img src="${item.img}">                  
@@ -478,25 +465,33 @@ function renderShop(){
           <p>${item.description}</p>                  
           <p class="prop">${item.property}</p>                  
         </div>                  
-      </div>                  
-    `;                  
+      </div>`;                  
+                  
     if(item.stock!==undefined){                  
-      const s=document.createElement("p"); s.className="stock"; s.textContent="В наличии: "+item.stock; d.appendChild(s);                  
+      const s=document.createElement("p"); 
+      s.className="stock"; 
+      s.textContent="В наличии: "+item.stock; 
+      d.appendChild(s);                  
     }                  
+                  
     const btn=document.createElement("button");                  
-    btn.classList.add('buy-btn'); // помечаем как кнопка покупки — чтобы общий звуковой обработчик её пропускал                  
-    d.appendChild(btn); updateButtonText(item,btn);                  
+    btn.classList.add('buy-btn');                  
+    d.appendChild(btn); 
+    updateButtonText(item,btn);                  
+                  
     btn.addEventListener("click",()=>{                  
       if(item.stock!==undefined && item.stock<=0) return;                  
       if(coins<item.cost) return;                  
-      coins-=item.cost;                  
+      coins -= item.cost;                  
       boughtItems[item.id] = (boughtItems[item.id]||0)+1;                  
       clickPower += item.id===1?1:item.power||0;                  
+                  
       startCounterAnimation(coins);                  
       startPlateAnimation(coins);                  
       updatePricesColor();                  
       renderShop();                  
     });                  
+                  
     wrap.appendChild(d);                  
     itemsBlock.appendChild(wrap);                  
   });                  
@@ -504,16 +499,19 @@ function renderShop(){
                   
 function updatePricesColor(){                  
   document.querySelectorAll('.item .price').forEach(p=>{                  
-    const txt=p.childNodes[0]?p.childNodes[0].textContent:p.textContent;                  
-    const cost=parseInt(txt)||0;                  
+    const txt = p.childNodes[0] ? p.childNodes[0].textContent : p.textContent;                  
+    const cost = parseInt(txt)||0;                  
     p.style.color=(coins<cost)?"#ff3333":"#fff";                  
   });                  
 }                  
-    
-/* PANELS */                  
-const panels = document.getElementById("panels");                  
-let btnTimers={};                  
                   
+/* ---------------------------------------------- */
+/* PANELS */
+/* ---------------------------------------------- */
+
+const panels = document.getElementById("panels");
+let btnTimers={};
+
 function safeSetStyle(el,prop,value,delay=0){                  
   const id = el.id + prop;                  
   if(btnTimers[id]) clearTimeout(btnTimers[id]);                  
@@ -521,14 +519,13 @@ function safeSetStyle(el,prop,value,delay=0){
   else btnTimers[id]=setTimeout(()=>{ el.style[prop]=value; }, delay);                  
 }                  
                   
-panels.style.transform="translateX(-392px)";                  
+/* ❗ ВАЖНО: исправленное начальное положение */
+panels.style.transform="translateX(-100vw)";
+
+/* Анимация таблички */
 function swingPlate(direction){
   const plate = document.getElementById("topPlate");
-
-  // ⛔ ГЛАВНОЕ: отключаем удар, если он был
   plate.classList.remove("plate-hit");
-
-  // если уже идёт покачивание — сбрасываем
   plate.classList.remove("swinging");
   void plate.offsetWidth;
 
@@ -550,72 +547,97 @@ function swingPlate(direction){
     plate.removeEventListener("animationend", handler);
   });
 }
-                  
-function goToShop(){ swingPlate("left"); panels.style.transform="translateX(-784px)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backToClickerBtn.style.display="block"; backToClickerBtn.style.right="-60px"; setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50); updatePricesColor(); }                  
-function goBackFromShop(){ swingPlate("right"); panels.style.transform="translateX(-392px)"; safeSetStyle(backToClickerBtn,"right","-60px"); safeSetStyle(backToClickerBtn,"display","none",400); shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtnEl.style.left="12px"; }                  
-function goToSettings(){ swingPlate("right"); panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; safeSetStyle(backBtnEl,"right","12px",50); }                  
-function goBackFromSettings(){ swingPlate("left"); panels.style.transform="translateX(-392px)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; safeSetStyle(backBtnEl,"right","-60px"); safeSetStyle(backBtnEl,"display","none",500); loginBtnEl.style.left="12px"; }                  
-                  
+
+/* ---------------------------------------------- */
+/* ❗ ИСПРАВЛЕННЫЕ ФУНКЦИИ ПЕРЕКЛЮЧЕНИЯ МЕНЮ */
+/* ---------------------------------------------- */
+
+function goToShop(){ 
+  swingPlate("left"); 
+  panels.style.transform="translateX(-200vw)";  /* ← было -784px */
+  shopBtnEl.style.right="-60px"; 
+  settingsBtnEl.style.left="-60px"; 
+  loginBtnEl.style.left="-60px"; 
+  backToClickerBtn.style.display="block"; 
+  backToClickerBtn.style.right="-60px"; 
+  setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50); 
+  updatePricesColor(); 
+}
+
+function goBackFromShop(){ 
+  swingPlate("right"); 
+  panels.style.transform="translateX(-100vw)"; /* ← было -392px */
+  safeSetStyle(backToClickerBtn,"right","-60px"); 
+  safeSetStyle(backToClickerBtn,"display","none",400); 
+  shopBtnEl.style.right="12px"; 
+  settingsBtnEl.style.left="12px"; 
+  loginBtnEl.style.left="12px"; 
+}
+
+function goToSettings(){ 
+  swingPlate("right"); 
+  panels.style.transform="translateX(0)";  /* правильно */
+  shopBtnEl.style.right="-60px"; 
+  settingsBtnEl.style.left="-60px"; 
+  loginBtnEl.style.left="-60px"; 
+  backBtnEl.style.display="block"; 
+  safeSetStyle(backBtnEl,"right","12px",50); 
+}
+
+function goBackFromSettings(){ 
+  swingPlate("left"); 
+  panels.style.transform="translateX(-100vw)"; /* ← было -392px */
+  shopBtnEl.style.right="12px"; 
+  settingsBtnEl.style.left="12px"; 
+  safeSetStyle(backBtnEl,"right","-60px"); 
+  safeSetStyle(backBtnEl,"display","none",500); 
+  loginBtnEl.style.left="12px"; 
+}
+
+/* ---------------------------------------------- */
+
 shopBtnEl.onclick=goToShop;                  
 settingsBtnEl.onclick=goToSettings;                  
 backBtnEl.onclick=goBackFromSettings;                  
 backToClickerBtn.onclick=goBackFromShop;                  
-                  
-/* plate click: короткая анимация и звук */                  
-const topPlateEl = document.getElementById('topPlate');                  
-if(topPlateEl){                  
-  topPlateEl.addEventListener('click', (e)=>{    
-    if(topPlateEl.style.display === 'none') return; // защита если plate скрыта    
-    playSound(sClickWood);    
-    
-    // запускаем короткую анимацию клика через класс    
-    topPlateEl.classList.remove('plate-hit');    
-    void topPlateEl.offsetWidth; // сброс для перезапуска анимации    
-    topPlateEl.classList.add('plate-hit');    
-});    
-    
-// вместо setTimeout используем animationend для очистки класса    
-topPlateEl.addEventListener('animationend', (e)=>{    
-    if(e.animationName === "plateHit"){ // убедись, что CSS анимация клика называется plateHit    
-        topPlateEl.classList.remove('plate-hit');    
-    }    
-});    
-}                  
-                  
-/* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */                  
+
+/* Звук кликов */
 document.addEventListener('click', (e)=>{                  
   const btn = e.target.closest('button');                  
   if(!btn) return;                  
-  // не воспроизводим звук для кнопок покупки (они имеют класс buy-btn)                  
   if(btn.classList.contains('buy-btn')) return;                  
-  // не воспроизводим звук для clickButton — он сам играет свой звук                  
   if(btn.id === 'clickButton') return;                  
-  // кнопка авторизации/настройки/навигации и т.д. — проигрываем звук                  
   playSound(sClickButton);                  
 });                  
-    
-/* document-level touchstart handler (for mobile) to catch button touches */                  
+
 document.addEventListener('touchstart', (e)=>{                  
   const btn = e.target.closest('button');                  
   if(!btn) return;                  
   if(btn.classList.contains('buy-btn')) return;                  
   if(btn.id === 'clickButton') return;                  
   playSound(sClickButton);                  
-}, {passive:true});                  
-                  
-/* ---------------------------------------------- */                  
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clickImg.style.display="block"; startPlateAnimation(coins); startCounterAnimation(coins); } });                  
-                  
-/* ---------------------------------------------- */                  
-/* СТАРТ */                  
+}, {passive:true});
+
+/* ---------------------------------------------- */
+
+document.addEventListener("visibilitychange",()=>{ 
+  if(!document.hidden){ 
+    clickImg.style.display="block"; 
+    startPlateAnimation(coins); 
+    startCounterAnimation(coins); 
+  } 
+});
+
+/* ---------------------------------------------- */
+/* СТАРТ */
+/* ---------------------------------------------- */
+
 fakeLoad(()=>{
-  panels.style.transform="translateX(-392px)";                  
+  panels.style.transform="translateX(-100vw)"; /* ← было -392px */
   renderShop();                  
   document.getElementById("topPlate").style.display="block";                  
-  // инициализация видимостей значений                  
   document.getElementById("counterValue").textContent = coins;                  
   if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;                  
   if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;                  
   if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;                  
-  // запускаем пустую анимацию синхронизации (если нужно)                  
 });
