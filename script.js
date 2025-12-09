@@ -73,7 +73,58 @@ const firebaseConfig = {
 const appFB = initializeApp(firebaseConfig);                
 const db = getDatabase(appFB);                
 const auth = getAuth(appFB);                
-const provider = new GoogleAuthProvider();                
+const provider = new GoogleAuthProvider();    
+
+/* ---------------------------------------------- */
+/* АВТОРИЗАЦИЯ */
+/* ---------------------------------------------- */
+
+loginBtnEl.addEventListener("click", async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    isGuest = false;
+    userId = user.uid;
+    localStorage.setItem("userId", userId);
+    alert(`Привет, ${user.displayName}!`);
+  } catch (error) {
+    console.error(error);
+    alert("Ошибка входа в аккаунт");
+  }
+});
+
+loginOutBtn.addEventListener("click", async () => {
+  try {
+    if(isGuest){
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      isGuest = false;
+      userId = user.uid;
+      localStorage.setItem("userId", userId);
+      alert(`Привет, ${user.displayName}!`);
+    } else {
+      await signOut(auth);
+      isGuest = true;
+      userId = "guest_" + Math.random().toString(36).substring(2,9);
+      localStorage.setItem("userId", userId);
+      alert("Вы вышли из аккаунта");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Ошибка авторизации");
+  }
+});
+
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    isGuest = false;
+    userId = user.uid;
+    // можно обновить UI
+  } else {
+    isGuest = true;
+    // UI возвращаем в гостевой режим
+  }
+});
                 
 /* ---------------------------------------------- */  
 /* SPLASH */  
