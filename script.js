@@ -73,7 +73,7 @@ const firebaseConfig = {
 const appFB = initializeApp(firebaseConfig);                
 const db = getDatabase(appFB);                
 const auth = getAuth(appFB);                
-const provider = new GoogleAuthProvider();    
+const provider = new GoogleAuthProvider();                
                 
 /* ---------------------------------------------- */  
 /* SPLASH */  
@@ -301,7 +301,7 @@ function counterTick(){
 }                
                 
 function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }                  
-                  
+
 /* ---------------------------------------------- */                  
 /* КЛИКЕР */                  
 /* ---------------------------------------------- */                  
