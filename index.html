@@ -37,8 +37,16 @@
 
   <div id="panels">
     <div id="settingsPanel">
-      <button id="loginOutBtn">Войти в аккаунт</button>
-      <!-- кнопка "Сбросить прогресс" создаётся из script.js -->
+  <div class="volume-control">
+    <img src="img/music-volume.png" alt="Музыка" class="volume-icon">
+    <input type="range" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0.8">
+  </div>
+  <div class="volume-control">
+    <img src="img/sound-volume.png" alt="Звуки" class="volume-icon">
+    <input type="range" id="soundVolumeSlider" min="0" max="1" step="0.01" value="0.8">
+  </div>
+  <button id="loginOutBtn">Войти в аккаунт</button>
+  <!-- кнопка "Сбросить прогресс" создаётся из script.js -->
     </div>
 
     <div id="clickerPanel">
