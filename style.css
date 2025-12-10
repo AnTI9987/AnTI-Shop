@@ -413,16 +413,113 @@ input[type=range] {
 }
 
 
-#settingsPanel {
-    position: relative;
-    z-index: 1;
-}
+/* =============================== */
+/*   ПОЛЗУНКИ ГРОМКОСТИ (ПОЛНЫЙ CSS) */
+/* =============================== */
 
 .volume-control {
-    z-index: 5;
+    position: relative;
+    overflow: visible !important;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
+/* Убираем синий квадрат при тапе */
+#musicVolumeSlider:focus,
+#soundVolumeSlider:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Базовые параметры ползунков */
 #musicVolumeSlider,
 #soundVolumeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 180px;
+    height: 12px;
+    background: transparent;
+    position: relative;
+    z-index: 30;
+    overflow: visible !important;
+    border-radius: 6px;
+}
+
+/* ======= Трек ползунка ======= */
+#musicVolumeSlider::-webkit-slider-runnable-track,
+#soundVolumeSlider::-webkit-slider-runnable-track {
+    height: 12px;
+    border-radius: 6px;
+    background: #332614; /* цвет линии */
+    overflow: visible !important;
+    position: relative;
+}
+
+#musicVolumeSlider::-moz-range-track,
+#soundVolumeSlider::-moz-range-track {
+    height: 12px;
+    border-radius: 6px;
+    background: #332614;
+}
+
+/* ======= Заполненная часть до кружка (для Firefox) ======= */
+#musicVolumeSlider::-moz-range-progress,
+#soundVolumeSlider::-moz-range-progress {
+    height: 12px;
+    border-radius: 6px;
+    background: #513B1E;
+}
+
+/* ======= КРУГЛЯШОК ======= */
+#musicVolumeSlider::-webkit-slider-thumb,
+#soundVolumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    background: #B48E70;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    margin-top: -7px; /* центрируем круг */
     z-index: 999;
+}
+
+/* Firefox */
+#musicVolumeSlider::-moz-range-thumb,
+#soundVolumeSlider::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    background: #B48E70;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 999;
+}
+
+/* ======= Заполненная часть (для WebKit) ======= */
+/* ЭТО ГЛАВНОЕ: передвигающаяся закрашенная часть */
+#musicVolumeSlider::-webkit-slider-runnable-track::before,
+#soundVolumeSlider::-webkit-slider-runnable-track::before {
+    content: "";
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: #513B1E;
+    border-radius: 6px;
+    width: var(--fill, 0%);
+    pointer-events: none;
+}
+
+/* Управление заполненной частью через JS */
+#musicVolumeSlider[data-value]::-webkit-slider-runnable-track::before {
+    width: calc(attr(data-value percentage));
+}
+#soundVolumeSlider[data-value]::-webkit-slider-runnable-track::before {
+    width: calc(attr(data-value percentage));
 }
