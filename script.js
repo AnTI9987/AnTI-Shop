@@ -1,6 +1,6 @@
 /* FIREBASE IMPORTS */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 /* ---------------------------------------------- */
@@ -717,61 +717,100 @@ setInterval(()=>{
 /* ---------------------------------------------- */
 /* ГРОМКОСТИ — ИНИЦИАЛИЗАЦИЯ ПОЛЗУНКОВ И ЗНАЧЕНИЙ */
 /* ---------------------------------------------- */
-// дефолтные значения
+/* ---------- SAFE: Volume sliders + save to Firebase ---------- */
+/* Переменные громкости (дефолт) */
 let musicVolume = 0.8;
 let soundVolume = 0.8;
 
-// если слайдеры ещё не в DOM (например HTML не изменён), попытаемся создать минимальные элементы безопасно
-(function ensureSlidersExist(){
-  if(!musicVolumeSlider || !soundVolumeSlider){
-    // если sliders нет, попробуем найти их повторно (вдруг DOM ещё не отрендерился)
-    musicVolumeSlider = document.getElementById("musicVolumeSlider");
-    soundVolumeSlider = document.getElementById("soundVolumeSlider");
-  }
-})();
+/* найдём элементы (могут быть null) */
+let musicVolumeSlider = document.getElementById("musicVolumeSlider");
+let soundVolumeSlider = document.getElementById("soundVolumeSlider");
 
-// применяем громкости к аудиоэлементам
-try {
-  if(menuMusic) menuMusic.volume = musicVolume;
-  sClickWood.volume = soundVolume;
-  sClickClicker.volume = soundVolume;
-  sClickButton.volume = soundVolume;
-} catch(e){}
+/* флаг, чтобы не дергать menuMusic.play() постоянно на iOS */
+let iosAudioUnlocked = false;
 
-// Если слайдеры существуют — установим их значения и повесим обработчики
-if(musicVolumeSlider){
-  musicVolumeSlider.value = musicVolume;
-  // iOS FIX — разрешаем менять volume только после явного user gesture
+/* безопасная функция для "разблокировки" audio в iOS — выполняется при первом пользовательском действии */
 function ensureIOSAudioUnlock() {
-    try {
-        menuMusic.play().catch(()=>{});
-        menuMusic.pause();
-    } catch(e){}
+  if (iosAudioUnlocked) return;
+  iosAudioUnlocked = true;
+  try {
+    if (menuMusic && typeof menuMusic.play === "function") {
+      // play — catch, чтобы не бросать ошибку
+      menuMusic.play().catch(()=>{ /* ignore */ });
+      // сразу же ставим на паузу, если нужно (play may start) — это даст iOS право менять volume
+      menuMusic.pause();
+    }
+  } catch(e){
+    // ничего делать не будем
+  }
 }
 
-// MUSIC
-musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
-musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
-
-musicVolumeSlider.addEventListener("input", (e) => {
-    musicVolume = parseFloat(e.target.value);
-    menuMusic.volume = musicVolume;
-    saveVolumeSettings();
-});
+/* безопасная функция сохранения громкостей в БД (использует update, не затирает другие поля) */
+async function saveVolumeSettings() {
+  // не сохраняем для гостя или если ключ не определён
+  if (isGuest || !userKey) return;
+  try {
+    await update(ref(db, 'users/' + userKey), {
+      volume: {
+        music: musicVolume,
+        sound: soundVolume
+      }
+    });
+  } catch (e) {
+    console.error("Ошибка saveVolumeSettings:", e);
+  }
 }
-if(soundVolumeSlider){
-  soundVolumeSlider.value = soundVolume;
-  soundVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
-soundVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
 
-soundVolumeSlider.addEventListener("input", (e) => {
-    soundVolume = parseFloat(e.target.value);
+/* Применим значения к аудио-элементам безопасно */
+try {
+  if (typeof musicVolume === "number" && menuMusic) menuMusic.volume = musicVolume;
+  if (typeof soundVolume === "number") {
     sClickWood.volume = soundVolume;
     sClickClicker.volume = soundVolume;
     sClickButton.volume = soundVolume;
-    saveVolumeSettings();
-});
+  }
+} catch(e){
+  console.warn("Не удалось установить начальные громкости:", e);
 }
+
+/* Подключим обработчики К ТОЛЬКО СУЩЕСТВУЮЩИМ элементам — это предотвращает падение */
+if (musicVolumeSlider) {
+  // при первом касании/нажатии разблокируем audio для iOS
+  musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock, {passive: true});
+  musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock, {passive: true});
+
+  // input — обновляем громкость и сохраняем
+  musicVolumeSlider.addEventListener("input", (e) => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v)) {
+      musicVolume = v;
+      try { if (menuMusic) menuMusic.volume = musicVolume; } catch(e){}
+      saveVolumeSettings();
+    }
+  });
+}
+
+if (soundVolumeSlider) {
+  soundVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock, {passive: true});
+  soundVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock, {passive: true});
+
+  soundVolumeSlider.addEventListener("input", (e) => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v)) {
+      soundVolume = v;
+      try {
+        sClickWood.volume = soundVolume;
+        sClickClicker.volume = soundVolume;
+        sClickButton.volume = soundVolume;
+      } catch(e){}
+      saveVolumeSettings();
+    }
+  });
+}
+
+/* Если слайдеры есть — убедимся, что их value синхронизирован с переменными */
+if (musicVolumeSlider) musicVolumeSlider.value = String(musicVolume);
+if (soundVolumeSlider) soundVolumeSlider.value = String(soundVolume);
 
 /* ---------------------------------------------- */
 /* ОБРАБОТЧИКИ СОСТОЯНИЯ АВТОРИЗАЦИИ И ЗАГРУЗКА ДАННЫХ */
