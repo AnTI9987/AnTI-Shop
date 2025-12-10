@@ -386,6 +386,7 @@ input[type=range] {
   border-radius: 50%;
   cursor: pointer;
   box-shadow: -2000px 0 0 2000px #513B1E;
+  z-index: 10;
 }
 
 /* Firefox */
