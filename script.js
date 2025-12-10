@@ -720,8 +720,9 @@ setInterval(()=>{
 // iOS Safari requires audio unlock on user gesture
 function ensureIOSAudioUnlock() {
     try {
-        menuMusic.play().catch(()=>{});
-        menuMusic.pause();
+        // заставляем Safari разрешить аудио
+        const p = menuMusic.play();
+        if (p) p.then(()=>{}).catch(()=>{});
     } catch(e){}
 }
 
