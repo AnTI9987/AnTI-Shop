@@ -717,6 +717,14 @@ setInterval(()=>{
 /* ---------------------------------------------- */
 /* ГРОМКОСТИ — ИНИЦИАЛИЗАЦИЯ ПОЛЗУНКОВ И ЗНАЧЕНИЙ */
 /* ---------------------------------------------- */
+// iOS Safari requires audio unlock on user gesture
+function ensureIOSAudioUnlock() {
+    try {
+        menuMusic.play().catch(()=>{});
+        menuMusic.pause();
+    } catch(e){}
+}
+
 // дефолтные значения
 let musicVolume = 0.8;
 let soundVolume = 0.8;
@@ -739,25 +747,17 @@ try {
 } catch(e){}
 
 // Если слайдеры существуют — установим их значения и повесим обработчики
-if(musicVolumeSlider){
-  musicVolumeSlider.value = musicVolume;
-  // iOS FIX — разрешаем менять volume только после явного user gesture
-function ensureIOSAudioUnlock() {
-    try {
-        menuMusic.play().catch(()=>{});
-        menuMusic.pause();
-    } catch(e){}
-}
+if (musicVolumeSlider) {
+    musicVolumeSlider.value = musicVolume;
 
-// MUSIC
-musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
-musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
+    musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
+    musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
 
-musicVolumeSlider.addEventListener("input", (e) => {
-    musicVolume = parseFloat(e.target.value);
-    menuMusic.volume = musicVolume;
-    saveVolumeSettings();
-});
+    musicVolumeSlider.addEventListener("input", (e) => {
+        musicVolume = parseFloat(e.target.value);
+        menuMusic.volume = musicVolume;
+        saveVolumeSettings();
+    });
 }
 if(soundVolumeSlider){
   soundVolumeSlider.value = soundVolume;
