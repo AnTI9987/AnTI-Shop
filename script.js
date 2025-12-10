@@ -401,7 +401,6 @@ clickButton.addEventListener("touchstart", e=>{
   animateClicker();
 },{passive:false});
 
-/* ---------------------------------------------- */
 /* МАГАЗИН */
 /* ---------------------------------------------- */
 const baseShopItems = [
@@ -762,32 +761,25 @@ if (musicVolumeSlider) {
     musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
     musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
 
-// Обновление заливки слайдера
-function updateSliderFill(slider, fillEl) {
-    const v = parseFloat(slider.value);
-    fillEl.style.width = (v * 100) + "%";
+    musicVolumeSlider.addEventListener("input", (e) => {
+        musicVolume = parseFloat(e.target.value);
+        menuMusic.volume = musicVolume;
+        saveVolumeSettings();
+    });
 }
+if(soundVolumeSlider){
+  soundVolumeSlider.value = soundVolume;
+  soundVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
+soundVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
 
-/* MUSIC */
-musicVolumeSlider.addEventListener("input", e => {
-    musicVolume = parseFloat(e.target.value);
-    menuMusic.volume = musicVolume;
-
-    updateSliderFill(musicVolumeSlider, document.getElementById("musicFill"));
-    saveVolumeSettings();
-});
-
-/* SOUNDS */
-soundVolumeSlider.addEventListener("input", e => {
+soundVolumeSlider.addEventListener("input", (e) => {
     soundVolume = parseFloat(e.target.value);
-
     sClickWood.volume = soundVolume;
     sClickClicker.volume = soundVolume;
     sClickButton.volume = soundVolume;
-
-    updateSliderFill(soundVolumeSlider, document.getElementById("soundFill"));
     saveVolumeSettings();
 });
+}
 
 /* ---------------------------------------------- */
 /* ОБРАБОТЧИКИ СОСТОЯНИЯ АВТОРИЗАЦИИ И ЗАГРУЗКА ДАННЫХ */
