@@ -762,25 +762,32 @@ if (musicVolumeSlider) {
     musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
     musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
 
-    musicVolumeSlider.addEventListener("input", (e) => {
-        musicVolume = parseFloat(e.target.value);
-        menuMusic.volume = musicVolume;
-        saveVolumeSettings();
-    });
+// Обновление заливки слайдера
+function updateSliderFill(slider, fillEl) {
+    const v = parseFloat(slider.value);
+    fillEl.style.width = (v * 100) + "%";
 }
-if(soundVolumeSlider){
-  soundVolumeSlider.value = soundVolume;
-  soundVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
-soundVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
 
-soundVolumeSlider.addEventListener("input", (e) => {
+/* MUSIC */
+musicVolumeSlider.addEventListener("input", e => {
+    musicVolume = parseFloat(e.target.value);
+    menuMusic.volume = musicVolume;
+
+    updateSliderFill(musicVolumeSlider, document.getElementById("musicFill"));
+    saveVolumeSettings();
+});
+
+/* SOUNDS */
+soundVolumeSlider.addEventListener("input", e => {
     soundVolume = parseFloat(e.target.value);
+
     sClickWood.volume = soundVolume;
     sClickClicker.volume = soundVolume;
     sClickButton.volume = soundVolume;
+
+    updateSliderFill(soundVolumeSlider, document.getElementById("soundFill"));
     saveVolumeSettings();
 });
-}
 
 /* ---------------------------------------------- */
 /* ОБРАБОТЧИКИ СОСТОЯНИЯ АВТОРИЗАЦИИ И ЗАГРУЗКА ДАННЫХ */
