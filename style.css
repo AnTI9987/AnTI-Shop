@@ -335,19 +335,18 @@ body, #app {
 }
 
 /* ----------------------- */
-/* УНИВЕРСАЛЬНЫЙ СТИЛЬ ПОЛЗУНКОВ (iOS SAFE) */
+/* РАБОЧИЙ СТИЛЬ ПОЛЗУНКОВ */
 /* ----------------------- */
 
 .volume-control {
     display: flex;
     align-items: center;
     width: 300px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     position: relative;
     z-index: 2000;
 }
 
-/* Иконка слева */
 .volume-control .volume-icon {
     width: 32px;
     height: 32px;
@@ -355,31 +354,31 @@ body, #app {
     z-index: 2001;
 }
 
-/* ------ ОБЁРТКА ДЛЯ ЛИНИИ ПОЛЗУНКА ------ */
+/* Линия слайдера */
 .slider-track {
     position: relative;
     width: 100%;
     height: 12px;
-    background: #332614;
+    background: #332614;     /* фон линии */
     border-radius: 6px;
-    overflow: visible !important;
+    overflow: visible;
     z-index: 2002;
 }
 
-/* Заливка до круга */
+/* Заполненная часть */
 .slider-fill {
     position: absolute;
-    height: 100%;
-    width: 80%; /* обновляется JS */
-    background: #513B1E;
-    border-radius: 6px;
-    top: 0;
     left: 0;
+    top: 0;
+    height: 100%;
+    background: #513B1E;     /* цвет заполненной части */
+    width: 80%;              /* JS будет динамически менять */
+    border-radius: 6px;
     pointer-events: none;
     z-index: 2003;
 }
 
-/* ------- НЕВИДИМЫЙ input, который двигает круг ------- */
+/* Невидимый range, управляющий thumb */
 input[type=range] {
     -webkit-appearance: none;
     appearance: none;
@@ -391,16 +390,16 @@ input[type=range] {
     outline: none;
 }
 
-/* Круг */
+/* Thumb (круг) */
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #B48E70;
-    position: relative;
-    z-index: 2005;
+    background: #B48E70;     /* цвет круга */
     margin-top: -6px;
+    position: relative;
+    z-index: 3000;
 }
 
 input[type=range]::-moz-range-thumb {
@@ -409,10 +408,9 @@ input[type=range]::-moz-range-thumb {
     border-radius: 50%;
     background: #B48E70;
     position: relative;
-    z-index: 2005;
+    z-index: 3000;
 }
 
-/* trек Firefox */
 input[type=range]::-moz-range-track {
     background: none;
 }
