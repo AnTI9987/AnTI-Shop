@@ -398,6 +398,8 @@ input[type=range] {
   height: 22px;
   background: #B48E70;
   border-radius: 50%;
+  position: relative;
+  z-index: 70 !important;
 }
 
 #musicVolumeSlider::-moz-range-progress,
