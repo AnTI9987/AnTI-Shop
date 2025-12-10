@@ -344,6 +344,7 @@ input[type=range] {
   outline: none;
 }
 
+/* заголовки секций */
 .settings-header {
   font-size: 22px;
   font-weight: 700;
@@ -352,19 +353,26 @@ input[type=range] {
   text-align: center;
 }
 
+/* Контейнер для ползунков */
 .volume-control {
   display: flex;
   align-items: center;
   width: 300px;
   margin-bottom: 20px;
+  position: relative;
+  overflow: visible !important;
+  z-index: 20;
 }
 
 .volume-control .volume-icon {
   width: 32px;
   height: 32px;
   margin-right: 12px;
+  position: relative;
+  z-index: 30;
 }
 
+/* сам слайдер */
 #musicVolumeSlider, #soundVolumeSlider {
   -webkit-appearance: none;
   appearance: none;
@@ -372,12 +380,24 @@ input[type=range] {
   height: 10px;
   background: #332614;
   border-radius: 5px;
-  overflow: hidden;
+  overflow: visible !important;  /* разрешаем thumb выходить */
   position: relative;
-  z-index: 0;
+  z-index: 40;
+  outline: none;
 }
 
-/* заполненная часть через тень */
+/* SAFARI FIX: чтобы трек НЕ обрезал кругляшок */
+#musicVolumeSlider::-webkit-slider-runnable-track,
+#soundVolumeSlider::-webkit-slider-runnable-track {
+  height: 10px;
+  background: #332614;
+  border-radius: 5px;
+  overflow: visible !important;
+  position: relative;
+  z-index: 40;
+}
+
+/* КРУГЛЯШОК (thumb) */
 #musicVolumeSlider::-webkit-slider-thumb,
 #soundVolumeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -386,140 +406,45 @@ input[type=range] {
   background: #B48E70;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: -2000px 0 0 2000px #513B1E;
+  margin-top: -6px;                 /* чтобы круг был по центру трека */
   position: relative;
-  z-index: 70 !important;
+  z-index: 999 !important;
+
+  /* заполненная часть через огромную тень */
+  box-shadow: -2000px 0 0 2000px #513B1E;
 }
 
-/* Firefox */
+/* Firefox — thumb */
 #musicVolumeSlider::-moz-range-thumb,
 #soundVolumeSlider::-moz-range-thumb {
   width: 22px;
   height: 22px;
-  background: #B48E70;
   border-radius: 50%;
+  background: #B48E70;
   position: relative;
-  z-index: 70 !important;
+  z-index: 999 !important;
 }
 
+/* Firefox — заполненная часть */
 #musicVolumeSlider::-moz-range-progress,
 #soundVolumeSlider::-moz-range-progress {
   background: #513B1E;
 }
 
+/* Firefox — трек */
 #musicVolumeSlider::-moz-range-track,
 #soundVolumeSlider::-moz-range-track {
   background: #332614;
+  border-radius: 5px;
+  height: 10px;
+  overflow: visible !important;
 }
 
-
-/* =============================== */
-/*   ПОЛЗУНКИ ГРОМКОСТИ (ПОЛНЫЙ CSS) */
-/* =============================== */
-
-.volume-control {
-    position: relative;
-    overflow: visible !important;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Убираем синий квадрат при тапе */
-#musicVolumeSlider:focus,
-#soundVolumeSlider:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* Базовые параметры ползунков */
-#musicVolumeSlider,
-#soundVolumeSlider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 180px;
-    height: 12px;
-    background: transparent;
-    position: relative;
-    z-index: 30;
-    overflow: visible !important;
-    border-radius: 6px;
-}
-
-/* ======= Трек ползунка ======= */
+/* thumb всегда сверху */
+#musicVolumeSlider, #soundVolumeSlider,
+#musicVolumeSlider::-webkit-slider-thumb,
+#soundVolumeSlider::-webkit-slider-thumb,
 #musicVolumeSlider::-webkit-slider-runnable-track,
 #soundVolumeSlider::-webkit-slider-runnable-track {
-    height: 12px;
-    border-radius: 6px;
-    background: #332614; /* цвет линии */
-    overflow: visible !important;
-    position: relative;
-}
-
-#musicVolumeSlider::-moz-range-track,
-#soundVolumeSlider::-moz-range-track {
-    height: 12px;
-    border-radius: 6px;
-    background: #332614;
-}
-
-/* ======= Заполненная часть до кружка (для Firefox) ======= */
-#musicVolumeSlider::-moz-range-progress,
-#soundVolumeSlider::-moz-range-progress {
-    height: 12px;
-    border-radius: 6px;
-    background: #513B1E;
-}
-
-/* ======= КРУГЛЯШОК ======= */
-#musicVolumeSlider::-webkit-slider-thumb,
-#soundVolumeSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 26px;
-    height: 26px;
-    background: #B48E70;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    margin-top: -7px; /* центрируем круг */
-    z-index: 999;
-}
-
-/* Firefox */
-#musicVolumeSlider::-moz-range-thumb,
-#soundVolumeSlider::-moz-range-thumb {
-    width: 26px;
-    height: 26px;
-    background: #B48E70;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 999;
-}
-
-/* ======= Заполненная часть (для WebKit) ======= */
-/* ЭТО ГЛАВНОЕ: передвигающаяся закрашенная часть */
-#musicVolumeSlider::-webkit-slider-runnable-track::before,
-#soundVolumeSlider::-webkit-slider-runnable-track::before {
-    content: "";
-    position: absolute;
-    height: 100%;
-    left: 0;
-    top: 0;
-    background: #513B1E;
-    border-radius: 6px;
-    width: var(--fill, 0%);
-    pointer-events: none;
-}
-
-/* Управление заполненной частью через JS */
-#musicVolumeSlider[data-value]::-webkit-slider-runnable-track::before {
-    width: calc(attr(data-value percentage));
-}
-#soundVolumeSlider[data-value]::-webkit-slider-runnable-track::before {
-    width: calc(attr(data-value percentage));
+  overflow: visible !important;
 }
