@@ -25,7 +25,7 @@ body {
   overflow: hidden;
   margin-bottom: 12px;
   position: relative;
-  transition: all 0.6s ease; /* плавная трансформация в кнопку */
+  transition: all 0.6s ease;
 }
 
 #progressBarContainer.to-button {
@@ -52,7 +52,7 @@ body {
   font-weight: 700;
   color: #000;
   opacity: 0;
-  pointer-events: none; /* нельзя нажать пока не появится */
+  pointer-events: none;
   transition: opacity 0.6s ease;
 }
 
@@ -72,13 +72,13 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: calc(100vw * 3); /* три панели */
+  width: calc(100vw * 3);
   height: 100%;
   display: flex;
   transition: transform 0.55s cubic-bezier(0.35,0.15,0.1,1);
 }
 
-/* SETTINGS */
+/* SETTINGS PANEL */
 #settingsPanel{
   width: 100vw;
   height:100%;
@@ -90,10 +90,26 @@ body {
   justify-content:flex-start;
   overflow-y:auto;
 }
-#settingsPanel button{margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;font-size:18px;transition:transform .12s ease;}
+
+.settings-header {
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFDBBF;
+  margin: 10px 0 16px;
+  text-align: center;
+}
+
+#settingsPanel button{
+  margin-top:20px;width:300px;padding:14px;background:#332614;color:#fff;border:none;border-radius:8px;
+  font-size:18px;transition:transform .12s ease;
+}
+
+.settings-btn {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600 !important;
+}
 
 /* CLICKER */
-/* заменил фон на градиент заката */
 #clickerPanel{
   width: 100vw;
   height:100%;
@@ -107,10 +123,10 @@ body {
   position:relative;
   overflow:hidden;
 }
+
 #counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}
 #counter img{width:24px;height:24px;}
 #clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}
-/* ground позиция */
 #ground{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;opacity:0.9;}
 #ground img{width:100%;}
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}
@@ -121,19 +137,18 @@ body {
   transition: transform 0.07s ease;
 }
 
-/* добавляем запрет выделения текста на табличке (topPlate) и её детям */
+/* запрет выделения текста */
 #topPlate, #topPlate * {
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  cursor: pointer; /* даём подсказку, что её можно нажать */
+  cursor: pointer;
 }
 
 body, #app {
-  overflow: hidden; /* запрещаем скролл */
+  overflow: hidden;
 }
 
-/* мягкий удар по табличке при клике */
 .plate-hit {
   animation: hitPlate 120ms ease-out;
 }
@@ -152,10 +167,9 @@ body, #app {
   background:#A7794C;
   padding-top:140px;
   overflow-y:auto;
-  -webkit-overflow-scrolling: touch; /* плавный скролл на мобильных */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ВЫПУКЛАЯ ВЕРХНЯЯ ПАНЕЛЬ */
 #shopPanelInner{
   background: none;
   margin:0 auto;
@@ -164,11 +178,6 @@ body, #app {
   width:350px;
   min-height:calc(100vh - 70px);
   box-shadow:none;
-}
-
-.settings-btn {
-  font-family: 'Montserrat', sans-serif !important;
-  font-weight: 600 !important;
 }
 
 /* ТОВАР */
@@ -229,60 +238,15 @@ body, #app {
   gap:6px;
 }
 
-.shopBalance img{
-  width:22px;
-  height:22px;
-}
+.shopBalance img{width:22px;height:22px;}
 
-.itemWrap{
-  width:100%;
-  padding:18px 0;
-  background-size:100% 100%;
-  background-repeat:no-repeat;
-  display:flex;
-  justify-content:center;
-}
+.itemWrap{width:100%;padding:18px 0;display:flex;justify-content:center;}
 
-.swinging {
-  animation: swingSuspended 0.9s ease-in-out;
-}
-
-.volume-control {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-  width: 300px;
-}
-
-.volume-control .volume-icon {
-  width: 32px;
-  height: 32px;
-  margin-right: 12px;
-}
-
-#musicVolumeSlider, #soundVolumeSlider {
-  flex: 1;
-  height: 8px;
-  border-radius: 4px;
-  background: #FFDCC0;
-  -webkit-appearance: none;
-}
-
-#musicVolumeSlider::-webkit-slider-thumb,
-#soundVolumeSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #FF7749;
-  cursor: pointer;
-}
-
+/* PLATE */
 #topPlate {
   width: 240px;
   height: 120px;
   position: relative;
-  top: 0;
   left: 50%;
   transform: translateX(-50%);
   transform-origin: 50% -50px;
@@ -293,19 +257,15 @@ body, #app {
 
 #topPlate img#plateImg {
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 100;
 }
 
 #plateTitle {
   font-size: 28px;
   font-weight: 700;
   color: #FFDBBF;
-  text-align: center;
   position: absolute;
   top: 28%;
   left: 50%;
@@ -321,7 +281,6 @@ body, #app {
   display: flex;
   align-items: center;
   gap: 6px;
-  justify-content: center;
   position: absolute;
   top: 58%;
   left: 50%;
@@ -329,17 +288,14 @@ body, #app {
   z-index: 200;
 }
 
-#plateBalance img{
-  width:22px;
-  height:22px;
-}
+#plateBalance img{width:22px;height:22px;}
 
 #playBtn {
   opacity: 0;
-  transform: translateY(-30px); /* кнопка будет вылетать сверху вниз */
+  transform: translateY(-30px);
   transition: transform 0.6s ease, opacity 0.6s ease;
-  font-size: 24px; /* увеличиваем размер кнопки */
-  padding: 16px 40px; /* больше кнопка */
+  font-size: 24px;
+  padding: 16px 40px;
   border-radius: 12px;
   background: linear-gradient(90deg, #FFBA67, #FF7749);
   color: #000;
@@ -350,7 +306,7 @@ body, #app {
 
 #splashScreen.loaded #playBtn {
   opacity: 1;
-  transform: translateY(0); /* кнопка плавно опускается вниз */
+  transform: translateY(0);
 }
 
 #splashScreen h1,
@@ -362,7 +318,7 @@ body, #app {
 #splashScreen.loaded h1,
 #splashScreen.loaded #progressBarContainer,
 #splashScreen.loaded #progressPercent {
-  transform: translateY(-50px); /* прогресс и надпись поднимаются вверх */
+  transform: translateY(-50px);
 }
 
 /* Анимации покачивания */
@@ -375,5 +331,78 @@ body, #app {
 }
 
 #counter {
-    visibility: hidden; /* скрывает содержимое, но занимает место */
+  visibility: hidden;
+}
+
+/* ----------------------- */
+/* НОВЫЙ СТИЛЬ ПОЛЗУНКОВ */
+/* ----------------------- */
+
+* { -webkit-tap-highlight-color: transparent; }
+
+input[type=range] {
+  outline: none;
+}
+
+.settings-header {
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFDBBF;
+  margin: 10px 0 16px;
+  text-align: center;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  width: 300px;
+  margin-bottom: 20px;
+}
+
+.volume-control .volume-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+}
+
+#musicVolumeSlider, #soundVolumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  background: #332614;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* заполненная часть через тень */
+#musicVolumeSlider::-webkit-slider-thumb,
+#soundVolumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #B48E70;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: -2000px 0 0 2000px #513B1E;
+}
+
+/* Firefox */
+#musicVolumeSlider::-moz-range-thumb,
+#soundVolumeSlider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: #B48E70;
+  border-radius: 50%;
+}
+
+#musicVolumeSlider::-moz-range-progress,
+#soundVolumeSlider::-moz-range-progress {
+  background: #513B1E;
+}
+
+#musicVolumeSlider::-moz-range-track,
+#soundVolumeSlider::-moz-range-track {
+  background: #332614;
 }
