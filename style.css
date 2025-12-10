@@ -335,7 +335,7 @@ body, #app {
 }
 
 /* ----------------------- */
-/* НОРМАЛЬНЫЙ РАБОЧИЙ СТИЛЬ ПОЛЗУНКОВ */
+/* УНИВЕРСАЛЬНЫЙ СТИЛЬ ПОЛЗУНКОВ (iOS SAFE) */
 /* ----------------------- */
 
 .volume-control {
@@ -344,83 +344,75 @@ body, #app {
     width: 300px;
     margin-bottom: 20px;
     position: relative;
-    overflow: visible !important;
-    z-index: 2000 !important; /* выше всех подложек */
+    z-index: 2000;
 }
 
+/* Иконка слева */
 .volume-control .volume-icon {
     width: 32px;
     height: 32px;
     margin-right: 12px;
-    z-index: 2001 !important;
+    z-index: 2001;
 }
 
-/* --- ОСНОВНОЙ RANGE-СЛАЙДЕР --- */
-#musicVolumeSlider,
-#soundVolumeSlider {
-    -webkit-appearance: none;
-    appearance: none;
+/* ------ ОБЁРТКА ДЛЯ ЛИНИИ ПОЛЗУНКА ------ */
+.slider-track {
+    position: relative;
     width: 100%;
     height: 12px;
     background: #332614;
     border-radius: 6px;
-
-    /* заливка до кружка — обновляется JS */
-    background-image: linear-gradient(#513B1E, #513B1E);
-    background-size: 0% 100%;        /* ИЗНАЧАЛЬНО 0% */
-    background-repeat: no-repeat;
-
-    position: relative;
-    z-index: 2002 !important;
-    outline: none;
     overflow: visible !important;
+    z-index: 2002;
 }
 
-/* ----- SAFARI iOS FIX — трек ----- */
-#musicVolumeSlider::-webkit-slider-runnable-track,
-#soundVolumeSlider::-webkit-slider-runnable-track {
-    height: 12px;
-    background: transparent;
+/* Заливка до круга */
+.slider-fill {
+    position: absolute;
+    height: 100%;
+    width: 80%; /* обновляется JS */
+    background: #513B1E;
     border-radius: 6px;
-    overflow: visible !important;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 2003;
 }
 
-/* ----- КРУГЛЯШОК ----- */
-#musicVolumeSlider::-webkit-slider-thumb,
-#soundVolumeSlider::-webkit-slider-thumb {
+/* ------- НЕВИДИМЫЙ input, который двигает круг ------- */
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 12px;
+    background: none;
+    position: relative;
+    z-index: 2004;
+    outline: none;
+}
+
+/* Круг */
+input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 24px;
     height: 24px;
     border-radius: 50%;
     background: #B48E70;
-    margin-top: -6px; /* выравнивание центра круга */
     position: relative;
-    z-index: 3000 !important; /* всегда поверх */
+    z-index: 2005;
+    margin-top: -6px;
 }
 
-/* Firefox thumb */
-#musicVolumeSlider::-moz-range-thumb,
-#soundVolumeSlider::-moz-range-thumb {
+input[type=range]::-moz-range-thumb {
     width: 24px;
     height: 24px;
-    background: #B48E70;
     border-radius: 50%;
+    background: #B48E70;
     position: relative;
-    z-index: 3000 !important;
+    z-index: 2005;
 }
 
-/* Firefox — трек */
-#musicVolumeSlider::-moz-range-track,
-#soundVolumeSlider::-moz-range-track {
-    background: #332614;
-    height: 12px;
-    border-radius: 6px;
-}
-
-/* Firefox — заполненная часть */
-#musicVolumeSlider::-moz-range-progress,
-#soundVolumeSlider::-moz-range-progress {
-    background: #513B1E;
-    height: 12px;
-    border-radius: 6px;
+/* trек Firefox */
+input[type=range]::-moz-range-track {
+    background: none;
 }
