@@ -36,19 +36,30 @@
   <button id="backToClickerBtn"><img src="img/back-icon.png" alt=""></button>
 
   <div id="panels">
+
+    <!-- SETTINGS PANEL -->
     <div id="settingsPanel">
-  <div class="volume-control">
-    <img src="img/music-volume.png" alt="Музыка" class="volume-icon">
-    <input type="range" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0.8">
-  </div>
-  <div class="volume-control">
-    <img src="img/sound-volume.png" alt="Звуки" class="volume-icon">
-    <input type="range" id="soundVolumeSlider" min="0" max="1" step="0.01" value="0.8">
-  </div>
-  <button id="loginOutBtn">Войти в аккаунт</button>
-  <!-- кнопка "Сбросить прогресс" создаётся из script.js -->
+
+      <h2 class="settings-header">НАСТРОЙКА ЗВУКОВ</h2>
+
+      <div class="volume-control">
+        <img src="img/music-volume.png" alt="Музыка" class="volume-icon">
+        <input type="range" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0.8">
+      </div>
+
+      <div class="volume-control">
+        <img src="img/sound-volume.png" alt="Звуки" class="volume-icon">
+        <input type="range" id="soundVolumeSlider" min="0" max="1" step="0.01" value="0.8">
+      </div>
+
+      <h2 class="settings-header">НАСТРОЙКИ ПРОГРЕССА</h2>
+
+      <button id="loginOutBtn">Войти в аккаунт</button>
+      <!-- кнопка "Сбросить прогресс" создаётся из script.js -->
+
     </div>
 
+    <!-- CLICKER PANEL -->
     <div id="clickerPanel">
       <div id="clickButtonWrapper">
         <div id="ground"><img id="groundImg" src="img/ground.png" alt=""></div>
@@ -61,11 +72,13 @@
       </div>
     </div>
 
+    <!-- SHOP PANEL -->
     <div id="shopPanel">
       <div id="shopPanelInner">
         <div id="items"></div>
       </div>
     </div>
+
   </div>
 </div>
 
