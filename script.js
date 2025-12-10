@@ -595,26 +595,34 @@ if(topPlateEl){
   });
 }
 
-/* общий обработчик звука для кнопок (исключая кнопки покупки buy-btn и сам clickButton) */
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  // не воспроизводим звук для кнопок покупки (они имеют класс buy-btn)
-  if(btn.classList.contains('buy-btn')) return;
-  // не воспроизводим звук для clickButton — он сам играет свой звук
-  if(btn.id === 'clickButton') return;
-  // кнопка авторизации/настройки/навигации и т.д. — проигрываем звук
-  try { sClickButton.currentTime = 0; sClickButton.play().catch(()=>{}); } catch(e) {}
-});
+/* === Глобальный звук кнопок — исправленная версия === */
+function handleButtonSound(e) {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    // исключения
+    if (btn.classList.contains("buy-btn")) return;
+    if (btn.id === "clickButton") return;
+
+    try {
+        sClickButton.currentTime = 0;
+        sClickButton.play().catch(()=>{});
+    } catch (e) {}
+}
+
+let isTouch = false;
+document.addEventListener("touchstart", () => { isTouch = true; }, { once: true });
 
 /* document-level touchstart handler (for mobile) to catch button touches */
-document.addEventListener('touchstart', (e)=>{
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  if(btn.classList.contains('buy-btn')) return;
-  if(btn.id === 'clickButton') return;
-  try { sClickButton.currentTime = 0; sClickButton.play().catch(()=>{}); } catch(e) {}
-}, {passive:true});
+document.addEventListener("touchstart", (e) => {
+    handleButtonSound(e);
+}, { passive: true });
+
+// ПК — звук по click, но только если НЕ было touch
+document.addEventListener("click", (e) => {
+    if (isTouch) return; // touch → звук уже проигран
+    handleButtonSound(e);
+});
 
 /* ---------------------------------------------- */
 /* АВТОРИЗАЦИЯ И UI КНОПОК */
