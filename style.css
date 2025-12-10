@@ -335,116 +335,91 @@ body, #app {
 }
 
 /* ----------------------- */
-/* НОВЫЙ СТИЛЬ ПОЛЗУНКОВ */
+/* НОРМАЛЬНЫЙ РАБОЧИЙ СТИЛЬ ПОЛЗУНКОВ */
 /* ----------------------- */
 
-* { -webkit-tap-highlight-color: transparent; }
-
-input[type=range] {
-  outline: none;
-}
-
-/* заголовки секций */
-.settings-header {
-  font-size: 22px;
-  font-weight: 700;
-  color: #FFDBBF;
-  margin: 10px 0 16px;
-  text-align: center;
-}
-
-/* Контейнер для ползунков */
 .volume-control {
-  display: flex;
-  align-items: center;
-  width: 300px;
-  margin-bottom: 20px;
-  position: relative;
-  overflow: visible !important;
-  z-index: 20;
+    display: flex;
+    align-items: center;
+    width: 300px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: visible !important;
+    z-index: 20;
 }
 
 .volume-control .volume-icon {
-  width: 32px;
-  height: 32px;
-  margin-right: 12px;
-  position: relative;
-  z-index: 30;
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
+    z-index: 25;
 }
 
-/* сам слайдер */
-#musicVolumeSlider, #soundVolumeSlider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 10px;
-  background: #332614;
-  border-radius: 5px;
-  overflow: visible !important;  /* разрешаем thumb выходить */
-  position: relative;
-  z-index: 40;
-  outline: none;
+/* --- ОСНОВНОЙ СЛАЙДЕР --- */
+#musicVolumeSlider,
+#soundVolumeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    background: #332614;
+    border-radius: 5px;
+
+    /* безопасная заливка, которую мы обновляем JS-ом */
+    background-image: linear-gradient(#513B1E, #513B1E);
+    background-size: 80% 100%;        /* default для 0.8 */
+    background-repeat: no-repeat;
+
+    position: relative;
+    z-index: 50;
+    outline: none;
+    overflow: visible !important;
 }
 
-/* SAFARI FIX: чтобы трек НЕ обрезал кругляшок */
+/* SAFARI FIX — чтобы не резало круг */
 #musicVolumeSlider::-webkit-slider-runnable-track,
 #soundVolumeSlider::-webkit-slider-runnable-track {
-  height: 10px;
-  background: #332614;
-  border-radius: 5px;
-  overflow: visible !important;
-  position: relative;
-  z-index: 40;
+    height: 10px;
+    background: transparent;
+    overflow: visible !important;
+    border-radius: 5px;
 }
 
-/* КРУГЛЯШОК (thumb) */
+/* --- КРУГЛЯШОК --- */
 #musicVolumeSlider::-webkit-slider-thumb,
 #soundVolumeSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
-  background: #B48E70;
-  border-radius: 50%;
-  cursor: pointer;
-  margin-top: -6px;                 /* чтобы круг был по центру трека */
-  position: relative;
-  z-index: 999 !important;
-
-  /* заполненная часть через огромную тень */
-  box-shadow: -2000px 0 0 2000px #513B1E;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #B48E70;
+    margin-top: -6px;
+    position: relative;
+    z-index: 999;
 }
 
-/* Firefox — thumb */
+/* Firefox thumb */
 #musicVolumeSlider::-moz-range-thumb,
 #soundVolumeSlider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #B48E70;
-  position: relative;
-  z-index: 999 !important;
-}
-
-/* Firefox — заполненная часть */
-#musicVolumeSlider::-moz-range-progress,
-#soundVolumeSlider::-moz-range-progress {
-  background: #513B1E;
+    width: 22px;
+    height: 22px;
+    background: #B48E70;
+    border-radius: 50%;
+    z-index: 999;
 }
 
 /* Firefox — трек */
 #musicVolumeSlider::-moz-range-track,
 #soundVolumeSlider::-moz-range-track {
-  background: #332614;
-  border-radius: 5px;
-  height: 10px;
-  overflow: visible !important;
+    background: #332614;
+    height: 10px;
+    border-radius: 5px;
 }
 
-/* thumb всегда сверху */
-#musicVolumeSlider, #soundVolumeSlider,
-#musicVolumeSlider::-webkit-slider-thumb,
-#soundVolumeSlider::-webkit-slider-thumb,
-#musicVolumeSlider::-webkit-slider-runnable-track,
-#soundVolumeSlider::-webkit-slider-runnable-track {
-  overflow: visible !important;
+/* Firefox — заполненная часть */
+#musicVolumeSlider::-moz-range-progress,
+#soundVolumeSlider::-moz-range-progress {
+    background: #513B1E;
+    height: 10px;
+    border-radius: 5px;
 }
