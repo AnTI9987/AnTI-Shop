@@ -411,3 +411,18 @@ input[type=range] {
 #soundVolumeSlider::-moz-range-track {
   background: #332614;
 }
+
+
+#settingsPanel {
+    position: relative;
+    z-index: 1;
+}
+
+.volume-control {
+    z-index: 5;
+}
+
+#musicVolumeSlider,
+#soundVolumeSlider {
+    z-index: 999;
+}
