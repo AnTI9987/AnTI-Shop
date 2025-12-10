@@ -741,21 +741,36 @@ try {
 // Если слайдеры существуют — установим их значения и повесим обработчики
 if(musicVolumeSlider){
   musicVolumeSlider.value = musicVolume;
-  musicVolumeSlider.addEventListener("input", (e) => {
+  // iOS FIX — разрешаем менять volume только после явного user gesture
+function ensureIOSAudioUnlock() {
+    try {
+        menuMusic.play().catch(()=>{});
+        menuMusic.pause();
+    } catch(e){}
+}
+
+// MUSIC
+musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
+musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
+
+musicVolumeSlider.addEventListener("input", (e) => {
     musicVolume = parseFloat(e.target.value);
-    if(menuMusic) menuMusic.volume = musicVolume;
+    menuMusic.volume = musicVolume;
     saveVolumeSettings();
-  });
+});
 }
 if(soundVolumeSlider){
   soundVolumeSlider.value = soundVolume;
-  soundVolumeSlider.addEventListener("input", (e) => {
+  soundVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
+soundVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
+
+soundVolumeSlider.addEventListener("input", (e) => {
     soundVolume = parseFloat(e.target.value);
     sClickWood.volume = soundVolume;
     sClickClicker.volume = soundVolume;
     sClickButton.volume = soundVolume;
     saveVolumeSettings();
-  });
+});
 }
 
 /* ---------------------------------------------- */
