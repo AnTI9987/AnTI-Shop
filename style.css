@@ -374,40 +374,6 @@ body, #app {
   100% { transform: translateX(-50%) rotate(0deg); }
 }
 
-/* ============================= */
-/* ИСКУССТВЕННЫЕ БРАУЗЕРНЫЕ ПАНЕЛИ (90px) */
-/* ============================= */
-
-#fakeTopBrowserPanel,
-#fakeBottomBrowserPanel {
-  position: fixed;
-  left: 0;
-  width: 100vw;
-  height: 90px;              /* новая точная высота */
-  z-index: 60;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-size: 100% 90px; /* картинка всегда 90px высотой */
-  background-position: center;
-}
-
-/* верхняя панель */
-#fakeTopBrowserPanel {
-  top: 0;
-  background-image: url("img/top-browser-panel.png");
-}
-
-/* нижняя панель */
-#fakeBottomBrowserPanel {
-  bottom: 0;
-  background-image: url("img/bottom-browser-panel.png");
-}
-
-#app {
-  margin-top: 90px;     /* отступ под верхнюю панель */
-  margin-bottom: 90px;  /* отступ под нижнюю панель */
-}
-
 #counter {
     visibility: hidden; /* скрывает содержимое, но занимает место */
 }
