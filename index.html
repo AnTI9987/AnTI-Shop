@@ -40,19 +40,25 @@
     <!-- SETTINGS PANEL -->
     <div id="settingsPanel">
 
-      <h2 class="settings-header">НАСТРОЙКА ЗВУКОВ</h2>
+<h2 class="settings-header">НАСТРОЙКА ЗВУКОВ</h2>
 
-      <div class="volume-control">
-        <img src="img/music-volume.png" alt="Музыка" class="volume-icon">
-        <input type="range" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0.8">
-      </div>
+<div class="volume-control">
+    <img class="volume-icon" src="img/music-volume.png">
+    <div class="slider-track">
+        <div id="musicFill" class="slider-fill"></div>
+        <input id="musicVolumeSlider" type="range" min="0" max="1" step="0.01">
+    </div>
+</div>
 
-      <div class="volume-control">
-        <img src="img/sound-volume.png" alt="Звуки" class="volume-icon">
-        <input type="range" id="soundVolumeSlider" min="0" max="1" step="0.01" value="0.8">
-      </div>
+<div class="volume-control">
+    <img class="volume-icon" src="img/sound-volume.png">
+    <div class="slider-track">
+        <div id="soundFill" class="slider-fill"></div>
+        <input id="soundVolumeSlider" type="range" min="0" max="1" step="0.01">
+    </div>
+</div>
 
-      <h2 class="settings-header">НАСТРОЙКИ ПРОГРЕССА</h2>
+<h2 class="settings-header">НАСТРОЙКИ ПРОГРЕССА</h2>
 
       <button id="loginOutBtn">Войти в аккаунт</button>
       <!-- кнопка "Сбросить прогресс" создаётся из script.js -->
