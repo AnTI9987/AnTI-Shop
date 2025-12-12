@@ -333,9 +333,9 @@ body, #app {
 }  
 
 /* Добавлено: проигрывание анимации при добавлении класса .swinging */ 
-/* #topPlate.swinging {
-  animation: swingSuspended 0.8s ease;
-} */
+#topPlate.swinging {
+  animation: swingSuspended 0.8s ease-out;
+}
 
 /* Скрыт по умолчанию (как было в оригинале) */
 #counter {  
