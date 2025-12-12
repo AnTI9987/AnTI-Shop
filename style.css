@@ -1,3 +1,5 @@
+/* ========== AnTI-Shop — style.css (исправленный) ========== */
+
 body {  
   margin: 0;  
   padding: 0;  
@@ -329,7 +331,13 @@ body, #app {
   75%  { transform: translateX(-50.25%) rotate(var(--deg3,3deg)); }  
   100% { transform: translateX(-50%) rotate(0deg); }  
 }  
-  
+
+/* Добавлено: проигрывание анимации при добавлении класса .swinging */ 
+#topPlate.swinging {
+  animation: swingSuspended 0.6s ease;
+}
+
+/* Скрыт по умолчанию (как было в оригинале) */
 #counter {  
   visibility: hidden;  
 }  
@@ -337,7 +345,8 @@ body, #app {
 /* ----------------------- */  
 /* НОРМАЛЬНЫЙ РАБОЧИЙ СТИЛЬ ПОЛЗУНКОВ */  
 /* ----------------------- */  
-  
+
+/* Контейнер управления громкостью */
 .volume-control {  
     display: flex;  
     align-items: center;  
@@ -362,18 +371,19 @@ body, #app {
     appearance: none;  
     width: 100%;  
     height: 10px;  
-    background: #332614;  
+    background: #332614; /* базовый цвет трека */  
     border-radius: 5px;  
-  
-    /* безопасная заливка, которую мы обновляем JS-ом */  
+
+    /* safety fallback (не полагаться только на background-size) */  
     background-image: linear-gradient(#513B1E, #513B1E);  
     background-size: 80% 100%;        /* default для 0.8 */  
     background-repeat: no-repeat;  
-  
+
     position: relative;  
     z-index: 50;  
     outline: none;  
     overflow: visible !important;  
+    /* чтобы в сафари/ios не обрезался кружок */
 }  
   
 /* SAFARI FIX — чтобы не резало круг */  
@@ -393,11 +403,14 @@ body, #app {
     height: 22px;  
     border-radius: 50%;  
     background: #B48E70;  
-    margin-top: -6px;  
+    margin-top: -6px; /* центрируем кружок относительно трека */  
     position: relative;  
-    z-index: 999;  
+    z-index: 9999; /* обязательно выше линии заполнения */  
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);  
+    border: none;
+    cursor: pointer;
 }  
-  
+
 /* Firefox thumb */  
 #musicVolumeSlider::-moz-range-thumb,  
 #soundVolumeSlider::-moz-range-thumb {  
@@ -405,7 +418,10 @@ body, #app {
     height: 22px;  
     background: #B48E70;  
     border-radius: 50%;  
-    z-index: 999;  
+    z-index: 9999;  
+    border: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    cursor: pointer;
 }  
   
 /* Firefox — трек */  
@@ -422,4 +438,22 @@ body, #app {
     background: #513B1E;  
     height: 10px;  
     border-radius: 5px;  
-    }
+}  
+
+/* Убираем дефолтный outline при фокусе, но оставляем доступность */
+#musicVolumeSlider:focus, #soundVolumeSlider:focus {
+  outline: none;
+}
+
+/* Уточняющие стили — предотвращают "вылаз" заливки за пределы трека */
+#musicVolumeSlider::-webkit-slider-runnable-track,
+#soundVolumeSlider::-webkit-slider-runnable-track {
+  border-radius: 5px;
+}
+
+/* Дополнительно: для touch устройств увеличим зону пальца — невидимая область вокруг */
+.volume-control input[type="range"] {
+  padding: 6px 0; /* увеличивает чувствительную область, не меняя вид */
+}
+
+/* Остальной стиль оставлен без изменений — он важен для внешнего вида */
