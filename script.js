@@ -19,15 +19,12 @@ imagesToPreload.forEach(src => {
 });
 
 /* ---------------------------------------------- */
-/* ПРОГРУЗКА ЗВУКОВ */
+/* ПРОГРУЗКА ЗВУКОВ — ТЕПЕРЬ ЧЕРЕЗ <audio> */
 /* ---------------------------------------------- */
-// все звуки берутся из папки sounds/
-const sClickWood = new Audio('sounds/click-wood.mp3');
-sClickWood.preload = 'auto';
-const sClickClicker = new Audio('sounds/click-clicker.mp3');
-sClickClicker.preload = 'auto';
-const sClickButton = new Audio('sounds/click-button.mp3');
-sClickButton.preload = 'auto';
+// iPhone НЕ даёт менять volume у new Audio(), поэтому ВСЕ звуки — только через теги в HTML
+const sClickWood = document.getElementById("sClickWood");
+const sClickClicker = document.getElementById("sClickClicker");
+const sClickButton = document.getElementById("sClickButton");
 const menuMusic = document.getElementById("menuMusic");
 
 /* ---------------------------------------------- */
@@ -39,24 +36,19 @@ const settingsBtnEl = document.getElementById("settingsBtn");
 settingsBtnEl.classList.add("settings-btn");
 settingsBtnEl.style.fontFamily = "'Montserrat', sans-serif";
 settingsBtnEl.style.fontWeight = "600";
+
 const backToClickerBtn = document.getElementById("backToClickerBtn");
 const loginBtnEl = document.getElementById("loginBtn");
 const loginOutBtn = document.getElementById("loginOutBtn");
 const clickButton = document.getElementById("clickButton");
 const clickImg = document.getElementById("clickImg");
 clickImg.style.display = "block";
-clickImg.style.marginTop = "50px";  // опускаем кликер-картинку на 50px вниз
+clickImg.style.marginTop = "50px";
 
-// sliders (вставлены в HTML settingsPanel; если их нет — создадим позже программно)
 let musicVolumeSlider = document.getElementById("musicVolumeSlider");
 let soundVolumeSlider = document.getElementById("soundVolumeSlider");
 
-// groundImg — теперь в index.html у <img id="groundImg">
 const groundImg = document.getElementById("groundImg");
-if(groundImg){
-  // если хочешь сдвинуть картинку дополнительно, делай здесь
-  // groundImg.style.transform = "translateY(-100px)";
-}
 
 const plateTitleEl = document.getElementById("plateTitle");
 const plateBalanceValueEl = document.getElementById("plateBalanceValue");
@@ -86,9 +78,7 @@ const provider = new GoogleAuthProvider();
 const splashScreen = document.getElementById("splashScreen");
 const progressBar = document.getElementById("progressBar");
 const progressPercent = document.getElementById("progressPercent");
-let progress = 0;
 
-// стиль для загрузки
 splashScreen.style.background = "#000";
 progressBar.style.background = "#fff";
 progressPercent.style.color = "#fff";
@@ -99,40 +89,36 @@ function fakeLoad(callback){
   const percent = document.getElementById("progressPercent");
   const playBtn = document.getElementById("playBtn");
 
-  const menuMusic = document.getElementById("menuMusic");
-
   playBtn.addEventListener("click", () => {
     try {
         menuMusic.volume = musicVolume;
         const playPromise = menuMusic.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(() => {});
-        }
+        if (playPromise !== undefined) playPromise.catch(()=>{});
     } catch (e) {}
   });
 
   let width = 0;
   const interval = setInterval(()=>{
-    width += Math.random()*2 + 0.5; // медленнее и плавнее
+    width += Math.random()*2 + 0.5;
     if(width>100) width=100;
     progress.style.width = width + "%";
     percent.textContent = Math.floor(width) + "%";
     if(width>=100){
       clearInterval(interval);
-      splash.classList.add("loaded"); // кнопка вылетает, прогресс и надпись поднимаются
+      splash.classList.add("loaded");
       if(callback) callback();
     }
   }, 50);
 
   playBtn.onclick = ()=>{
     splash.style.transition = "opacity 1s ease";
-    splash.style.opacity = "0";  // плавное затухание
+    splash.style.opacity = "0";
     setTimeout(()=>{ splash.style.display = "none"; }, 1000);
   };
 }
 
 /* ---------------------------------------------- */
-/* ПЕРЕМЕННЫЕ И СТАРТОВЫЕ НАСТРОЙКИ */
+/* ПЕРЕМЕННЫЕ */
 /* ---------------------------------------------- */
 let isGuest = true;
 let localUserId = localStorage.getItem("userId");
@@ -149,12 +135,11 @@ const counterValue = document.getElementById("counterValue");
 
 let boughtItems = { "1":0, "2":0 };
 
-// переменные для сохранения в Firebase
-let userKey = null;        // ключ — email пользователя с заменой точек
-let lastSavedCoins = coins; // для отслеживания изменений монет
+let userKey = null;
+let lastSavedCoins = coins;
 
 /* ---------------------------------------------- */
-/* КНОПКА Сбросить прогресс (создаётся динамически) */
+/* КНОПКА Сбросить прогресс */
 /* ---------------------------------------------- */
 const resetProgressBtn = document.createElement("button");
 resetProgressBtn.textContent = "Сбросить прогресс";
@@ -164,17 +149,12 @@ resetProgressBtn.style.display = "block";
 resetProgressBtn.style.marginTop = "12px";
 loginOutBtn.parentNode.insertBefore(resetProgressBtn, loginOutBtn.nextSibling);
 
-// подтверждение оставляем (это не кнопки авторизации)
 resetProgressBtn.onclick = async () => {
-  let msg = "";
-  if(!isGuest){
-    msg = "Вы уверены, что хотите сбросить прогресс? Все достижения на вашем аккаунте будут испепелены!";
-  }else{
-    msg = "Вы уверены, что хотите сбросить прогресс? Все локальные достижения будут испепелены!";
-  }
+  let msg = isGuest ?
+    "Вы уверены, что хотите сбросить прогресс? Все локальные достижения будут испепелены!" :
+    "Вы уверены, что хотите сбросить прогресс? Все достижения на вашем аккаунте будут испепелены!";
 
-  const confirmReset = confirm(msg);
-  if(confirmReset){
+  if(confirm(msg)){
     coins = 0;
     clickPower = 1;
     boughtItems = {"1":0,"2":0};
@@ -183,6 +163,7 @@ resetProgressBtn.onclick = async () => {
     if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
     if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
     if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
+
     renderShop();
     startCounterAnimation(coins);
     startPlateAnimation(coins);
@@ -195,7 +176,7 @@ resetProgressBtn.onclick = async () => {
 };
 
 /* ---------------------------------------------- */
-/* АНИМАЦИЯ ПЛАШКИ (plate) */
+/* АНИМАЦИЯ ПЛАШКИ */
 /* ---------------------------------------------- */
 const plateAnim = {
   running: false,
@@ -225,7 +206,6 @@ function startPlateAnimation(newTarget){
     plateAnim.from = currentDisplayed;
     plateAnim.to = newTarget;
     plateAnim.startTime = now;
-
     plateAnim.duration = Math.max(60, plateAnim.baseDuration * 0.6);
   }
 
@@ -251,7 +231,7 @@ function plateTick(){
 }
 
 /* ---------------------------------------------- */
-/* АНИМАЦИЯ СЧЁТЧИКА (центральный counter и shop balances) */
+/* АНИМАЦИЯ СЧЁТЧИКА */
 /* ---------------------------------------------- */
 const counterAnim = {
   running: false,
@@ -315,23 +295,19 @@ function counterTick(){
   }
 }
 
-/* easing */
 function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
 
 /* ---------------------------------------------- */
 /* КЛИКЕР */
 /* ---------------------------------------------- */
 
-/* spawnFloatingCoin — белые +монеты с небольшой тенью */
+// Белые +монеты ↑
 function spawnFloatingCoin(x,y,value){
   const el = document.createElement("div");
   el.className = "floating-coin";
   el.style.left = (x - 12) + "px";
   el.style.top  = (y - 12) + "px";
-  el.style.position = "absolute";
-  el.style.pointerEvents = "none";
-  el.style.zIndex = 9999;
-  el.innerHTML = `<span style="font-weight:700;font-size:18px;color:#ffffff;text-shadow:0 2px 6px rgba(0,0,0,0.45);">+${value}</span><img src="img/anti-coin.png" style="width:18px;height:18px;margin-left:6px;vertical-align:middle;">`;
+  el.innerHTML = `<span style="font-weight:700;font-size:18px;color:#ffffff;text-shadow:0 2px 6px rgba(0,0,0,0.45);">+${value}</span><img src="img/anti-coin.png" style="width:18px;height:18px;margin-left:6px;">`;
   document.body.appendChild(el);
 
   requestAnimationFrame(()=>{
@@ -346,7 +322,7 @@ function spawnFloatingCoin(x,y,value){
 function clickAction(x,y){
   if(clickPower === 1){
     coins += 1;
-    document.getElementById("counterValue").textContent = coins;
+    counterValue.textContent = coins;
     if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
     if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
     if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
@@ -361,7 +337,6 @@ function clickAction(x,y){
   startCounterAnimation(coins);
   startPlateAnimation(coins);
   spawnFloatingCoin(x,y,clickPower);
-
   updatePricesColor();
 }
 
@@ -374,24 +349,21 @@ function animateClicker(){
   }, 100);
 }
 
-/* play audio helper: reset time and play (catch promise) */
 function playSound(audio){
   try{
     if(!audio) return;
     audio.pause();
     audio.currentTime = 0;
-    const p = audio.play();
-    if(p && p.catch) p.catch(()=>{/* ignore autoplay errors */});
+    audio.play().catch(()=>{});
   }catch(e){}
 }
 
-/* clicker events — тоже проигрываем звук click-clicker */
 clickButton.addEventListener("click", e=>{
-  // sound for clicker
   try { sClickClicker.currentTime = 0; sClickClicker.play().catch(()=>{}); } catch(e){}
   clickAction(e.clientX, e.clientY);
   animateClicker();
 });
+
 clickButton.addEventListener("touchstart", e=>{
   e.preventDefault();
   try { sClickClicker.currentTime = 0; sClickClicker.play().catch(()=>{}); } catch(e){}
@@ -401,6 +373,9 @@ clickButton.addEventListener("touchstart", e=>{
   animateClicker();
 },{passive:false});
 
+/* -------------------- ЧАСТЬ 2/2 -------------------- */
+
+/* ---------------------------------------------- */
 /* МАГАЗИН */
 /* ---------------------------------------------- */
 const baseShopItems = [
@@ -436,8 +411,9 @@ function updateButtonText(item,btn){
   p.innerHTML = `${item.cost}<img src="img/anti-coin.png">`;
   p.style.color=(coins<item.cost)?"#ff3333":"#fff";
   btn.appendChild(p);
-     }
+}
 
+/* Рендер магазина */
 function renderShop(){
   updateShopItems();
   itemsBlock.innerHTML="";
@@ -504,7 +480,7 @@ function updatePricesColor(){
   });
 }
 
-/* Функция покупки с моментальным сохранением */
+/* Покупка */
 function purchaseItem(item){
   if(item.stock !== undefined && item.stock <=0) return;
   if(coins < item.cost) return;
@@ -518,30 +494,33 @@ function purchaseItem(item){
   updatePricesColor();
   renderShop();
 
-  if(!isGuest) savePlayerData(); // мгновенное сохранение в БД
+  if(!isGuest) savePlayerData();
 }
 
 /* ---------------------------------------------- */
-/* PANELS */
+/* PANELS и plate swing */
 /* ---------------------------------------------- */
 const panels = document.getElementById("panels");
 let btnTimers={};
 
 function safeSetStyle(el,prop,value,delay=0){
-  const id = el.id + prop;
+  const id = (el.id||Math.random()) + prop;
   if(btnTimers[id]) clearTimeout(btnTimers[id]);
   if(delay===0) el.style[prop]=value;
   else btnTimers[id]=setTimeout(()=>{ el.style[prop]=value; }, delay);
 }
 
+/* стартовое положение панелей (как в оригинале) */
 panels.style.transform="translateX(-392px)";
+
 function swingPlate(direction){
   const plate = document.getElementById("topPlate");
+  if(!plate) return;
 
-  // ⛔ ГЛАВНОЕ: отключаем удар, если он был
+  // отключаем удар, если он был
   plate.classList.remove("plate-hit");
 
-  // если уже идёт покачивание — сбрасываем
+  // сбрасываем текущее покачивание
   plate.classList.remove("swinging");
   void plate.offsetWidth;
 
@@ -564,141 +543,179 @@ function swingPlate(direction){
   });
 }
 
-function goToShop(){ swingPlate("left"); panels.style.transform="translateX(-200vw)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backToClickerBtn.style.display="block"; backToClickerBtn.style.right="-60px"; setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50); updatePricesColor(); }
-function goBackFromShop(){ swingPlate("right"); panels.style.transform="translateX(-100vw)"; safeSetStyle(backToClickerBtn,"right","-60px"); safeSetStyle(backToClickerBtn,"display","none",400); shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; loginBtnEl.style.left="12px"; }
-function goToSettings(){ swingPlate("right"); panels.style.transform="translateX(0)"; shopBtnEl.style.right="-60px"; settingsBtnEl.style.left="-60px"; loginBtnEl.style.left="-60px"; backBtnEl.style.display="block"; safeSetStyle(backBtnEl,"right","12px",50); }
-function goBackFromSettings(){ swingPlate("left"); panels.style.transform="translateX(-100vw)"; shopBtnEl.style.right="12px"; settingsBtnEl.style.left="12px"; safeSetStyle(backBtnEl,"right","-60px"); safeSetStyle(backBtnEl,"display","none",500); loginBtnEl.style.left="12px"; }
+function goToShop(){ 
+  swingPlate("left"); 
+  panels.style.transform="translateX(-200vw)"; 
+  shopBtnEl.style.right="-60px"; 
+  settingsBtnEl.style.left="-60px"; 
+  loginBtnEl.style.left="-60px"; 
+  backToClickerBtn.style.display="block"; 
+  backToClickerBtn.style.right="-60px"; 
+  setTimeout(()=>safeSetStyle(backToClickerBtn,"right","12px",0),50); 
+  updatePricesColor(); 
+}
+function goBackFromShop(){ 
+  swingPlate("right"); 
+  panels.style.transform="translateX(-100vw)"; 
+  safeSetStyle(backToClickerBtn,"right","-60px"); 
+  safeSetStyle(backToClickerBtn,"display","none",400); 
+  shopBtnEl.style.right="12px"; 
+  settingsBtnEl.style.left="12px"; 
+  loginBtnEl.style.left="12px"; 
+}
+function goToSettings(){ 
+  swingPlate("right"); 
+  panels.style.transform="translateX(0)"; 
+  shopBtnEl.style.right="-60px"; 
+  settingsBtnEl.style.left="-60px"; 
+  loginBtnEl.style.left="-60px"; 
+  backBtnEl.style.display="block"; 
+  safeSetStyle(backBtnEl,"right","12px",50); 
+}
+function goBackFromSettings(){ 
+  swingPlate("left"); 
+  panels.style.transform="translateX(-100vw)"; 
+  shopBtnEl.style.right="12px"; 
+  settingsBtnEl.style.left="12px"; 
+  safeSetStyle(backBtnEl,"right","-60px"); 
+  safeSetStyle(backBtnEl,"display","none",500); 
+  loginBtnEl.style.left="12px"; 
+}
 
 shopBtnEl.onclick=goToShop;
 settingsBtnEl.onclick=goToSettings;
 backBtnEl.onclick=goBackFromSettings;
 backToClickerBtn.onclick=goBackFromShop;
 
-/* plate click: короткая анимация и звук */
+/* plate click: звук и короткая анимация */
 const topPlateEl = document.getElementById('topPlate');
 if(topPlateEl){
   topPlateEl.addEventListener('click', (e)=>{
-    if(topPlateEl.style.display === 'none') return; // защита если plate скрыта
-    try { sClickWood.currentTime = 0; sClickWood.play().catch(()=>{}); } catch(e) {}
-    // запускаем короткую анимацию клика через класс
+    if(topPlateEl.style.display === 'none') return;
+    try { 
+      if(sClickWood){ sClickWood.currentTime = 0; sClickWood.play().catch(()=>{}); } 
+    } catch(e) {}
     topPlateEl.classList.remove('plate-hit');
-    void topPlateEl.offsetWidth; // сброс для перезапуска анимации
+    void topPlateEl.offsetWidth; // сброс
     topPlateEl.classList.add('plate-hit');
   });
 
-  // вместо setTimeout используем animationend для очистки класса
+  // Надёжный обработчик очистки класса plate-hit на завершение анимации
   topPlateEl.addEventListener('animationend', (e)=>{
-    if(e.animationName === "plateHit"){ // убедись, что CSS анимация клика называется plateHit
-        topPlateEl.classList.remove('plate-hit');
+    // keyframes в CSS называются "hitPlate"
+    if(e && e.animationName && e.animationName.toLowerCase().includes("hit")) {
+      topPlateEl.classList.remove('plate-hit');
     }
   });
 }
 
-/* === Глобальный звук кнопок — исправленная версия === */
+/* ---------------------------------------------- */
+/* ГЛОБАЛЬНЫЙ ЗВУК КНОПОК (исключения buy-btn и clickButton) */
+/* ---------------------------------------------- */
 function handleButtonSound(e) {
     const btn = e.target.closest("button");
     if (!btn) return;
 
-    // исключения
     if (btn.classList.contains("buy-btn")) return;
     if (btn.id === "clickButton") return;
 
     try {
-        sClickButton.currentTime = 0;
-        sClickButton.play().catch(()=>{});
+        if(sClickButton){ sClickButton.currentTime = 0; sClickButton.play().catch(()=>{}); }
     } catch (e) {}
 }
 
 let isTouch = false;
 document.addEventListener("touchstart", () => { isTouch = true; }, { once: true });
 
-/* document-level touchstart handler (for mobile) to catch button touches */
 document.addEventListener("touchstart", (e) => {
     handleButtonSound(e);
 }, { passive: true });
 
-// ПК — звук по click, но только если НЕ было touch
 document.addEventListener("click", (e) => {
-    if (isTouch) return; // touch → звук уже проигран
+    if (isTouch) return;
     handleButtonSound(e);
 });
 
 /* ---------------------------------------------- */
-/* АВТОРИЗАЦИЯ И UI КНОПОК */
+/* ГРОМКОСТИ — ИНИЦИАЛИЗАЦИЯ ПОЛЗУНКОВ И ЛОГИКА ЗАЛИВКИ */
 /* ---------------------------------------------- */
 
-// Делаем стиль у loginOutBtn похожим на resetProgressBtn
-loginOutBtn.style.fontFamily = "'Montserrat', sans-serif";
-loginOutBtn.style.fontWeight = "600";
-
-// Обновление UI кнопок в зависимости от статуса авторизации
-function updateAuthUI(user){
-  if(user){
-    loginOutBtn.textContent = "Выйти из аккаунта";
-    loginBtnEl.style.display = "none";
-  } else {
-    loginOutBtn.textContent = "Войти в аккаунт";
-    loginBtnEl.style.display = "block";
-  }
+// iOS Safari unlock
+function ensureIOSAudioUnlock() {
+    try {
+        const p = menuMusic.play();
+        if (p) p.then(()=>{}).catch(()=>{});
+    } catch(e){}
 }
 
-// Вход через верхнюю кнопку
-loginBtnEl.addEventListener("click", async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    // onAuthStateChanged обработает загрузку данных и UI
-  } catch (e) {
-    console.error("Ошибка входа:", e);
-  }
-});
+// дефолтные значения
+let musicVolume = 0.8;
+let soundVolume = 0.8;
 
-// Кнопка в настройках: вход/выход
-loginOutBtn.addEventListener("click", async () => {
-  try {
-    if(isGuest){
-      // вход
-      await signInWithPopup(auth, provider);
-      // onAuthStateChanged обработает остальное
-    } else {
-      // выход
-      await signOut(auth);
-      // onAuthStateChanged обработает сброс интерфейса
-    }
-  } catch (e) {
-    console.error("Ошибка авторизации/выхода:", e);
+/* Функция, которая обновляет вид заполненной части трека.
+   Мы используем простой linear-gradient, который корректно работает в Safari/iOS и на Android. */
+function updateSliderFill(slider){
+  if(!slider) return;
+  // значение ожидается от 0 до 1 (у тебя step 0.01)
+  const val = parseFloat(slider.value);
+  const percent = Math.max(0, Math.min(100, Math.round(val * 100)));
+  // background: заполненная часть — #513B1E, остальное — #332614
+  slider.style.background = `linear-gradient(90deg, #513B1E ${percent}%, #332614 ${percent}%)`;
+}
+
+/* Попытка найти ползунки (вдруг DOM ещё не готов) */
+(function ensureSlidersExist(){
+  if(!musicVolumeSlider || !soundVolumeSlider){
+    musicVolumeSlider = document.getElementById("musicVolumeSlider");
+    soundVolumeSlider = document.getElementById("soundVolumeSlider");
   }
-});
+})();
+
+/* Применяем громкости к аудио-элементам (если они существуют) */
+try {
+  if(menuMusic) menuMusic.volume = musicVolume;
+  if(sClickWood) sClickWood.volume = soundVolume;
+  if(sClickClicker) sClickClicker.volume = soundVolume;
+  if(sClickButton) sClickButton.volume = soundVolume;
+} catch(e){}
+
+/* Если слайдеры есть — установим значения и обработчики */
+if (musicVolumeSlider) {
+    musicVolumeSlider.value = musicVolume;
+
+    musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
+    musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
+
+    // обновляем фон сразу чтобы отобразить текущее значение
+    updateSliderFill(musicVolumeSlider);
+
+    musicVolumeSlider.addEventListener("input", (e) => {
+        musicVolume = parseFloat(e.target.value);
+        if(menuMusic) menuMusic.volume = musicVolume;
+        updateSliderFill(musicVolumeSlider);
+        saveVolumeSettings();
+    });
+}
+if (soundVolumeSlider) {
+    soundVolumeSlider.value = soundVolume;
+
+    soundVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
+    soundVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
+
+    updateSliderFill(soundVolumeSlider);
+
+    soundVolumeSlider.addEventListener("input", (e) => {
+        soundVolume = parseFloat(e.target.value);
+        if(sClickWood) sClickWood.volume = soundVolume;
+        if(sClickClicker) sClickClicker.volume = soundVolume;
+        if(sClickButton) sClickButton.volume = soundVolume;
+        updateSliderFill(soundVolumeSlider);
+        saveVolumeSettings();
+    });
+}
 
 /* ---------------------------------------------- */
-/* Сохранение / Загрузка данных игрока в Firebase */
-/* ---------------------------------------------- */
-
-// Вспомогательная функция для чтения ключа из email
-function buildUserKeyFromEmail(email){
-  if(!email) return null;
-  // заменяем все точки на нижнее подчеркивание, приводим к нижнему регистру
-  return email.toLowerCase().replace(/\./g, '_');
-}
-
-// Сохраняет основной блок данных игрока (coins, clickPower, items) + volume не трогает
-async function savePlayerData() {
-  if(!isGuest && userKey){
-    try{
-      await set(ref(db, 'users/' + userKey), {
-        coins: coins,
-        clickPower: clickPower,
-        items: boughtItems,
-        // не трогаем volume здесь — она отдельно сохраняется в saveVolumeSettings
-      });
-      lastSavedCoins = coins;
-    } catch(e){
-      console.error("Ошибка сохранения данных в Firebase:", e);
-    }
-  }
-}
-
-// Сохраняет громкости (volume) отдельно, чтобы не перезаписывать случайно другие поля
+/* Сохранение громкости отдельно */
 async function saveVolumeSettings() {
   if(!isGuest && userKey){
     try{
@@ -709,12 +726,35 @@ async function saveVolumeSettings() {
     } catch(e){
       console.error("Ошибка сохранения громкости в Firebase:", e);
     }
+  } else {
+    // для гостя ничего не сохраняем в БД — можно хранить в localStorage, если нужно
+    try {
+      localStorage.setItem("anti_musicVolume", String(musicVolume));
+      localStorage.setItem("anti_soundVolume", String(soundVolume));
+    } catch(e){}
   }
 }
 
+/* Если в localStorage есть сохранённые громкости для гостя — применим их */
+try {
+  const savedMusic = localStorage.getItem("anti_musicVolume");
+  const savedSound = localStorage.getItem("anti_soundVolume");
+  if(savedMusic !== null) {
+    musicVolume = parseFloat(savedMusic);
+    if(menuMusic) menuMusic.volume = musicVolume;
+    if(musicVolumeSlider) { musicVolumeSlider.value = musicVolume; updateSliderFill(musicVolumeSlider); }
+  }
+  if(savedSound !== null) {
+    soundVolume = parseFloat(savedSound);
+    if(sClickWood) sClickWood.volume = soundVolume;
+    if(sClickClicker) sClickClicker.volume = soundVolume;
+    if(sClickButton) sClickButton.volume = soundVolume;
+    if(soundVolumeSlider) { soundVolumeSlider.value = soundVolume; updateSliderFill(soundVolumeSlider); }
+  }
+} catch(e){}
+
 /* ---------------------------------------------- */
-/* ПЕРИОДИЧЕСКОЕ АВТОСОХРАНЕНИЕ (каждые 5 секунд) */
-/* ---------------------------------------------- */
+/* АВТОСОХРАНЕНИЕ */
 setInterval(()=>{
   if(!isGuest && coins !== lastSavedCoins){
     savePlayerData();
@@ -722,68 +762,29 @@ setInterval(()=>{
 }, 5000);
 
 /* ---------------------------------------------- */
-/* ГРОМКОСТИ — ИНИЦИАЛИЗАЦИЯ ПОЛЗУНКОВ И ЗНАЧЕНИЙ */
+/* AUTH и загрузка данных пользователя */
 /* ---------------------------------------------- */
-// iOS Safari requires audio unlock on user gesture
-function ensureIOSAudioUnlock() {
-    try {
-        // заставляем Safari разрешить аудио
-        const p = menuMusic.play();
-        if (p) p.then(()=>{}).catch(()=>{});
-    } catch(e){}
+function buildUserKeyFromEmail(email){
+  if(!email) return null;
+  return email.toLowerCase().replace(/\./g, '_');
 }
 
-// дефолтные значения
-let musicVolume = 0.8;
-let soundVolume = 0.8;
-
-// если слайдеры ещё не в DOM (например HTML не изменён), попытаемся создать минимальные элементы безопасно
-(function ensureSlidersExist(){
-  if(!musicVolumeSlider || !soundVolumeSlider){
-    // если sliders нет, попробуем найти их повторно (вдруг DOM ещё не отрендерился)
-    musicVolumeSlider = document.getElementById("musicVolumeSlider");
-    soundVolumeSlider = document.getElementById("soundVolumeSlider");
+async function savePlayerData() {
+  if(!isGuest && userKey){
+    try{
+      await set(ref(db, 'users/' + userKey), {
+        coins: coins,
+        clickPower: clickPower,
+        items: boughtItems,
+      });
+      lastSavedCoins = coins;
+    } catch(e){
+      console.error("Ошибка сохранения данных в Firebase:", e);
+    }
   }
-})();
-
-// применяем громкости к аудиоэлементам
-try {
-  if(menuMusic) menuMusic.volume = musicVolume;
-  sClickWood.volume = soundVolume;
-  sClickClicker.volume = soundVolume;
-  sClickButton.volume = soundVolume;
-} catch(e){}
-
-// Если слайдеры существуют — установим их значения и повесим обработчики
-if (musicVolumeSlider) {
-    musicVolumeSlider.value = musicVolume;
-
-    musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
-    musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
-
-    musicVolumeSlider.addEventListener("input", (e) => {
-        musicVolume = parseFloat(e.target.value);
-        menuMusic.volume = musicVolume;
-        saveVolumeSettings();
-    });
-}
-if(soundVolumeSlider){
-  soundVolumeSlider.value = soundVolume;
-  soundVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
-soundVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
-
-soundVolumeSlider.addEventListener("input", (e) => {
-    soundVolume = parseFloat(e.target.value);
-    sClickWood.volume = soundVolume;
-    sClickClicker.volume = soundVolume;
-    sClickButton.volume = soundVolume;
-    saveVolumeSettings();
-});
 }
 
-/* ---------------------------------------------- */
-/* ОБРАБОТЧИКИ СОСТОЯНИЯ АВТОРИЗАЦИИ И ЗАГРУЗКА ДАННЫХ */
-/* ---------------------------------------------- */
+/* onAuthStateChanged */
 onAuthStateChanged(auth, (user) => {
   if(user){
     isGuest = false;
@@ -791,7 +792,6 @@ onAuthStateChanged(auth, (user) => {
     userKey = buildUserKeyFromEmail(user.email);
     updateAuthUI(user);
 
-    // загружаем данные игрока из Firebase
     get(ref(db, 'users/' + userKey)).then(snapshot=>{
       if(snapshot.exists()){
         const data = snapshot.val();
@@ -800,22 +800,19 @@ onAuthStateChanged(auth, (user) => {
         clickPower = data.clickPower || 1;
         boughtItems = data.items || {"1":0,"2":0};
 
-        // загружаем громкости, если они есть
         if(data.volume){
           musicVolume = (data.volume.music !== undefined) ? Number(data.volume.music) : 0.8;
           soundVolume = (data.volume.sound !== undefined) ? Number(data.volume.sound) : 0.8;
 
-          // если слайдеры есть — установим значения
-          if(musicVolumeSlider) musicVolumeSlider.value = musicVolume;
-          if(soundVolumeSlider) soundVolumeSlider.value = soundVolume;
+          if(musicVolumeSlider) { musicVolumeSlider.value = musicVolume; updateSliderFill(musicVolumeSlider); }
+          if(soundVolumeSlider) { soundVolumeSlider.value = soundVolume; updateSliderFill(soundVolumeSlider); }
 
           if(menuMusic) menuMusic.volume = musicVolume;
-          sClickWood.volume = soundVolume;
-          sClickClicker.volume = soundVolume;
-          sClickButton.volume = soundVolume;
+          if(sClickWood) sClickWood.volume = soundVolume;
+          if(sClickClicker) sClickClicker.volume = soundVolume;
+          if(sClickButton) sClickButton.volume = soundVolume;
         }
 
-        // обновляем UI
         counterValue.textContent = coins;
         if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
         if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
@@ -827,8 +824,6 @@ onAuthStateChanged(auth, (user) => {
 
         lastSavedCoins = coins;
       } else {
-        // если записи нет, инициализируем её (можно оставить пустой — но не перезаписываем volume)
-        // создадим начальную запись с текущими значениями
         set(ref(db, 'users/' + userKey), {
           coins: coins,
           clickPower: clickPower,
@@ -838,7 +833,7 @@ onAuthStateChanged(auth, (user) => {
     }).catch(err=>console.error(err));
 
   } else {
-    // вышли в гостевой режим — обнуляем интерфейс
+    // гостевой режим
     isGuest = true;
     userKey = null;
     updateAuthUI(null);
@@ -852,15 +847,14 @@ onAuthStateChanged(auth, (user) => {
     if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
     if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
 
-    // вернуть дефолтные громкости (не будем сохранять их)
     musicVolume = 0.8;
     soundVolume = 0.8;
-    if(musicVolumeSlider) musicVolumeSlider.value = musicVolume;
-    if(soundVolumeSlider) soundVolumeSlider.value = soundVolume;
+    if(musicVolumeSlider) { musicVolumeSlider.value = musicVolume; updateSliderFill(musicVolumeSlider); }
+    if(soundVolumeSlider) { soundVolumeSlider.value = soundVolume; updateSliderFill(soundVolumeSlider); }
     if(menuMusic) menuMusic.volume = musicVolume;
-    sClickWood.volume = soundVolume;
-    sClickClicker.volume = soundVolume;
-    sClickButton.volume = soundVolume;
+    if(sClickWood) sClickWood.volume = soundVolume;
+    if(sClickClicker) sClickClicker.volume = soundVolume;
+    if(sClickButton) sClickButton.volume = soundVolume;
 
     startCounterAnimation(coins);
     startPlateAnimation(coins);
@@ -868,17 +862,55 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+/* Кнопки входа/выход */
+loginBtnEl.addEventListener("click", async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    console.error("Ошибка входа:", e);
+  }
+});
+
+loginOutBtn.addEventListener("click", async () => {
+  try {
+    if(isGuest){
+      await signInWithPopup(auth, provider);
+    } else {
+      await signOut(auth);
+    }
+  } catch (e) {
+    console.error("Ошибка авторизации/выхода:", e);
+  }
+});
+
+function updateAuthUI(user){
+  if(user){
+    loginOutBtn.textContent = "Выйти из аккаунта";
+    loginBtnEl.style.display = "none";
+  } else {
+    loginOutBtn.textContent = "Войти в аккаунт";
+    loginBtnEl.style.display = "block";
+  }
+}
+
 /* ---------------------------------------------- */
-/* START */
-/* ---------------------------------------------- */
+/* START — запуск */
 fakeLoad(()=>{
+  // корректируем позицию панелей на старт
   panels.style.transform="translateX(-100vw)";
   renderShop();
-  document.getElementById("topPlate").style.display="block";
-  // инициализация видимостей значений
-  document.getElementById("counterValue").textContent = coins;
+  if(document.getElementById("topPlate")) document.getElementById("topPlate").style.display="block";
+
+  // инициализация значений на UI
+  if(counterValue) counterValue.textContent = coins;
   if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
   if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
   if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
-  // запускаем пустую анимацию синхронизации (если нужно)
+
+  // Убедимся, что слайдеры отрисованы и их фон соответствует значению
+  if(musicVolumeSlider) updateSliderFill(musicVolumeSlider);
+  if(soundVolumeSlider) updateSliderFill(soundVolumeSlider);
+
+  // Пробуем разблокировать audio в iOS (если пользователь уже взаимодействовал)
+  ensureIOSAudioUnlock();
 });
