@@ -324,16 +324,17 @@ body, #app {
 }  
   
 /* Анимации покачивания */  
-@keyframes swingSuspended {
-  0%   { transform: rotate(var(--deg1)); }
-  30%  { transform: rotate(var(--deg2)); }
-  60%  { transform: rotate(var(--deg3)); }
-  100% { transform: rotate(0deg); }
-}
+@keyframes swingSuspended {  
+  0%   { transform: translateX(-50%) rotate(0deg); }  
+  25%  { transform: translateX(-49.5%) rotate(var(--deg1,8deg)); }  
+  50%  { transform: translateX(-50.5%) rotate(var(--deg2,-5deg)); }  
+  75%  { transform: translateX(-50.25%) rotate(var(--deg3,3deg)); }  
+  100% { transform: translateX(-50%) rotate(0deg); }  
+}  
 
 /* Добавлено: проигрывание анимации при добавлении класса .swinging */ 
 #topPlate.swinging {
-    animation: swingSuspended 0.8s cubic-bezier(.34,1.56,.64,1);
+  animation: swingSuspended 0.8s ease;
 }
 
 /* Скрыт по умолчанию (как было в оригинале) */
@@ -371,7 +372,7 @@ body, #app {
     width: 100%;  
     height: 10px;  
     background: #332614; /* базовый цвет трека */  
-    border-radius: 3px;  
+    border-radius: 5px;  
 
     /* safety fallback (не полагаться только на background-size) */  
     background-image: linear-gradient(#513B1E, #513B1E);  
@@ -428,7 +429,7 @@ body, #app {
 #soundVolumeSlider::-moz-range-track {  
     background: #332614;  
     height: 10px;  
-    border-radius: 3px;  
+    border-radius: 5px;  
 }  
   
 /* Firefox — заполненная часть */  
@@ -436,7 +437,7 @@ body, #app {
 #soundVolumeSlider::-moz-range-progress {  
     background: #513B1E;  
     height: 10px;  
-    border-radius: 3px;  
+    border-radius: 5px;  
 }  
 
 /* Убираем дефолтный outline при фокусе, но оставляем доступность */
@@ -447,7 +448,7 @@ body, #app {
 /* Уточняющие стили — предотвращают "вылаз" заливки за пределы трека */
 #musicVolumeSlider::-webkit-slider-runnable-track,
 #soundVolumeSlider::-webkit-slider-runnable-track {
-  border-radius: 3px;
+  border-radius: 5px;
 }
 
 /* Дополнительно: для touch устройств увеличим зону пальца — невидимая область вокруг */
