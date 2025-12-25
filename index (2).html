@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>AnTI Shop</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splashScreen">
+  <h1>AnTI-Shop</h1>
+
+  <div id="progressBarContainer">
+    <div id="progressBar"></div>
+  </div>
+
+  <div id="progressPercent">0%</div>
+
+  <button id="playBtn">Играть</button>
+  <div id="playBtnInside">Играть</div>
+</div>
+
+<div id="app">
+  <div id="topPlate">
+      <img id="plateImg" src="img/stat-table.png" alt="">
+      <div id="plateTitle">AnTI-Shop</div>
+      <div id="plateBalance">
+          <span id="plateBalanceValue">0</span>
+          <img src="img/anti-coin.png" alt="">
+      </div>
+  </div>
+
+  <!-- КНОПКИ -->
+  <button id="settingsBtn"><img src="img/settings.png" alt=""></button>
+  <button id="loginBtn"><img src="img/login.png" alt=""></button>
+  <button id="shopBtn"><img src="img/shop-icon.png" alt=""></button>
+  <button id="backBtn"><img src="img/back-icon.png" alt=""></button>
+  <button id="backToClickerBtn"><img src="img/back-icon.png" alt=""></button>
+
+  <div id="panels">
+
+    <!-- SETTINGS PANEL -->
+    <div id="settingsPanel">
+
+      <h2 class="settings-header">НАСТРОЙКА ЗВУКОВ</h2>
+
+      <div class="volume-control">
+        <img src="img/music-volume.png" alt="Музыка" class="volume-icon">
+        <input type="range"
+               id="musicVolumeSlider"
+               min="0" max="1" step="0.01" value="0.8">
+      </div>
+
+      <div class="volume-control">
+        <img src="img/sound-volume.png" alt="Звуки" class="volume-icon">
+        <input type="range"
+               id="soundVolumeSlider"
+               min="0" max="1" step="0.01" value="0.8">
+      </div>
+
+      <h2 class="settings-header">НАСТРОЙКИ ПРОГРЕССА</h2>
+
+      <button id="loginOutBtn">Войти в аккаунт</button>
+      <!-- кнопка "Сбросить прогресс" создаётся из script.js -->
+
+    </div>
+
+    <!-- CLICKER PANEL -->
+    <div id="clickerPanel">
+      <div id="clickButtonWrapper">
+
+        <div id="ground">
+          <img id="groundImg" src="img/ground.png" alt="">
+        </div>
+
+        <button id="clickButton">
+          <img id="clickImg" src="img/click1.png" alt="">
+        </button>
+
+      </div>
+
+      <div id="counter" style="margin-top:20px;">
+        <span id="counterValue">0</span>
+        <img src="img/anti-coin.png" alt="">
+      </div>
+    </div>
+
+    <!-- SHOP PANEL -->
+    <div id="shopPanel">
+      <div id="shopPanelInner">
+        <div id="items"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 🎵 ВСЕ ЗВУКИ ТЕПЕРЬ ЧЕРЕЗ <audio> -->
+<audio id="menuMusic" src="audio/menu-song.mp3" preload="auto" loop></audio>
+<audio id="sClickWood" src="audio/click-wood.mp3" preload="auto"></audio>
+<audio id="sClickClicker" src="audio/click-clicker.mp3" preload="auto"></audio>
+<audio id="sClickButton" src="audio/click-button.mp3" preload="auto"></audio>
+
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
