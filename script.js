@@ -640,117 +640,55 @@ document.addEventListener("click", (e) => {
 /* ГРОМКОСТИ — ИНИЦИАЛИЗАЦИЯ ПОЛЗУНКОВ И ЛОГИКА ЗАЛИВКИ */
 /* ---------------------------------------------- */
 
-// iOS Safari unlock
-function ensureIOSAudioUnlock() {
-    try {
-        const p = menuMusic.play();
-        if (p) p.then(()=>{}).catch(()=>{});
-    } catch(e){}
-}
+const musicToggleBtn = document.getElementById("musicToggleBtn");
+const soundToggleBtn = document.getElementById("soundToggleBtn");
 
-// дефолтные значения
-let musicVolume = 0.8;
-let soundVolume = 0.8;
+// состояния: true = включено, false = выключено
+let musicEnabled = true;
+let soundEnabled = true;
 
-/* Функция, которая обновляет вид заполненной части трека.
-   Мы используем простой linear-gradient, который корректно работает в Safari/iOS и на Android. */
-function updateSliderFill(slider){
-  if(!slider) return;
-  // значение ожидается от 0 до 1 (у тебя step 0.01)
-  const val = parseFloat(slider.value);
-  const percent = Math.max(0, Math.min(100, Math.round(val * 100)));
-  // background: заполненная часть — #513B1E, остальное — #332614
-  slider.style.background = `linear-gradient(90deg, #513B1E ${percent}%, #332614 ${percent}%)`;
-}
-
-/* Попытка найти ползунки (вдруг DOM ещё не готов) */
-(function ensureSlidersExist(){
-  if(!musicVolumeSlider || !soundVolumeSlider){
-    musicVolumeSlider = document.getElementById("musicVolumeSlider");
-    soundVolumeSlider = document.getElementById("soundVolumeSlider");
-  }
-})();
-
-/* Применяем громкости к аудио-элементам (если они существуют) */
-try {
-  if(menuMusic) menuMusic.volume = musicVolume;
-  if(sClickWood) sClickWood.volume = soundVolume;
-  if(sClickClicker) sClickClicker.volume = soundVolume;
-  if(sClickButton) sClickButton.volume = soundVolume;
-} catch(e){}
-
-/* Если слайдеры есть — установим значения и обработчики */
-if (musicVolumeSlider) {
-    musicVolumeSlider.value = musicVolume;
-
-    musicVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
-    musicVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
-
-    // обновляем фон сразу чтобы отобразить текущее значение
-    updateSliderFill(musicVolumeSlider);
-
-    musicVolumeSlider.addEventListener("input", (e) => {
-        musicVolume = parseFloat(e.target.value);
-        if(menuMusic) menuMusic.volume = musicVolume;
-        updateSliderFill(musicVolumeSlider);
-        saveVolumeSettings();
-    });
-}
-if (soundVolumeSlider) {
-    soundVolumeSlider.value = soundVolume;
-
-    soundVolumeSlider.addEventListener("touchstart", ensureIOSAudioUnlock);
-    soundVolumeSlider.addEventListener("mousedown", ensureIOSAudioUnlock);
-
-    updateSliderFill(soundVolumeSlider);
-
-    soundVolumeSlider.addEventListener("input", (e) => {
-        soundVolume = parseFloat(e.target.value);
-        if(sClickWood) sClickWood.volume = soundVolume;
-        if(sClickClicker) sClickClicker.volume = soundVolume;
-        if(sClickButton) sClickButton.volume = soundVolume;
-        updateSliderFill(soundVolumeSlider);
-        saveVolumeSettings();
-    });
-}
-
-/* ---------------------------------------------- */
-/* Сохранение громкости отдельно */
-async function saveVolumeSettings() {
-  if(!isGuest && userKey){
-    try{
-      await set(ref(db, 'users/' + userKey + '/volume'), {
-        music: musicVolume,
-        sound: soundVolume
-      });
-    } catch(e){
-      console.error("Ошибка сохранения громкости в Firebase:", e);
-    }
+// Музыка
+musicToggleBtn.addEventListener("click", () => {
+  musicEnabled = !musicEnabled;
+  if(musicEnabled){
+    menuMusic.play().catch(()=>{});
+    musicToggleBtn.querySelector("img").src = "img/music-volume-on.png";
+    menuMusic.volume = 0.8;
   } else {
-    // для гостя ничего не сохраняем в БД — можно хранить в localStorage, если нужно
-    try {
-      localStorage.setItem("anti_musicVolume", String(musicVolume));
-      localStorage.setItem("anti_soundVolume", String(soundVolume));
-    } catch(e){}
+    menuMusic.pause();
+    musicToggleBtn.querySelector("img").src = "img/music-volume-off.png";
   }
-}
+});
 
-/* Если в localStorage есть сохранённые громкости для гостя — применим их */
+// Звуки
+soundToggleBtn.addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  soundToggleBtn.querySelector("img").src = soundEnabled ? "img/sound-volume-on.png" : "img/sound-volume-off.png";
+
+  // volume всех звуков
+  const volume = soundEnabled ? 0.8 : 0;
+  if(sClickWood) sClickWood.volume = volume;
+  if(sClickClicker) sClickClicker.volume = volume;
+  if(sClickButton) sClickButton.volume = volume;
+});
+
+// при загрузке страницы
 try {
-  const savedMusic = localStorage.getItem("anti_musicVolume");
-  const savedSound = localStorage.getItem("anti_soundVolume");
-  if(savedMusic !== null) {
-    musicVolume = parseFloat(savedMusic);
-    if(menuMusic) menuMusic.volume = musicVolume;
-    if(musicVolumeSlider) { musicVolumeSlider.value = musicVolume; updateSliderFill(musicVolumeSlider); }
-  }
-  if(savedSound !== null) {
-    soundVolume = parseFloat(savedSound);
-    if(sClickWood) sClickWood.volume = soundVolume;
-    if(sClickClicker) sClickClicker.volume = soundVolume;
-    if(sClickButton) sClickButton.volume = soundVolume;
-    if(soundVolumeSlider) { soundVolumeSlider.value = soundVolume; updateSliderFill(soundVolumeSlider); }
-  }
+  const savedMusic = localStorage.getItem("anti_musicEnabled");
+  const savedSound = localStorage.getItem("anti_soundEnabled");
+  if(savedMusic !== null) musicEnabled = savedMusic === "true";
+  if(savedSound !== null) soundEnabled = savedSound === "true";
+
+  musicToggleBtn.querySelector("img").src = musicEnabled ? "img/music-volume-on.png" : "img/music-volume-off.png";
+  soundToggleBtn.querySelector("img").src = soundEnabled ? "img/sound-volume-on.png" : "img/sound-volume-off.png";
+
+  menuMusic.volume = musicEnabled ? 0.8 : 0;
+  if(!musicEnabled) menuMusic.pause();
+
+  const vol = soundEnabled ? 0.8 : 0;
+  if(sClickWood) sClickWood.volume = vol;
+  if(sClickClicker) sClickClicker.volume = vol;
+  if(sClickButton) sClickButton.volume = vol;
 } catch(e){}
 
 /* ---------------------------------------------- */
