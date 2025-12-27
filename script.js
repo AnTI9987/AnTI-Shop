@@ -89,14 +89,6 @@ function fakeLoad(callback){
   const percent = document.getElementById("progressPercent");
   const playBtn = document.getElementById("playBtn");
 
-  playBtn.addEventListener("click", () => {
-    try {
-        menuMusic.volume = musicVolume;
-        const playPromise = menuMusic.play();
-        if (playPromise !== undefined) playPromise.catch(()=>{});
-    } catch (e) {}
-  });
-
   let width = 0;
   const interval = setInterval(()=>{
     width += Math.random()*2 + 0.5;
@@ -350,9 +342,9 @@ function animateClicker(){
 }
 
 function playSound(audio){
+  if(!soundEnabled) return;
+  if(!audio) return;
   try{
-    if(!audio) return;
-    audio.pause();
     audio.currentTime = 0;
     audio.play().catch(()=>{});
   }catch(e){}
@@ -844,11 +836,4 @@ fakeLoad(()=>{
   if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
   if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
   if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
-
-  // Убедимся, что слайдеры отрисованы и их фон соответствует значению
-  if(musicVolumeSlider) updateSliderFill(musicVolumeSlider);
-  if(soundVolumeSlider) updateSliderFill(soundVolumeSlider);
-
-  // Пробуем разблокировать audio в iOS (если пользователь уже взаимодействовал)
-  ensureIOSAudioUnlock();
 });
