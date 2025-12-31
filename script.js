@@ -730,19 +730,6 @@ onAuthStateChanged(auth, (user) => {
         clickPower = data.clickPower || 1;
         boughtItems = data.items || {"1":0,"2":0};
 
-        if(data.volume){
-          musicVolume = (data.volume.music !== undefined) ? Number(data.volume.music) : 0.8;
-          soundVolume = (data.volume.sound !== undefined) ? Number(data.volume.sound) : 0.8;
-
-          if(musicVolumeSlider) { musicVolumeSlider.value = musicVolume; updateSliderFill(musicVolumeSlider); }
-          if(soundVolumeSlider) { soundVolumeSlider.value = soundVolume; updateSliderFill(soundVolumeSlider); }
-
-          if(menuMusic) menuMusic.volume = musicVolume;
-          if(sClickWood) sClickWood.volume = soundVolume;
-          if(sClickClicker) sClickClicker.volume = soundVolume;
-          if(sClickButton) sClickButton.volume = soundVolume;
-        }
-
         counterValue.textContent = coins;
         if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
         if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
@@ -776,15 +763,6 @@ onAuthStateChanged(auth, (user) => {
     if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
     if(document.getElementById("shopBalanceValue")) document.getElementById("shopBalanceValue").textContent = coins;
     if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
-
-    musicVolume = 0.8;
-    soundVolume = 0.8;
-    if(musicVolumeSlider) { musicVolumeSlider.value = musicVolume; updateSliderFill(musicVolumeSlider); }
-    if(soundVolumeSlider) { soundVolumeSlider.value = soundVolume; updateSliderFill(soundVolumeSlider); }
-    if(menuMusic) menuMusic.volume = musicVolume;
-    if(sClickWood) sClickWood.volume = soundVolume;
-    if(sClickClicker) sClickClicker.volume = soundVolume;
-    if(sClickButton) sClickButton.volume = soundVolume;
 
     startCounterAnimation(coins);
     startPlateAnimation(coins);
@@ -837,3 +815,18 @@ fakeLoad(()=>{
   if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
   if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
 });
+
+function applySoundState(){
+  // музыка
+  if(menuMusic){
+    menuMusic.volume = musicEnabled ? 0.8 : 0;
+    if(musicEnabled) menuMusic.play().catch(()=>{});
+    else menuMusic.pause();
+  }
+
+  // звуки
+  const vol = soundEnabled ? 0.8 : 0;
+  if(sClickWood) sClickWood.volume = vol;
+  if(sClickClicker) sClickClicker.volume = vol;
+  if(sClickButton) sClickButton.volume = vol;
+}
