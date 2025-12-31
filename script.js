@@ -351,14 +351,14 @@ function playSound(audio){
 }
 
 clickButton.addEventListener("click", e=>{
-  try { sClickClicker.currentTime = 0; sClickClicker.play().catch(()=>{}); } catch(e){}
+  playSound(sClickClicker);
   clickAction(e.clientX, e.clientY);
   animateClicker();
 });
 
 clickButton.addEventListener("touchstart", e=>{
   e.preventDefault();
-  try { sClickClicker.currentTime = 0; sClickClicker.play().catch(()=>{}); } catch(e){}
+playSound(sClickClicker);
   for(const t of e.changedTouches){
     clickAction(t.clientX, t.clientY);
   }
@@ -585,7 +585,7 @@ if(topPlateEl){
   topPlateEl.addEventListener('click', (e)=>{
     if(topPlateEl.style.display === 'none') return;
     try { 
-      if(sClickWood){ sClickWood.currentTime = 0; sClickWood.play().catch(()=>{}); } 
+      playSound(sClickWood);
     } catch(e) {}
     topPlateEl.classList.remove('plate-hit');
     void topPlateEl.offsetWidth; // сброс
@@ -612,7 +612,7 @@ function handleButtonSound(e) {
     if (btn.id === "clickButton") return;
 
     try {
-        if(sClickButton){ sClickButton.currentTime = 0; sClickButton.play().catch(()=>{}); }
+        playSound(sClickButton);
     } catch (e) {}
 }
 
@@ -830,3 +830,18 @@ function applySoundState(){
   if(sClickClicker) sClickClicker.volume = vol;
   if(sClickButton) sClickButton.volume = vol;
 }
+
+
+let audioUnlocked = false;
+
+function unlockAudioOnce(){
+  if(audioUnlocked) return;
+  audioUnlocked = true;
+
+  if(musicEnabled && menuMusic){
+    menuMusic.play().catch(()=>{});
+  }
+}
+
+document.addEventListener("click", unlockAudioOnce, { once: true });
+document.addEventListener("touchstart", unlockAudioOnce, { once: true });
