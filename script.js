@@ -27,6 +27,9 @@ const sClickClicker = document.getElementById("sClickClicker");
 const sClickButton = document.getElementById("sClickButton");
 const menuMusic = document.getElementById("menuMusic");
 
+let musicEnabled = true;
+let soundEnabled = true;
+
 /* ---------------------------------------------- */
 /* ЭЛЕМЕНТЫ */
 /* ---------------------------------------------- */
@@ -102,11 +105,20 @@ function fakeLoad(callback){
     }
   }, 50);
 
-  playBtn.onclick = ()=>{
-    splash.style.transition = "opacity 1s ease";
-    splash.style.opacity = "0";
-    setTimeout(()=>{ splash.style.display = "none"; }, 1000);
-  };
+  playBtn.onclick = () => {
+
+  // 🔓 РАЗБЛОКИРОВКА АУДИО — СТРОГО ПО КЛИКУ
+  try {
+    if (musicEnabled && menuMusic) {
+      menuMusic.currentTime = 0;
+      menuMusic.play().catch(()=>{});
+    }
+  } catch(e){}
+
+  splash.style.transition = "opacity 1s ease";
+  splash.style.opacity = "0";
+  setTimeout(()=>{ splash.style.display = "none"; }, 1000);
+};
 }
 
 /* ---------------------------------------------- */
@@ -605,6 +617,7 @@ if(topPlateEl){
 /* ГЛОБАЛЬНЫЙ ЗВУК КНОПОК (исключения buy-btn и clickButton) */
 /* ---------------------------------------------- */
 function handleButtonSound(e) {
+    if (!soundEnabled) return;
     const btn = e.target.closest("button");
     if (!btn) return;
 
@@ -634,10 +647,6 @@ document.addEventListener("click", (e) => {
 
 const musicToggleBtn = document.getElementById("musicToggleBtn");
 const soundToggleBtn = document.getElementById("soundToggleBtn");
-
-// состояния: true = включено, false = выключено
-let musicEnabled = true;
-let soundEnabled = true;
 
 // Музыка
 musicToggleBtn.addEventListener("click", () => {
@@ -832,16 +841,4 @@ function applySoundState(){
 }
 
 
-let audioUnlocked = false;
 
-function unlockAudioOnce(){
-  if(audioUnlocked) return;
-  audioUnlocked = true;
-
-  if(musicEnabled && menuMusic){
-    menuMusic.play().catch(()=>{});
-  }
-}
-
-document.addEventListener("click", unlockAudioOnce, { once: true });
-document.addEventListener("touchstart", unlockAudioOnce, { once: true });
