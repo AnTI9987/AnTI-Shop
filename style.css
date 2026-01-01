@@ -132,7 +132,7 @@ body {
 #ground img{width:100%;}  
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}  
 #clickImg {  
-  width: 260px;  
+  width: 270px;  
   display: block;  
   pointer-events: none;  
   transition: transform 0.07s ease;  
@@ -155,6 +155,28 @@ body {
   to {
     transform: scaleY(0.985); /* сила дыхания */
   }
+}
+
+/* ===================== */
+/* ТЕНЬ ПОД ПЕРСОНАЖЕМ */
+/* ===================== */
+
+#characterBreath::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;              /* чуть ниже ног */
+  transform: translateX(-50%);
+
+  width: 140px;              /* ширина тени */
+  height: 22px;              /* высота тени */
+  background: rgba(0, 0, 0, 0.35);
+
+  border-radius: 50%;
+  filter: blur(8px);
+
+  z-index: -1;               /* строго под персонажем */
+  pointer-events: none;
 }
   
 /* запрет выделения текста */  
