@@ -133,11 +133,43 @@ body {
 #ground img{width:100%;}  
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}  
 #clickImg {  
-  width: 220px;  
+  width: 250px;  
   display: block;  
   pointer-events: none;  
   transition: transform 0.07s ease;  
 }  
+
+/* ===================== */
+/* АНИМАЦИЯ ДЫХАНИЯ */
+/* ===================== */
+
+#clickImg {
+  transform-origin: bottom center;
+  animation: breathing 4.8s infinite;
+}
+
+/* Ключевые кадры дыхания */
+@keyframes breathing {
+  0% {
+    transform: scaleY(1);
+  }
+
+  25% {
+    transform: scaleY(0.985);
+  }
+
+  50% {
+    transform: scaleY(0.97);
+  }
+
+  75% {
+    transform: scaleY(0.985);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}
   
 /* запрет выделения текста */  
 #topPlate, #topPlate * {  
