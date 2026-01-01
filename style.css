@@ -129,7 +129,7 @@ body {
 #counter{font-size:28px;margin:10px 0;display:flex;justify-content:center;align-items:center;gap:6px;color:#000;}  
 #counter img{width:24px;height:24px;}  
 #clickButtonWrapper{position:relative;width:100%;display:flex;justify-content:center;margin-top:200px;}  
-#ground{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;opacity:0.9;}  
+#ground{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:100%;pointer-events:none;z-index:0;opacity:1;}  
 #ground img{width:100%;}  
 #clickButton{background:none;border:none;z-index:1;position:relative;display:flex;align-items:center;justify-content:center;padding:0;}  
 #clickImg {  
