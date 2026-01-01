@@ -105,12 +105,28 @@ function fakeLoad(callback){
     }
   }, 50);
 
-  playBtn.onclick = () => {
+playBtn.onclick = () => {
 
-  // 🔓 РАЗБЛОКИРОВКА АУДИО — СТРОГО ПО КЛИКУ
+  // 🔓 РАЗБЛОКИРОВКА ВСЕГО АУДИО (КРИТИЧНО)
   try {
-    if (musicEnabled && menuMusic) {
-      menuMusic.currentTime = 0;
+    const unlock = (audio) => {
+      if (!audio) return;
+      audio.volume = 0;
+      audio.currentTime = 0;
+      audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }).catch(()=>{});
+    };
+
+    unlock(menuMusic);
+    unlock(sClickButton);
+    unlock(sClickClicker);
+    unlock(sClickWood);
+
+    // включаем реальную громкость
+    if (menuMusic && musicEnabled) {
+      menuMusic.volume = 0.8;
       menuMusic.play().catch(()=>{});
     }
   } catch(e){}
