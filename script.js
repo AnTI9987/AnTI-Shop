@@ -48,9 +48,6 @@ const clickImg = document.getElementById("clickImg");
 clickImg.style.display = "block";
 clickImg.style.marginTop = "50px";
 
-let musicVolumeSlider = document.getElementById("musicVolumeSlider");
-let soundVolumeSlider = document.getElementById("soundVolumeSlider");
-
 const groundImg = document.getElementById("groundImg");
 
 const plateTitleEl = document.getElementById("plateTitle");
@@ -118,7 +115,7 @@ playBtn.onclick = () => {
     }).catch(()=>{});
   };
 
-  // 🔓 разблокировка ВСЕХ звуков
+  // 🔓 разблокировка ВСЕХ звуков (строго по клику)
   unlock(menuMusic, musicEnabled ? 0.8 : 0);
   unlock(sClickButton, soundEnabled ? 0.8 : 0);
   unlock(sClickClicker, soundEnabled ? 0.8 : 0);
@@ -130,7 +127,10 @@ playBtn.onclick = () => {
     menuMusic.play().catch(()=>{});
   }
 
-  goToClicker();
+  // ⬇⬇⬇ ВОТ ЭТО БЫЛО ПОТЕРЯНО ⬇⬇⬇
+  splash.style.transition = "opacity 1s ease";
+  splash.style.opacity = "0";
+  setTimeout(()=>{ splash.style.display = "none"; }, 1000);
 };
 }
 
@@ -664,7 +664,14 @@ const soundToggleBtn = document.getElementById("soundToggleBtn");
 // Музыка
 musicToggleBtn.addEventListener("click", () => {
   musicEnabled = !musicEnabled;
-  menuMusic.volume = musicEnabled ? 0.8 : 0;
+
+  if(musicEnabled){
+    menuMusic.volume = 0.8;
+    menuMusic.play().catch(()=>{});
+  } else {
+    menuMusic.pause();
+  }
+
   musicToggleBtn.querySelector("img").src =
     musicEnabled ? "img/music-volume-on.png" : "img/music-volume-off.png";
 });
