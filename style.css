@@ -117,8 +117,9 @@ body {
   height:100%;  
   background: linear-gradient(  
         180deg,   
-        #DD7171 0%,   
-        #FECE76 50%,   
+        #DD7171 0%,
+        #F4996A 15%,
+        #FECE76 40%,   
         #FECE76 100%  
     );  
   padding-top:20px;  
