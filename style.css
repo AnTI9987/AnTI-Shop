@@ -140,15 +140,15 @@ body {
 }  
 
 /* ===================== */
-/* АНИМАЦИЯ ДЫХАНИЯ (ИСПРАВЛЕННАЯ) */
+/* ДЫХАНИЕ — ТОЛЬКО КОНТЕЙНЕР */
 /* ===================== */
 
-#clickImg {
+#clickButton {
   transform-origin: bottom center;
-  animation: breathing 2.4s cubic-bezier(0.4, 0.0, 0.2, 1) infinite alternate;
+  animation: breathing 2.6s cubic-bezier(0.4, 0.0, 0.2, 1)
+             infinite alternate;
 }
 
-/* Один этап = одно ускорение + одно замедление */
 @keyframes breathing {
   from {
     transform: scaleY(1);
