@@ -140,34 +140,21 @@ body {
 }  
 
 /* ===================== */
-/* АНИМАЦИЯ ДЫХАНИЯ */
+/* АНИМАЦИЯ ДЫХАНИЯ (ИСПРАВЛЕННАЯ) */
 /* ===================== */
 
 #clickImg {
   transform-origin: bottom center;
-  animation: breathing 4.8s infinite;
+  animation: breathing 2.4s cubic-bezier(0.4, 0.0, 0.2, 1) infinite alternate;
 }
 
-/* Ключевые кадры дыхания */
+/* Один этап = одно ускорение + одно замедление */
 @keyframes breathing {
-  0% {
+  from {
     transform: scaleY(1);
   }
-
-  25% {
-    transform: scaleY(0.985);
-  }
-
-  50% {
+  to {
     transform: scaleY(0.97);
-  }
-
-  75% {
-    transform: scaleY(0.985);
-  }
-
-  100% {
-    transform: scaleY(1);
   }
 }
   
