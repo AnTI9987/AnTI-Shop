@@ -107,33 +107,30 @@ function fakeLoad(callback){
 
 playBtn.onclick = () => {
 
-  // 🔓 РАЗБЛОКИРОВКА ВСЕГО АУДИО (КРИТИЧНО)
-  try {
-    const unlock = (audio) => {
-      if (!audio) return;
-      audio.volume = 0;
+  const unlock = (audio, volume = 0.8) => {
+    if(!audio) return;
+    audio.muted = false;
+    audio.volume = volume;
+    audio.currentTime = 0;
+    audio.play().then(()=>{
+      audio.pause();
       audio.currentTime = 0;
-      audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-      }).catch(()=>{});
-    };
+    }).catch(()=>{});
+  };
 
-    unlock(menuMusic);
-    unlock(sClickButton);
-    unlock(sClickClicker);
-    unlock(sClickWood);
+  // 🔓 разблокировка ВСЕХ звуков
+  unlock(menuMusic, musicEnabled ? 0.8 : 0);
+  unlock(sClickButton, soundEnabled ? 0.8 : 0);
+  unlock(sClickClicker, soundEnabled ? 0.8 : 0);
+  unlock(sClickWood, soundEnabled ? 0.8 : 0);
 
-    // включаем реальную громкость
-    if (menuMusic && musicEnabled) {
-      menuMusic.volume = 0.8;
-      menuMusic.play().catch(()=>{});
-    }
-  } catch(e){}
+  // ▶ запуск фоновой музыки
+  if(musicEnabled && menuMusic){
+    menuMusic.currentTime = 0;
+    menuMusic.play().catch(()=>{});
+  }
 
-  splash.style.transition = "opacity 1s ease";
-  splash.style.opacity = "0";
-  setTimeout(()=>{ splash.style.display = "none"; }, 1000);
+  goToClicker();
 };
 }
 
@@ -667,14 +664,9 @@ const soundToggleBtn = document.getElementById("soundToggleBtn");
 // Музыка
 musicToggleBtn.addEventListener("click", () => {
   musicEnabled = !musicEnabled;
-  if(musicEnabled){
-    menuMusic.play().catch(()=>{});
-    musicToggleBtn.querySelector("img").src = "img/music-volume-on.png";
-    menuMusic.volume = 0.8;
-  } else {
-    menuMusic.pause();
-    musicToggleBtn.querySelector("img").src = "img/music-volume-off.png";
-  }
+  menuMusic.volume = musicEnabled ? 0.8 : 0;
+  musicToggleBtn.querySelector("img").src =
+    musicEnabled ? "img/music-volume-on.png" : "img/music-volume-off.png";
 });
 
 // Звуки
@@ -688,25 +680,6 @@ soundToggleBtn.addEventListener("click", () => {
   if(sClickClicker) sClickClicker.volume = volume;
   if(sClickButton) sClickButton.volume = volume;
 });
-
-// при загрузке страницы
-try {
-  const savedMusic = localStorage.getItem("anti_musicEnabled");
-  const savedSound = localStorage.getItem("anti_soundEnabled");
-  if(savedMusic !== null) musicEnabled = savedMusic === "true";
-  if(savedSound !== null) soundEnabled = savedSound === "true";
-
-  musicToggleBtn.querySelector("img").src = musicEnabled ? "img/music-volume-on.png" : "img/music-volume-off.png";
-  soundToggleBtn.querySelector("img").src = soundEnabled ? "img/sound-volume-on.png" : "img/sound-volume-off.png";
-
-  menuMusic.volume = musicEnabled ? 0.8 : 0;
-  if(!musicEnabled) menuMusic.pause();
-
-  const vol = soundEnabled ? 0.8 : 0;
-  if(sClickWood) sClickWood.volume = vol;
-  if(sClickClicker) sClickClicker.volume = vol;
-  if(sClickButton) sClickButton.volume = vol;
-} catch(e){}
 
 /* ---------------------------------------------- */
 /* АВТОСОХРАНЕНИЕ */
@@ -840,21 +813,3 @@ fakeLoad(()=>{
   if(document.getElementById("shopBalanceValueClicker")) document.getElementById("shopBalanceValueClicker").textContent = coins;
   if(document.getElementById("plateBalanceValue")) document.getElementById("plateBalanceValue").textContent = coins;
 });
-
-function applySoundState(){
-  // музыка
-  if(menuMusic){
-    menuMusic.volume = musicEnabled ? 0.8 : 0;
-    if(musicEnabled) menuMusic.play().catch(()=>{});
-    else menuMusic.pause();
-  }
-
-  // звуки
-  const vol = soundEnabled ? 0.8 : 0;
-  if(sClickWood) sClickWood.volume = vol;
-  if(sClickClicker) sClickClicker.volume = vol;
-  if(sClickButton) sClickButton.volume = vol;
-}
-
-
-
