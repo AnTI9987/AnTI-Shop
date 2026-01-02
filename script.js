@@ -32,32 +32,37 @@ let soundEnabled = true;
 
 let audioUnlocked = false;
 
-// -----------------------------
-// РАЗБЛОКИРОВКА ВСЕХ ЗВУКОВ — НАДЁЖНО
-// -----------------------------
-function unlockAllAudioReliable() {
-  if(audioUnlocked) return;
+// ----------------------------------------
+// НАДЕЖНАЯ РАЗБЛОКИРОВКА АУДИО
+// ----------------------------------------
+let audioUnlocked = false;
+
+function unlockAudioOnce(e) {
+  if (audioUnlocked) return;
   audioUnlocked = true;
 
-  // воспроизводим каждый звук отдельно с задержкой, чтобы браузер разрешил
-  const audios = [menuMusic, sClickClicker, sClickWood, sClickButton];
+  // Воспроизводим каждый звук один за другим, строго в рамках пользовательского события
+  [menuMusic, sClickClicker, sClickWood, sClickButton].forEach(a => {
+    if (!a) return;
 
-  audios.forEach((a, i) => {
-    if(!a) return;
     a.muted = false;
     a.volume = 0.8;
+    a.currentTime = 0;
 
-    // небольшая задержка между play(), чтобы iOS точно разрешил
-    setTimeout(()=>{
-      a.currentTime = 0;
-      a.play().catch(()=>{}); 
-    }, i * 50);
+    // важно: play() вызван напрямую в рамках события e
+    a.play().catch(err => {
+      // игнорируем ошибку — на iOS она может возникнуть, если audio ещё не готов
+    });
   });
+
+  // удаляем слушатели после первого клика/тача
+  document.removeEventListener("click", unlockAudioOnce);
+  document.removeEventListener("touchstart", unlockAudioOnce);
 }
 
-// запуск при первом клике или таче на любом месте
-document.addEventListener("click", unlockAllAudioReliable, { once: true });
-document.addEventListener("touchstart", unlockAllAudioReliable, { once: true });
+// Слушатели на первый клик или тач
+document.addEventListener("click", unlockAudioOnce);
+document.addEventListener("touchstart", unlockAudioOnce);
 
 /* ---------------------------------------------- */
 /* ЭЛЕМЕНТЫ */
