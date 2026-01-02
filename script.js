@@ -110,24 +110,22 @@ playBtn.onclick = () => {
     audio.volume = volume;
     audio.currentTime = 0;
     audio.play().then(()=>{
-      audio.pause();
       audio.currentTime = 0;
     }).catch(()=>{});
   };
 
-  // 🔓 разблокировка ВСЕХ звуков (строго по клику)
+  // 🔓 разблокировка ВСЕХ звуков
   unlock(menuMusic, musicEnabled ? 0.8 : 0);
-  unlock(sClickButton, soundEnabled ? 0.8 : 0);
-  unlock(sClickClicker, soundEnabled ? 0.8 : 0);
-  unlock(sClickWood, soundEnabled ? 0.8 : 0);
+  unlock(sClickButton, soundEnabled ? 0.8 : 0.8);
+  unlock(sClickClicker, soundEnabled ? 0.8 : 0.8);
+  unlock(sClickWood, soundEnabled ? 0.8 : 0.8);
 
-  // ▶ запуск фоновой музыки
-  if(musicEnabled && menuMusic){
-    menuMusic.currentTime = 0;
+  // ▶ ФОНОВАЯ МУЗЫКА — ТОЛЬКО ОДИН play()
+  if(musicEnabled){
+    menuMusic.loop = true;
     menuMusic.play().catch(()=>{});
   }
 
-  // ⬇⬇⬇ ВОТ ЭТО БЫЛО ПОТЕРЯНО ⬇⬇⬇
   splash.style.transition = "opacity 1s ease";
   splash.style.opacity = "0";
   setTimeout(()=>{ splash.style.display = "none"; }, 1000);
