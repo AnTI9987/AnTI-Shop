@@ -32,6 +32,25 @@ let soundEnabled = true;
 
 let audioUnlocked = false;
 
+// -----------------------------
+// ВСЕОБЩАЯ РАЗБЛОКИРОВКА АУДИО
+// -----------------------------
+function unlockAllAudio() {
+  if(audioUnlocked) return;
+  [menuMusic, sClickButton, sClickClicker, sClickWood].forEach(a=>{
+    if(!a) return;
+    a.muted = false;
+    a.volume = 0.8;   // убедимся, что volume не 0
+    a.currentTime = 0;
+    a.play().catch(()=>{});
+  });
+  audioUnlocked = true;
+}
+
+// разблокировка при первом клике или первом касании на любом элементе
+document.addEventListener("click", unlockAllAudio, { once: true });
+document.addEventListener("touchstart", unlockAllAudio, { once: true });
+
 /* ---------------------------------------------- */
 /* ЭЛЕМЕНТЫ */
 /* ---------------------------------------------- */
@@ -109,18 +128,6 @@ function fakeLoad(callback){
 const playBtn = document.getElementById("playBtn");
 
 playBtn.addEventListener("click", () => {
-
-  // 🔓 РАЗБЛОКИРОВКА АУДИО — СТРОГО ПЕРВЫЙ КЛИК
-  if(!audioUnlocked){
-    [menuMusic, sClickButton, sClickClicker, sClickWood].forEach(a=>{
-      if(!a) return;
-      a.muted = false;
-      a.volume = 0.8;
-      a.currentTime = 0;
-      a.play().catch(()=>{});
-    });
-    audioUnlocked = true;
-  }
 
   // ▶ запуск музыки
   if(musicEnabled){
