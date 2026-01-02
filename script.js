@@ -33,23 +33,31 @@ let soundEnabled = true;
 let audioUnlocked = false;
 
 // -----------------------------
-// ВСЕОБЩАЯ РАЗБЛОКИРОВКА АУДИО
+// РАЗБЛОКИРОВКА ВСЕХ ЗВУКОВ — НАДЁЖНО
 // -----------------------------
-function unlockAllAudio() {
+function unlockAllAudioReliable() {
   if(audioUnlocked) return;
-  [menuMusic, sClickButton, sClickClicker, sClickWood].forEach(a=>{
+  audioUnlocked = true;
+
+  // воспроизводим каждый звук отдельно с задержкой, чтобы браузер разрешил
+  const audios = [menuMusic, sClickClicker, sClickWood, sClickButton];
+
+  audios.forEach((a, i) => {
     if(!a) return;
     a.muted = false;
-    a.volume = 0.8;   // убедимся, что volume не 0
-    a.currentTime = 0;
-    a.play().catch(()=>{});
+    a.volume = 0.8;
+
+    // небольшая задержка между play(), чтобы iOS точно разрешил
+    setTimeout(()=>{
+      a.currentTime = 0;
+      a.play().catch(()=>{}); 
+    }, i * 50);
   });
-  audioUnlocked = true;
 }
 
-// разблокировка при первом клике или первом касании на любом элементе
-document.addEventListener("click", unlockAllAudio, { once: true });
-document.addEventListener("touchstart", unlockAllAudio, { once: true });
+// запуск при первом клике или таче на любом месте
+document.addEventListener("click", unlockAllAudioReliable, { once: true });
+document.addEventListener("touchstart", unlockAllAudioReliable, { once: true });
 
 /* ---------------------------------------------- */
 /* ЭЛЕМЕНТЫ */
