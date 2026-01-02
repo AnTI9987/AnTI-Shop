@@ -27,10 +27,41 @@ const sClickClicker = document.getElementById("sClickClicker");
 const sClickButton = document.getElementById("sClickButton");
 const menuMusic = document.getElementById("menuMusic");
 
-let musicEnabled = true;
-let soundEnabled = true;
+/* ---------------------------------------------- */
+/* AUDIO UNLOCK (ОБЯЗАТЕЛЬНО) */
+/* ---------------------------------------------- */
 
 let audioUnlocked = false;
+
+function unlockAudio(){
+  if(audioUnlocked) return;
+
+  const audios = [
+    sClickWood,
+    sClickClicker,
+    sClickButton
+    // если есть музыка — добавь её сюда
+  ];
+
+  audios.forEach(a=>{
+    try{
+      a.volume = 0;
+      const p = a.play();
+      if(p && p.then){
+        p.then(()=>{
+          a.pause();
+          a.currentTime = 0;
+          a.volume = 1;
+        }).catch(()=>{});
+      }
+    }catch(e){}
+  });
+
+  audioUnlocked = true;
+}
+
+let musicEnabled = true;
+let soundEnabled = true;
 
 /* ---------------------------------------------- */
 /* ЭЛЕМЕНТЫ */
@@ -104,34 +135,21 @@ function fakeLoad(callback){
     }
   }, 50);
 
-}
-
 const playBtn = document.getElementById("playBtn");
 
-playBtn.addEventListener("click", () => {
+playBtn.onclick = () => {
+  unlockAudio(); // ← ВАЖНЕЙШАЯ СТРОКА
 
-  // 🔓 РАЗБЛОКИРОВКА АУДИО — СТРОГО ПЕРВЫЙ КЛИК
-  if(!audioUnlocked){
-    [menuMusic, sClickButton, sClickClicker, sClickWood].forEach(a=>{
-      if(!a) return;
-      a.muted = false;
-      a.volume = 0.8;
-      a.currentTime = 0;
-      a.play().catch(()=>{});
-    });
-    audioUnlocked = true;
-  }
+  playBtn.remove();
+  splashScreen.style.transition = "opacity 1s";
+  splashScreen.style.opacity = 0;
 
-  // ▶ запуск музыки
-  if(musicEnabled){
-    menuMusic.loop = true;
-    menuMusic.play().catch(()=>{});
-  }
-
-  // скрытие splash
-  splashScreen.style.opacity = "0";
-  setTimeout(()=> splashScreen.style.display = "none", 1000);
-});
+  setTimeout(() => {
+    splashScreen.style.display = "none";
+    if(onDone) onDone();
+  }, 1000);
+};
+}
 
 /* ---------------------------------------------- */
 /* ПЕРЕМЕННЫЕ */
