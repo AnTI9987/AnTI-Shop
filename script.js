@@ -27,41 +27,10 @@ const sClickClicker = document.getElementById("sClickClicker");
 const sClickButton = document.getElementById("sClickButton");
 const menuMusic = document.getElementById("menuMusic");
 
-/* ---------------------------------------------- */
-/* AUDIO UNLOCK (ОБЯЗАТЕЛЬНО) */
-/* ---------------------------------------------- */
-
-let audioUnlocked = false;
-
-function unlockAudio(){
-  if(audioUnlocked) return;
-
-  const audios = [
-  sClickWood,
-  sClickClicker,
-  sClickButton,
-  menuMusic // ← ВАЖНО
-];
-
-  audios.forEach(a=>{
-    try{
-      a.volume = 0;
-      const p = a.play();
-      if(p && p.then){
-        p.then(()=>{
-          a.pause();
-          a.currentTime = 0;
-          a.volume = 1;
-        }).catch(()=>{});
-      }
-    }catch(e){}
-  });
-
-  audioUnlocked = true;
-}
-
 let musicEnabled = true;
 let soundEnabled = true;
+
+let audioUnlocked = false;
 
 /* ---------------------------------------------- */
 /* ЭЛЕМЕНТЫ */
@@ -116,38 +85,53 @@ splashScreen.style.background = "#000";
 progressBar.style.background = "#fff";
 progressPercent.style.color = "#fff";
 
-function fakeLoad(onDone){
+function fakeLoad(callback){
   const splash = document.getElementById("splashScreen");
   const progress = document.getElementById("progressBar");
   const percent = document.getElementById("progressPercent");
   const playBtn = document.getElementById("playBtn");
 
   let width = 0;
-
   const interval = setInterval(()=>{
-    width += Math.random() * 2 + 0.5;
-    if(width >= 100){
-      width = 100;
-      clearInterval(interval);
-      splash.classList.add("loaded");
-    }
+    width += Math.random()*2 + 0.5;
+    if(width>100) width=100;
     progress.style.width = width + "%";
     percent.textContent = Math.floor(width) + "%";
+    if(width>=100){
+      clearInterval(interval);
+      splash.classList.add("loaded");
+      if(callback) callback();
+    }
   }, 50);
 
-  playBtn.onclick = () => {
-    unlockAudio(); // 🔑 РАЗБЛОКИРОВКА ЗВУКА (КРИТИЧНО)
-
-    playBtn.remove();
-    splash.style.transition = "opacity 1s";
-    splash.style.opacity = "0";
-
-    setTimeout(() => {
-      splash.style.display = "none";
-      if (onDone) onDone();
-    }, 1000);
-  };
 }
+
+const playBtn = document.getElementById("playBtn");
+
+playBtn.addEventListener("click", () => {
+
+  // 🔓 РАЗБЛОКИРОВКА АУДИО — СТРОГО ПЕРВЫЙ КЛИК
+  if(!audioUnlocked){
+    [menuMusic, sClickButton, sClickClicker, sClickWood].forEach(a=>{
+      if(!a) return;
+      a.muted = false;
+      a.volume = 0.8;
+      a.currentTime = 0;
+      a.play().catch(()=>{});
+    });
+    audioUnlocked = true;
+  }
+
+  // ▶ запуск музыки
+  if(musicEnabled){
+    menuMusic.loop = true;
+    menuMusic.play().catch(()=>{});
+  }
+
+  // скрытие splash
+  splashScreen.style.opacity = "0";
+  setTimeout(()=> splashScreen.style.display = "none", 1000);
+});
 
 /* ---------------------------------------------- */
 /* ПЕРЕМЕННЫЕ */
