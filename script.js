@@ -30,6 +30,8 @@ const menuMusic = document.getElementById("menuMusic");
 let musicEnabled = true;
 let soundEnabled = true;
 
+let audioUnlocked = false;
+
 /* ---------------------------------------------- */
 /* ЭЛЕМЕНТЫ */
 /* ---------------------------------------------- */
@@ -102,35 +104,34 @@ function fakeLoad(callback){
     }
   }, 50);
 
-playBtn.onclick = () => {
+}
 
-  const unlock = (audio, volume = 0.8) => {
-    if(!audio) return;
-    audio.muted = false;
-    audio.volume = volume;
-    audio.currentTime = 0;
-    audio.play().then(()=>{
-      audio.currentTime = 0;
-    }).catch(()=>{});
-  };
+const playBtn = document.getElementById("playBtn");
 
-  // 🔓 разблокировка ВСЕХ звуков
-  unlock(menuMusic, musicEnabled ? 0.8 : 0);
-  unlock(sClickButton, soundEnabled ? 0.8 : 0.8);
-  unlock(sClickClicker, soundEnabled ? 0.8 : 0.8);
-  unlock(sClickWood, soundEnabled ? 0.8 : 0.8);
+playBtn.addEventListener("click", () => {
 
-  // ▶ ФОНОВАЯ МУЗЫКА — ТОЛЬКО ОДИН play()
+  // 🔓 РАЗБЛОКИРОВКА АУДИО — СТРОГО ПЕРВЫЙ КЛИК
+  if(!audioUnlocked){
+    [menuMusic, sClickButton, sClickClicker, sClickWood].forEach(a=>{
+      if(!a) return;
+      a.muted = false;
+      a.volume = 0.8;
+      a.currentTime = 0;
+      a.play().catch(()=>{});
+    });
+    audioUnlocked = true;
+  }
+
+  // ▶ запуск музыки
   if(musicEnabled){
     menuMusic.loop = true;
     menuMusic.play().catch(()=>{});
   }
 
-  splash.style.transition = "opacity 1s ease";
-  splash.style.opacity = "0";
-  setTimeout(()=>{ splash.style.display = "none"; }, 1000);
-};
-}
+  // скрытие splash
+  splashScreen.style.opacity = "0";
+  setTimeout(()=> splashScreen.style.display = "none", 1000);
+});
 
 /* ---------------------------------------------- */
 /* ПЕРЕМЕННЫЕ */
