@@ -110,7 +110,7 @@ const playBtn = document.getElementById("playBtn");
 
 playBtn.addEventListener("click", () => {
 
-  // 🔓 РАЗБЛОКИРОВКА АУДИО — СТРОГО ПЕРВЫЙ КЛИК
+  // 🔓 РАЗБЛОКИРОВКА АУДИО — первый клик
   if(!audioUnlocked){
     [menuMusic, sClickButton, sClickClicker, sClickWood].forEach(a=>{
       if(!a) return;
@@ -374,6 +374,31 @@ function playSound(audio){
   }catch(e){}
 }
 
+function handleButtonSound(e) {
+    if (!soundEnabled) return;
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    if (btn.classList.contains("buy-btn")) return;
+    if (btn.id === "clickButton") return;
+
+    try {
+        playSound(sClickButton);
+    } catch (e) {}
+}
+
+let isTouch = false;
+document.addEventListener("touchstart", () => { isTouch = true; }, { once: true });
+
+document.addEventListener("touchstart", (e) => {
+    handleButtonSound(e);
+}, { passive: true });
+
+document.addEventListener("click", (e) => {
+    if (isTouch) return;
+    handleButtonSound(e);
+});
+
 clickButton.addEventListener("click", e=>{
   playSound(sClickClicker);
   clickAction(e.clientX, e.clientY);
@@ -382,7 +407,7 @@ clickButton.addEventListener("click", e=>{
 
 clickButton.addEventListener("touchstart", e=>{
   e.preventDefault();
-playSound(sClickClicker);
+  playSound(sClickClicker);
   for(const t of e.changedTouches){
     clickAction(t.clientX, t.clientY);
   }
