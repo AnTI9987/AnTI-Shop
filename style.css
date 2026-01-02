@@ -144,7 +144,7 @@ body {
 
 #characterBreath {
   transform-origin: bottom center;
-  animation: breathing 2.6s cubic-bezier(0.4, 0.0, 0.2, 1)
+  animation: breathing 2s cubic-bezier(0.4, 0.0, 0.2, 1)
              infinite alternate;
 }
 
@@ -165,12 +165,12 @@ body {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -4px;              /* чуть ниже ног */
+  bottom: -5px;              /* чуть ниже ног */
   transform: translateX(-50%);
 
-  width: 160px;              /* ширина тени */
-  height: 22px;              /* высота тени */
-  background: rgba(0, 0, 0, 0.8);
+  width: 170px;              /* ширина тени */
+  height: 25px;              /* высота тени */
+  background: rgba(0, 0, 0, 0.6);
 
   border-radius: 50%;
   filter: blur(2px);
