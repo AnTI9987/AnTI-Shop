@@ -37,11 +37,11 @@ function unlockAudio(){
   if(audioUnlocked) return;
 
   const audios = [
-    sClickWood,
-    sClickClicker,
-    sClickButton
-    // если есть музыка — добавь её сюда
-  ];
+  sClickWood,
+  sClickClicker,
+  sClickButton,
+  menuMusic // ← ВАЖНО
+];
 
   audios.forEach(a=>{
     try{
@@ -116,39 +116,37 @@ splashScreen.style.background = "#000";
 progressBar.style.background = "#fff";
 progressPercent.style.color = "#fff";
 
-function fakeLoad(callback){
+function fakeLoad(onDone){
   const splash = document.getElementById("splashScreen");
   const progress = document.getElementById("progressBar");
   const percent = document.getElementById("progressPercent");
   const playBtn = document.getElementById("playBtn");
 
   let width = 0;
+
   const interval = setInterval(()=>{
-    width += Math.random()*2 + 0.5;
-    if(width>100) width=100;
-    progress.style.width = width + "%";
-    percent.textContent = Math.floor(width) + "%";
-    if(width>=100){
+    width += Math.random() * 2 + 0.5;
+    if(width >= 100){
+      width = 100;
       clearInterval(interval);
       splash.classList.add("loaded");
-      if(callback) callback();
     }
+    progress.style.width = width + "%";
+    percent.textContent = Math.floor(width) + "%";
   }, 50);
 
-const playBtn = document.getElementById("playBtn");
+  playBtn.onclick = () => {
+    unlockAudio(); // 🔑 РАЗБЛОКИРОВКА ЗВУКА (КРИТИЧНО)
 
-playBtn.onclick = () => {
-  unlockAudio(); // ← ВАЖНЕЙШАЯ СТРОКА
+    playBtn.remove();
+    splash.style.transition = "opacity 1s";
+    splash.style.opacity = "0";
 
-  playBtn.remove();
-  splashScreen.style.transition = "opacity 1s";
-  splashScreen.style.opacity = 0;
-
-  setTimeout(() => {
-    splashScreen.style.display = "none";
-    if(onDone) onDone();
-  }, 1000);
-};
+    setTimeout(() => {
+      splash.style.display = "none";
+      if (onDone) onDone();
+    }, 1000);
+  };
 }
 
 /* ---------------------------------------------- */
