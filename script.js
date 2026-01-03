@@ -357,11 +357,20 @@ function clickAction(x,y){
 }
 
 function animateClicker(){
+  const breath = document.getElementById("characterBreath");
+
   clickImg.style.transform = "scale(0.93)";
   clickImg.src = "img/click2.png";
+
+  // сжимаем тень
+  breath.classList.add("shadow-pressed");
+
   setTimeout(()=>{
     clickImg.style.transform = "scale(1)";
     clickImg.src = "img/click1.png";
+
+    // возвращаем тень
+    breath.classList.remove("shadow-pressed");
   }, 100);
 }
 
