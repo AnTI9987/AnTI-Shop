@@ -178,6 +178,11 @@ body {
   z-index: -1;               /* строго под персонажем */
   pointer-events: none;
 }
+
+/* ТЕНЬ СЖИМАЕТСЯ ПРИ КЛИКЕ */
+#characterBreath.shadow-pressed::after {
+  transform: translateX(-50%) scale(0.85);
+}
   
 /* запрет выделения текста */  
 #topPlate, #topPlate * {  
