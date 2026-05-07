@@ -1,0 +1,273 @@
+/* ========== AnTI Shop - style.css ========== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: #0f0c0a;
+    color: #f5e8d3;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* HEADER */
+#mainHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: rgba(15, 12, 10, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 1000;
+    border-bottom: 1px solid #3a2f25;
+}
+
+.header-btn {
+    background: none;
+    border: none;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.clicker-btn img {
+    width: 38px;
+    height: 38px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffdb9e;
+    letter-spacing: 1px;
+}
+
+.balance {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 22px;
+    font-weight: 600;
+    background: rgba(51, 38, 20, 0.6);
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: 1px solid #6b5a42;
+}
+
+.balance img {
+    width: 28px;
+    height: 28px;
+}
+
+/* SHOP PAGE */
+#shopPage {
+    padding-top: 90px;
+    padding-bottom: 40px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.shop-title {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 40px;
+    color: #ffdb9e;
+    font-weight: 700;
+}
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+/* EMPTY STATE */
+.empty-state {
+    text-align: center;
+    padding: 100px 20px;
+    font-size: 24px;
+    color: #8b6f47;
+    display: none;
+}
+
+/* CLICKER OVERLAY */
+.clicker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, #8B2E2E 0%, #D97F1F 100%);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.clicker-overlay.hidden {
+    transform: translateY(-100%);
+}
+
+.clicker-content {
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.close-clicker-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.4);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    z-index: 10;
+    cursor: pointer;
+}
+
+#clickerBalance {
+    margin-top: 80px;
+    font-size: 32px;
+    font-weight: 700;
+    z-index: 10;
+}
+
+/* CLICK AREA */
+#clickArea {
+    position: relative;
+    margin-top: 60px;
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    justify-content: center;
+}
+
+#ground {
+    position: absolute;
+    bottom: -20px;
+    width: 100%;
+    z-index: 1;
+}
+
+#ground img {
+    width: 100%;
+    opacity: 0.95;
+}
+
+#clickButton {
+    background: none;
+    border: none;
+    z-index: 2;
+    padding: 0;
+    cursor: pointer;
+}
+
+#clickImg {
+    width: 260px;
+    transition: transform 0.08s ease;
+    filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5));
+}
+
+/* MODAL */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #1c1612;
+    padding: 40px 30px;
+    border-radius: 16px;
+    max-width: 360px;
+    text-align: center;
+    border: 2px solid #6b5a42;
+}
+
+.modal-content h3 {
+    margin-bottom: 30px;
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
+    background: white;
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: #c8a37c;
+    border: 1px solid #6b5a42;
+    border-radius: 12px;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+/* Анимация нажатия на кликер */
+#clickImg:active {
+    transform: scale(0.88);
+}
+
+/* Адаптив */
+@media (max-width: 480px) {
+    #clickImg {
+        width: 230px;
+    }
+    
+    .shop-title {
+        font-size: 28px;
+    }
+}
