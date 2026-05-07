@@ -229,4 +229,14 @@ body {
 
 .clicker-overlay.hidden { display: none; }
 
+/* Фикс видимости по умолчанию */
+#clickerOverlay.hidden,
+#loginModal.hidden {
+    display: none !important;
+}
+
+.clicker-overlay {
+    transform: translateY(-100%) !important;
+}
+
 /* Остальные стили кликера оставляю как были */
