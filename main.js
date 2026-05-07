@@ -6,64 +6,57 @@ import { initShop } from './shop.js';
 let currentCoins = 1240;
 
 async function initApp() {
-    console.log("🚀 Запуск приложения...");
+    console.log("%c🚀 Запуск AnTI Shop...", "color: orange; font-size: 16px");
 
     await initAuth();
 
     initClicker();
     initShop();
 
-    // Обновляем баланс в шапке
     document.getElementById('headerBalanceValue').textContent = currentCoins;
 
     setupEventListeners();
-
-    console.log("✅ AnTI Shop успешно запущен");
 }
 
 function setupEventListeners() {
     const clickerBtn = document.getElementById('clickerOpenBtn');
     
-    if (!clickerBtn) {
-        console.error("Кнопка #clickerOpenBtn не найдена!");
-        return;
+    console.log("Кнопка найдена:", !!clickerBtn);
+
+    if (clickerBtn) {
+        // Убираем все старые обработчики
+        clickerBtn.replaceWith(clickerBtn.cloneNode(true));
+        const newBtn = document.getElementById('clickerOpenBtn');
+
+        newBtn.style.border = "2px solid red"; // временная отладочная обводка
+
+        newBtn.addEventListener('click', (e) => {
+            console.log("%c✅ Кнопка нажата!", "color: lime; font-size: 15px");
+            e.stopImmediatePropagation();
+
+            const user = getCurrentUser();
+            
+            if (isUserGuest() || !user) {
+                console.log("Показываем модальное окно входа");
+                document.getElementById('loginModal').classList.remove('hidden');
+            } else {
+                console.log("Открываем кликер");
+                const overlay = document.getElementById('clickerOverlay');
+                overlay.classList.remove('hidden');
+                overlay.style.transform = 'translateY(0)';
+            }
+        });
+
+        console.log("Обработчик клика успешно повешен");
+    } else {
+        console.error("❌ Кнопка #clickerOpenBtn не найдена в DOM!");
     }
 
-    // Главная кнопка открытия кликера
-    clickerBtn.addEventListener('click', () => {
-        console.log("Клик по кнопке кликера");
-        
-        const user = getCurrentUser();
-        
-        if (isUserGuest() || !user) {
-            // Показываем модальное окно входа
-            document.getElementById('loginModal').classList.remove('hidden');
-        } else {
-            // Показываем кликер
-            const overlay = document.getElementById('clickerOverlay');
-            overlay.classList.remove('hidden');
-            // Принудительно сбрасываем позицию
-            overlay.style.transform = 'translateY(0)';
-        }
-    });
-
-    // Закрытие кликера
-    document.getElementById('closeClickerBtn').addEventListener('click', () => {
-        const overlay = document.getElementById('clickerOverlay');
-        overlay.style.transform = 'translateY(-100%)';
-        setTimeout(() => {
-            overlay.classList.add('hidden');
-        }, 600);
-    });
-
-    // Кнопки в модальном окне
+    // Модальное окно
     document.getElementById('googleLoginBtn').addEventListener('click', async () => {
-        console.log("Попытка входа через Google...");
+        console.log("Нажата кнопка Google");
         const user = await loginWithGoogle();
-        if (user) {
-            document.getElementById('loginModal').classList.add('hidden');
-            alert("✅ Вход выполнен! Теперь можешь открыть кликер.");
-        }
+        if (user) document.getElementById('loginModal').classList.add('hidden');
     });
 
     document.getElementById('closeModalBtn').addEventListener('click', () => {
@@ -71,5 +64,4 @@ function setupEventListeners() {
     });
 }
 
-// Запуск
 document.addEventListener('DOMContentLoaded', initApp);
