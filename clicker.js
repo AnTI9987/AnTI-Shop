@@ -1,114 +1,96 @@
-/* ── js/clicker.js ── */
-import { state }           from "./state.js";
-import { saveCoins }       from "./db.js";
-import { showAuthModal }   from "./auth.js";
-import { updateBalanceUI, spawnFloatingCoin } from "./ui.js";
+// js/clicker.js
+let coins = 0;
+let clickPower = 1;
+let boughtItems = {};
 
-/* ── DOM ── */
-const drawer         = document.getElementById("clickerDrawer");
-const toggleBtn      = document.getElementById("clickerToggleBtn");
-const backBtn        = document.getElementById("clickerBackBtn");
-const mainClickBtn   = document.getElementById("mainClickBtn");
-const clickImg       = document.getElementById("clickImg");
-const character      = document.getElementById("clickCharacter");
+let clickerBalanceEl, clickImg, clickButton;
 
-let isOpen = false;
+export function initClicker() {
+    clickerBalanceEl = document.getElementById('clickerBalanceValue');
+    clickImg = document.getElementById('clickImg');
+    clickButton = document.getElementById('clickButton');
 
-/* ──────────────────────────────────────────────── */
-/*  OPEN / CLOSE                                   */
-/* ──────────────────────────────────────────────── */
+    // Клик мышью
+    clickButton.addEventListener('click', (e) => {
+        handleClick(e.clientX, e.clientY);
+        animateClick();
+    });
 
-function openDrawer() {
-  drawer.classList.remove("closing");
-  drawer.classList.add("open");
-  isOpen = true;
-  /* не даём скролить страницу под drawer */
-  document.body.style.overflow = "hidden";
+    // Клик тачем (мобильные)
+    clickButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        for (let touch of e.changedTouches) {
+            handleClick(touch.clientX, touch.clientY);
+        }
+        animateClick();
+    }, { passive: false });
 }
-
-function closeDrawer() {
-  /* меняем кривую на "raise" перед удалением .open */
-  drawer.classList.add("closing");
-  drawer.classList.remove("open");
-  isOpen = false;
-  document.body.style.overflow = "";
-
-  /* убираем класс closing после окончания transition */
-  drawer.addEventListener("transitionend", function cleanup(e) {
-    if (e.propertyName === "transform") {
-      drawer.classList.remove("closing");
-      drawer.removeEventListener("transitionend", cleanup);
-    }
-  });
-}
-
-/* ──────────────────────────────────────────────── */
-/*  КНОПКА ОТКРЫТИЯ: проверка авторизации          */
-/* ──────────────────────────────────────────────── */
-
-toggleBtn.addEventListener("click", () => {
-  if (!state.user) {
-    showAuthModal();
-    return;
-  }
-  openDrawer();
-});
-
-backBtn.addEventListener("click", closeDrawer);
-
-/* ESC тоже закрывает */
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && isOpen) closeDrawer();
-});
-
-/* ──────────────────────────────────────────────── */
-/*  КЛИК                                           */
-/* ──────────────────────────────────────────────── */
 
 function handleClick(x, y) {
-  state.coins += 1;
-  updateBalanceUI(state.coins);
-  spawnFloatingCoin(x, y, 1);
-  animateCharacter();
+    coins += clickPower;
+    
+    updateClickerBalance();
+    createFloatingCoin(x, y, clickPower);
+    
+    // Можно добавить звук здесь позже
 }
 
-function animateCharacter() {
-  /* персонаж */
-  if (clickImg) {
-    clickImg.style.transform = "scale(0.91)";
-    /* пробуем подменить картинку click2.png */
-    const src2 = clickImg.src.replace("click1.png", "click2.png");
-    clickImg.src = src2;
-  }
-  character.classList.add("pressed");
+function animateClick() {
+    clickImg.style.transform = 'scale(0.85)';
+    setTimeout(() => {
+        clickImg.style.transform = 'scale(1)';
+    }, 80);
+}
 
-  setTimeout(() => {
-    if (clickImg) {
-      clickImg.style.transform = "scale(1)";
-      clickImg.src = clickImg.src.replace("click2.png", "click1.png");
+function createFloatingCoin(x, y, value) {
+    const coin = document.createElement('div');
+    coin.className = 'floating-coin';
+    coin.style.left = `${x - 20}px`;
+    coin.style.top = `${y - 20}px`;
+    coin.innerHTML = `+${value} <img src="img/anti-coin.png" alt="">`;
+    
+    document.getElementById('clickerOverlay').appendChild(coin);
+
+    setTimeout(() => {
+        coin.style.transform = 'translateY(-120px)';
+        coin.style.opacity = '0';
+    }, 10);
+
+    setTimeout(() => coin.remove(), 800);
+}
+
+export function updateClickerBalance() {
+    if (clickerBalanceEl) {
+        clickerBalanceEl.textContent = Math.floor(coins);
     }
-    character.classList.remove("pressed");
-  }, 100);
 }
 
-/* mouse */
-mainClickBtn.addEventListener("click", (e) => {
-  handleClick(e.clientX, e.clientY);
-});
+export function getCoins() {
+    return coins;
+}
 
-/* touch — preventDefault чтобы не было двойного срабатывания */
-mainClickBtn.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  for (const t of e.changedTouches) {
-    handleClick(t.clientX, t.clientY);
-  }
-}, { passive: false });
+export function getClickPower() {
+    return clickPower;
+}
 
-/* сохранить при закрытии страницы */
-window.addEventListener("beforeunload", () => {
-  if (state.user && state.coins !== state.lastSaved) {
-    saveCoins();
-  }
-});
+export function addCoins(amount) {
+    coins += amount;
+    updateClickerBalance();
+}
 
-export { openDrawer, closeDrawer };
+export function setPlayerData(data) {
+    if (data) {
+        coins = data.coins || 0;
+        clickPower = data.clickPower || 1;
+        boughtItems = data.boughtItems || {};
+        updateClickerBalance();
+    }
+}
+
+export function getPlayerDataForSave() {
+    return {
+        coins: Math.floor(coins),
+        clickPower: clickPower,
+        boughtItems: boughtItems
+    };
+}
