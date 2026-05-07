@@ -1,0 +1,64 @@
+/* ========== settings.css ========== */
+
+#settingsPanel {
+  width: 100vw;
+  height: 100%;
+  background: linear-gradient(to bottom, #A7794C, #8E663D);
+  padding-top: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.settings-header {
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFDBBF;
+  margin: 10px 0 16px;
+  text-align: center;
+}
+
+#settingsPanel button {
+  margin-top: 20px;
+  width: 300px;
+  padding: 14px;
+  background: #332614;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  transition: transform .12s ease;
+}
+
+.settings-btn {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+#volumeButtonsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+#volumeButtonsContainer button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 0;
+  width: auto;
+}
+
+#volumeButtonsContainer button img {
+  transition: transform 0.1s ease;
+  cursor: pointer;
+}
+
+#volumeButtonsContainer button:active img {
+  transform: scale(0.9);
+}

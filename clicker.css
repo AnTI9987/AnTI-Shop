@@ -1,0 +1,93 @@
+/* ========== clicker.css ========== */
+
+#clickerPanel {
+  width: 100vw;
+  height: 100%;
+  background: linear-gradient(180deg, #DD7171 0%, #FECE76 50%);
+  padding-top: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+#counter {
+  font-size: 28px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  color: #000;
+  visibility: hidden;
+}
+#counter img { width: 24px; height: 24px; }
+
+#clickButtonWrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 200px;
+}
+
+#ground {
+  position: absolute;
+  left: 50%;
+  top: -30px;
+  transform: translateX(-50%);
+  width: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+}
+#ground img { width: 100%; }
+
+#clickButton {
+  background: none;
+  border: none;
+  z-index: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+#clickImg {
+  width: 270px;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.07s ease;
+  margin-top: 50px;
+}
+
+/* Дыхание персонажа */
+#characterBreath {
+  transform-origin: bottom center;
+  animation: breathing 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite alternate;
+}
+
+@keyframes breathing {
+  from { transform: scaleY(1); }
+  to   { transform: scaleY(0.985); }
+}
+
+/* Тень под персонажем */
+#characterBreath::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%);
+  width: 170px;
+  height: 25px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  filter: blur(2px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Тень сжимается при клике */
+#characterBreath.shadow-pressed::after {
+  transform: translateX(-50%) scale(0.85);
+}

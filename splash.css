@@ -1,0 +1,91 @@
+/* ========== splash.css ========== */
+
+#splashScreen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: #888;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.8s ease;
+}
+
+#splashScreen h1 {
+  color: #fff;
+  font-size: 38px;
+  margin-bottom: 26px;
+}
+
+#progressBarContainer {
+  width: 300px;
+  height: 24px;
+  background: #555;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  position: relative;
+  transition: all 0.6s ease;
+}
+
+#progressBarContainer.to-button {
+  width: 260px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #ffba67, #ff7749);
+}
+
+#progressBar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #ffba67, #ff7749);
+  border-radius: 12px;
+  transition: width 0.2s ease, opacity 0.4s ease;
+}
+
+#progressPercent { color: #fff; }
+
+#playBtnInside {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+#playBtn {
+  opacity: 0;
+  transform: translateY(-30px);
+  transition: transform 0.6s ease, opacity 0.6s ease;
+  font-size: 24px;
+  padding: 16px 40px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #FFBA67, #FF7749);
+  color: #000;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+#splashScreen.loaded #playBtn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#splashScreen h1,
+#progressBarContainer,
+#progressPercent {
+  transition: transform 0.6s ease;
+}
+
+#splashScreen.loaded h1,
+#splashScreen.loaded #progressBarContainer,
+#splashScreen.loaded #progressPercent {
+  transform: translateY(-50px);
+}
