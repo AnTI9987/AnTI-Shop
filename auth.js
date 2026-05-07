@@ -1,89 +1,84 @@
-/* ── js/auth.js ── */
-import { auth, provider, signInWithPopup, signOut, onAuthStateChanged }
-  from "./firebase.js";
-import { state, emailToKey } from "./state.js";
-import { loadCoins, saveCoins } from "./db.js";
-import { updateBalanceUI }  from "./ui.js";
+// js/auth.js
+import { auth, provider, signInWithPopup, signOut, onAuthStateChanged, ref, set, get, db } from './firebase.js';
 
-/* ── DOM ── */
-const authBtn       = document.getElementById("authBtn");
-const authModal     = document.getElementById("authModal");
-const googleSignBtn = document.getElementById("googleSignInBtn");
-const modalCloseBtn = document.getElementById("modalCloseBtn");
-const balanceDisplay = document.getElementById("balanceDisplay");
+let currentUser = null;
+let isGuest = true;
 
-/* ── Открыть/закрыть модалку ── */
-export function showAuthModal() {
-  authModal.classList.remove("hidden");
+export function initAuth() {
+    return new Promise((resolve) => {
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                isGuest = false;
+                console.log("✅ Авторизован:", user.email);
+            } else {
+                currentUser = null;
+                isGuest = true;
+                console.log("👤 Гостевой режим");
+            }
+            resolve();
+        });
+    });
 }
 
-function hideAuthModal() {
-  authModal.classList.add("hidden");
+export function getCurrentUser() {
+    return currentUser;
 }
 
-/* ── Обновить UI хедера под авторизацию ── */
-function applyAuthUI(user) {
-  if (user) {
-    authBtn.textContent = user.displayName
-      ? user.displayName.split(" ")[0].toUpperCase()
-      : "ВЫЙТИ";
-    authBtn.classList.add("signed-in");
-    balanceDisplay.classList.remove("hidden");
-  } else {
-    authBtn.textContent = "ВОЙТИ";
-    authBtn.classList.remove("signed-in");
-    balanceDisplay.classList.add("hidden");
-  }
+export function isUserGuest() {
+    return isGuest;
 }
 
-/* ── onAuthStateChanged ── */
-export function initAuth(onSignIn, onSignOut) {
-  onAuthStateChanged(auth, async (user) => {
-    state.user    = user;
-    state.userKey = user ? emailToKey(user.email) : null;
-
-    applyAuthUI(user);
-    hideAuthModal();
-
-    if (user) {
-      state.coins     = await loadCoins();
-      state.lastSaved = state.coins;
-      updateBalanceUI(state.coins);
-      if (onSignIn) onSignIn();
-    } else {
-      state.coins     = 0;
-      state.lastSaved = 0;
-      updateBalanceUI(0);
-      if (onSignOut) onSignOut();
+// Вход через Google
+export async function loginWithGoogle() {
+    try {
+        const result = await signInWithPopup(auth, provider);
+        return result.user;
+    } catch (error) {
+        console.error("Ошибка входа через Google:", error);
+        return null;
     }
-  });
+}
 
-  /* — кнопка ВОЙТИ в хедере — */
-  authBtn.addEventListener("click", async () => {
-    if (state.user) {
-      /* выход */
-      try { await signOut(auth); } catch (e) { console.error(e); }
-    } else {
-      showAuthModal();
+// Выход
+export async function logout() {
+    try {
+        await signOut(auth);
+    } catch (error) {
+        console.error("Ошибка выхода:", error);
     }
-  });
+}
 
-  /* — кнопка Google в модалке — */
-  googleSignBtn.addEventListener("click", async () => {
-    try { await signInWithPopup(auth, provider); }
-    catch (e) { console.error("signIn error:", e); }
-  });
-
-  /* — закрыть модалку — */
-  modalCloseBtn.addEventListener("click", hideAuthModal);
-  authModal.addEventListener("click", (e) => {
-    if (e.target === authModal) hideAuthModal();
-  });
-
-  /* — автосейв каждые 5 сек — */
-  setInterval(() => {
-    if (state.user && state.coins !== state.lastSaved) {
-      saveCoins();
+// Сохранение данных игрока
+export async function savePlayerData(userId, data) {
+    if (!userId) return false;
+    
+    try {
+        await set(ref(db, 'users/' + userId), {
+            coins: data.coins || 0,
+            clickPower: data.clickPower || 1,
+            boughtItems: data.boughtItems || {},
+            lastUpdated: Date.now()
+        });
+        return true;
+    } catch (e) {
+        console.error("Ошибка сохранения данных:", e);
+        return false;
     }
-  }, 5000);
+}
+
+// Загрузка данных игрока
+export async function loadPlayerData(userId) {
+    if (!userId) return null;
+    
+    try {
+        const snapshot = await get(ref(db, 'users/' + userId));
+        if (snapshot.exists()) {
+            return snapshot.val();
+        }
+        return null;
+    } catch (e) {
+        console.error("Ошибка загрузки данных:", e);
+        return null;
+    }
 }
