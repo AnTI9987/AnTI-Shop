@@ -2,22 +2,25 @@
 console.log("%c🚀 main.js загружен", "color: orange; font-size: 16px");
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOMContentLoaded сработал");
+    console.log("✅ DOMContentLoaded");
 
     const btn = document.getElementById('clickerOpenBtn');
     
     if (btn) {
-        console.log("✅ Кнопка найдена в DOM");
+        console.log("✅ Кнопка найдена");
 
-        btn.style.border = "3px solid lime"; // яркая обводка если найдена
+        // Убираем все предыдущие обработчики и добавляем новый
+        btn.replaceWith(btn.cloneNode(true));
+        const newBtn = document.getElementById('clickerOpenBtn');
 
-        btn.addEventListener('click', () => {
-            console.log("%c✅ КНОПКА НАЖАТА!", "color: lime; font-size: 18px; font-weight: bold");
-            alert("Кнопка работает! ✅\n\nСейчас должно появиться окно входа.");
+        newBtn.addEventListener('click', (e) => {
+            console.log("%c✅ КЛИК ПО КНОПКЕ ЗАРЕГИСТРИРОВАН!", "color: lime; font-size: 18px; font-weight: bold");
+            e.stopImmediatePropagation();
             
+            alert("Кнопка работает!\n\nСейчас должно открыться окно входа.");
             document.getElementById('loginModal').classList.remove('hidden');
         });
-    } else {
-        console.error("❌ Кнопка НЕ найдена!");
+
+        console.log("Обработчик повешен");
     }
 });
