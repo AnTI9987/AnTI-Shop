@@ -67,6 +67,27 @@
         </div>
     </div>
 
-    <script type="module" src="js/main.js"></script>
+<!-- ВРЕМЕННЫЙ ТЕСТОВЫЙ СКРИПТ -->
+    <script>
+        console.log("%c🔥 INLINE SCRIPT РАБОТАЕТ", "color: red; font-size: 18px");
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('clickerOpenBtn');
+            
+            if (btn) {
+                console.log("%c✅ Кнопка найдена", "color: lime; font-size: 16px");
+                btn.style.border = "5px solid red";
+                btn.style.background = "rgba(255,0,0,0.2)";
+
+                btn.addEventListener('click', () => {
+                    console.log("%cBUTTON CLICKED!", "color: yellow; font-size: 20px");
+                    alert("Кнопка работает! ✅");
+                    document.getElementById('loginModal').classList.remove('hidden');
+                });
+            } else {
+                console.error("Кнопка не найдена");
+            }
+        });
+    </script>
 </body>
 </html>
