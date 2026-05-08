@@ -1,26 +1,26 @@
-// js/main.js
-console.log("%c🚀 main.js загружен", "color: orange; font-size: 16px");
+// js/main.js — ТЕСТОВАЯ ВЕРСИЯ БЕЗ ИМПОРТОВ
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("✅ DOMContentLoaded");
+    console.log("%c🚀 Тестовая версия main.js загружена", "color: orange; font-size: 18px");
 
     const btn = document.getElementById('clickerOpenBtn');
-    
+
     if (btn) {
-        console.log("✅ Кнопка найдена");
+        console.log("%c✅ Кнопка найдена в DOM", "color: lime");
 
-        // Убираем все предыдущие обработчики и добавляем новый
-        btn.replaceWith(btn.cloneNode(true));
-        const newBtn = document.getElementById('clickerOpenBtn');
+        // Яркая обводка для видимости
+        btn.style.border = "4px solid lime";
+        btn.style.background = "rgba(0, 255, 0, 0.1)";
 
-        newBtn.addEventListener('click', (e) => {
-            console.log("%c✅ КЛИК ПО КНОПКЕ ЗАРЕГИСТРИРОВАН!", "color: lime; font-size: 18px; font-weight: bold");
-            e.stopImmediatePropagation();
+        btn.addEventListener('click', function(e) {
+            console.log("%c🔥 КНОПКА НАЖАТА!", "color: red; font-size: 20px; font-weight: bold");
+            alert("✅ Кнопка работает!\n\nМодальное окно должно открыться.");
             
-            alert("Кнопка работает!\n\nСейчас должно открыться окно входа.");
             document.getElementById('loginModal').classList.remove('hidden');
         });
 
-        console.log("Обработчик повешен");
+        console.log("Обработчик клика добавлен");
+    } else {
+        console.error("❌ Кнопка НЕ найдена");
     }
 });
