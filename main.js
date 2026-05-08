@@ -1,24 +1,32 @@
-// js/main.js
-console.log("%c🚀 AnTI Shop main.js загружен успешно", "color: lime; font-size: 16px");
+// js/main.js — СТАБИЛЬНАЯ ВЕРСИЯ
+
+console.log("%c🚀 AnTI Shop запущен (обычный скрипт)", "color: lime; font-size: 16px");
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("✅ DOM готов");
+    console.log("✅ DOM полностью загружен");
 
     const clickerBtn = document.getElementById('clickerOpenBtn');
 
     if (clickerBtn) {
-        clickerBtn.style.border = "2px solid #00ff00"; // временная зелёная обводка
+        console.log("✅ Кнопка кликера найдена");
+
+        // Яркая обводка для проверки
+        clickerBtn.style.border = "3px solid lime";
+        clickerBtn.style.background = "rgba(0, 255, 0, 0.1)";
 
         clickerBtn.addEventListener('click', () => {
-            console.log("%cКнопка кликера нажата", "color: lime");
+            console.log("%c🔥 Кнопка нажата успешно!", "color: lime; font-size: 18px");
             document.getElementById('loginModal').classList.remove('hidden');
         });
+    } else {
+        console.error("❌ Кнопка #clickerOpenBtn не найдена");
     }
 
     // Закрытие модального окна
-    document.getElementById('closeModalBtn').addEventListener('click', () => {
-        document.getElementById('loginModal').classList.add('hidden');
-    });
-
-    console.log("🎉 Приложение инициализировано");
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            document.getElementById('loginModal').classList.add('hidden');
+        });
+    }
 });
